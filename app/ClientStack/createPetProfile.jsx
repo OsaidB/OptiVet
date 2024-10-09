@@ -5,8 +5,13 @@ import Slider from '@react-native-community/slider';
 import * as SplashScreen from "expo-splash-screen";
 import {useFonts} from "expo-font";
 import PetService from "../../Services/PetService";
+// import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useRouter } from 'expo-router'; // Import useRouter
 
 export default function CreatePetProfile() {
+    // const navigation = useNavigation(); // Get the navigation object
+    const router = useRouter(); // Get the router object
+
     const [petType, setPetType] = useState('');
     const [petName, setPetName] = useState('');
     const [petAgeMonths, setPetAgeMonths] = useState(0);
@@ -85,6 +90,8 @@ export default function CreatePetProfile() {
             console.log("Pet profile created:", response);
             Alert.alert('Success', 'Pet profile created successfully!');
             resetForm();
+            // navigation.navigate('PetProfiles'); // Navigate back to PetProfiles
+            router.push('/ClientStack/PetProfiles'); // Navigate back to PetProfiles
         } catch (error) {
             console.error("Error creating pet profile:", error);
             Alert.alert('Error', 'Failed to create pet profile.');
