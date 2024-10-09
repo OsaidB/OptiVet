@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, {useEffect, useState} from 'react';
+import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity} from 'react-native';
+import {Picker} from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
+import {useFonts} from "expo-font";
+import PetService from "../../Services/PetService";
 
 export default function CreatePetProfile() {
     const [petType, setPetType] = useState('');
@@ -12,6 +13,15 @@ export default function CreatePetProfile() {
     const [petBreed, setPetBreed] = useState('');
     const [petMedicalHistory, setPetMedicalHistory] = useState('');
 
+    const [owner, setOwner] = useState({
+        email: "o.osaidb2015@gmail.com",
+        password: "0000",
+        firstName: "Osaid",
+        lastName: "Baba",
+        phoneNumber: "0598786818",
+        dateOfBirth: "2000-12-12"
+    });
+
     SplashScreen.preventAutoHideAsync();
     const [loaded] = useFonts({
         SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
@@ -19,43 +29,66 @@ export default function CreatePetProfile() {
 
     const petData = {
         Dog: [
-            { label: 'Select a breed', value: 'Select a breed' },
-            { label: 'Golden Retriever', value: 'Golden Retriever' },
-            { label: 'Bulldog', value: 'Bulldog' },
-            { label: 'Beagle', value: 'Beagle' },
-            { label: 'Poodle', value: 'Poodle' },
+            {label: 'Select a breed', value: 'Select a breed'},
+            {label: 'Golden Retriever', value: 'Golden Retriever'},
+            {label: 'Bulldog', value: 'Bulldog'},
+            {label: 'Beagle', value: 'Beagle'},
+            {label: 'Poodle', value: 'Poodle'},
         ],
         Cat: [
-            { label: 'Select a breed', value: 'Select a breed' },
-            { label: 'Persian', value: 'Persian' },
-            { label: 'Siamese', value: 'Siamese' },
-            { label: 'Maine Coon', value: 'Maine Coon' },
-            { label: 'Bengal', value: 'Bengal' },
+            {label: 'Select a breed', value: 'Select a breed'},
+            {label: 'Persian', value: 'Persian'},
+            {label: 'Siamese', value: 'Siamese'},
+            {label: 'Maine Coon', value: 'Maine Coon'},
+            {label: 'Bengal', value: 'Bengal'},
         ],
         Bird: [
-            { label: 'Select a breed', value: 'Select a breed' },
-            { label: 'Parakeet', value: 'Parakeet' },
-            { label: 'Canary', value: 'Canary' },
-            { label: 'Cockatiel', value: 'Cockatiel' },
+            {label: 'Select a breed', value: 'Select a breed'},
+            {label: 'Parakeet', value: 'Parakeet'},
+            {label: 'Canary', value: 'Canary'},
+            {label: 'Cockatiel', value: 'Cockatiel'},
         ],
     };
+    const calculateBirthDate = (ageInMonths) => {
+        const today = new Date();
+        const birthDateEstimate = new Date(today.setMonth(today.getMonth() - ageInMonths));
+        const year = birthDateEstimate.getFullYear();
+        const month = String(birthDateEstimate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const day = String(birthDateEstimate.getDate()).padStart(2, '0');
 
-    const handleSubmit = () => {
+        return `${year}-${month}-${day}`;
+    };
+
+    const handleSubmit = async () => {
         if (!petName || !petAgeMonths || !petType || !petBreed) {
             Alert.alert('Validation Error', 'Please fill in all fields.');
             return;
         }
+        const birthDate = calculateBirthDate(petAgeMonths);
 
-        console.log({
-            type: petType,
+        const petProfileData = {
             name: petName,
-            ageMonths: petAgeMonths,
-            breed: petBreed,
-            medicalHistory: petMedicalHistory,
-        });
+            ownerId: "1",
 
-        resetForm();
-        Alert.alert('Success', 'Pet profile created successfully!');
+            type: petType,
+            breed: petBreed,
+
+            // ageMonths: petAgeMonths,
+            birthDate: birthDate,
+            medicalHistory: petMedicalHistory
+
+        };
+
+        try {
+            const response = await PetService.createPet(petProfileData);
+
+            console.log("Pet profile created:", response);
+            Alert.alert('Success', 'Pet profile created successfully!');
+            resetForm();
+        } catch (error) {
+            console.error("Error creating pet profile:", error);
+            Alert.alert('Error', 'Failed to create pet profile.');
+        }
     };
 
     const resetForm = () => {
@@ -101,10 +134,10 @@ export default function CreatePetProfile() {
                     setPetBreed(''); // Reset breed when pet type changes
                 }}
             >
-                <Picker.Item label="Select a pet type" value="" />
-                <Picker.Item label="Dog" value="Dog" />
-                <Picker.Item label="Cat" value="Cat" />
-                <Picker.Item label="Bird" value="Bird" />
+                <Picker.Item label="Select a pet type" value=""/>
+                <Picker.Item label="Dog" value="Dog"/>
+                <Picker.Item label="Cat" value="Cat"/>
+                <Picker.Item label="Bird" value="Bird"/>
             </Picker>
 
             {/* Dropdown for selecting Pet Breed based on Pet Type */}
@@ -115,14 +148,15 @@ export default function CreatePetProfile() {
                 onValueChange={(itemValue) => setPetBreed(itemValue)}
                 enabled={!!petType}
             >
-                <Picker.Item label="Select a breed" value="" />
+                <Picker.Item label="Select a breed" value=""/>
                 {petData[petType]?.map((breed, index) => (
-                    <Picker.Item key={index} label={breed.label} value={breed.value || 'Select a breed'} />
+                    <Picker.Item key={index} label={breed.label} value={breed.value || 'Select a breed'}/>
                 ))}
             </Picker>
 
             {/* Slider for selecting Pet Age in Months */}
-            <Text style={styles.label}>Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} ({ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''})</Text>
+            <Text style={styles.label}>Select Pet
+                Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} ({ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''})</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
@@ -143,7 +177,7 @@ export default function CreatePetProfile() {
             />
 
             <View style={styles.buttonContainer}>
-                <Button title="Create Profile" onPress={handleSubmit} />
+                <Button title="Create Profile" onPress={handleSubmit}/>
                 <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
                     <Text style={styles.resetButtonText}>Reset</Text>
                 </TouchableOpacity>

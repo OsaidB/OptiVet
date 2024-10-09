@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Link } from 'expo-router';
+import PetService from "../../Services/PetService";
 
 export default function PetProfiles() {
-    const [pets, setPets] = useState([
-        { id: '1', name: 'Buddy', age: 3, breed: 'Golden Retriever' },
-        { id: '2', name: 'Max', age: 2, breed: 'Bulldog' },
-    ]);
+    const [pets, setPets] = useState([]);
+    const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
+
+    useEffect(() => {
+        const fetchPets = async () => {
+            try {
+                const fetchedPets = await PetService.getPetsByOwnerId(ownerId);
+                setPets(fetchedPets);
+            } catch (error) {
+                console.error("Error fetching pets:", error);
+                Alert.alert('Error', 'Failed to load pet profiles.');
+            }
+        };
+
+        fetchPets();
+    }, []);
+
+    const calculateAge = (birthDate) => {
+        const today = new Date();
+        const birth = new Date(birthDate);
+        const ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + (today.getMonth() - birth.getMonth());
+        return ageInMonths >= 12
+            ? `${Math.floor(ageInMonths / 12)} years ${ageInMonths % 12} months`
+            : `${ageInMonths} month${ageInMonths !== 1 ? 's' : ''}`;
+    };
 
     return (
         <View style={styles.container}>
@@ -15,12 +37,14 @@ export default function PetProfiles() {
             {/* List of Pet Profiles */}
             <FlatList
                 data={pets}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()} // Ensure ID is a string for FlatList
                 renderItem={({ item }) => (
                     <View style={styles.petCard}>
                         <Text style={styles.petName}>{item.name}</Text>
-                        <Text>Age: {item.age}</Text>
+                        <Text>Type: {item.type}</Text>
                         <Text>Breed: {item.breed}</Text>
+                        <Text>Age: {calculateAge(item.birthDate)}</Text>
+                        <Text>Medical History: {item.medicalHistory}</Text>
                     </View>
                 )}
             />
