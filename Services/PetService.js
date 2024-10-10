@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8080/api/pets';
+const BASE_URL = 'http://192.168.1.51:8080/api/pets';
 
 const PetService = {
     // Create a new pet
