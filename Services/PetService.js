@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
 const BASE_URL = 'http://192.168.1.51:8080/api/pets';
 
@@ -14,6 +15,56 @@ const PetService = {
         }
     },
 
+    // // Upload pet image
+    // uploadPetImage: async (imageUri) => {
+    //     try {
+    //         const formData = new FormData();
+    //         formData.append('image', {
+    //             uri: imageUri,
+    //             name: 'petImage.jpg',
+    //             type: 'image/jpeg',
+    //         });
+    //         console.log("uploadPetImage",formData);
+    //         const response = await axios.post(`${BASE_URL}/uploadImage`, formData, {
+    //             headers: {
+    //                 'Content-Type': 'multipart/form-data',
+    //             },
+    //         });
+    //         return response.data; // URL of the uploaded image
+    //     } catch (error) {
+    //         console.error("Error uploading pet image:", error);
+    //         throw error;
+    //     }
+    // },
+
+    uploadPetImage: async (imageUri) => {
+        try {
+            const formData = new FormData();
+
+            if (Platform.OS === 'web') {
+                const response = await fetch(imageUri);
+                const blob = await response.blob();
+                formData.append('image', blob, 'petImage.jpg');
+            } else {
+                formData.append('image', {
+                    uri: imageUri,
+                    name: 'petImage.jpg',
+                    type: 'image/jpeg',
+                });
+            }
+
+            const response = await axios.post(`${BASE_URL}/uploadImage`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error("Error uploading pet image:", error);
+            throw error;
+        }
+    },
     // Get a pet by its ID
     getPetById: async (petId) => {
         try {

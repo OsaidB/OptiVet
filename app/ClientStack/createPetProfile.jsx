@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Platform} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import * as SplashScreen from "expo-splash-screen";
 import {useFonts} from "expo-font";
 import PetService from "../../Services/PetService";
@@ -17,6 +19,7 @@ export default function CreatePetProfile() {
     const [petAgeMonths, setPetAgeMonths] = useState(0);
     const [petBreed, setPetBreed] = useState('');
     const [petMedicalHistory, setPetMedicalHistory] = useState('');
+    const [petPhoto, setPetPhoto] = useState(null); // State for the pet's photo
 
     const [owner, setOwner] = useState({
         email: "o.osaidb2015@gmail.com",
@@ -64,13 +67,101 @@ export default function CreatePetProfile() {
         return `${year}-${month}-${day}`;
     };
 
+    // const pickImage = async () => {
+    //     const result = await ImagePicker.launchImageLibraryAsync({
+    //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //         allowsEditing: true,
+    //         aspect: [4, 3],
+    //         quality: 1,
+    //     });
+    //
+    //     if (!result.canceled) {
+    //         setPetPhoto(result.uri);
+    //     }
+    // };
+    //----------------------------------------------------------------------------
+    // const pickImage = async () => {
+    //     // Request permission to access media library
+    //     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    //
+    //     if (permissionResult.granted === false) {
+    //         Alert.alert('Permission to access camera roll is required!');
+    //         return;
+    //     }
+    //
+    //     // Launch the image picker
+    //     const result = await ImagePicker.launchImageLibraryAsync({
+    //         mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //         allowsEditing: true,
+    //         aspect: [4, 3],
+    //         quality: 1,
+    //     });
+    //
+    //     // Check if the user cancelled the picker
+    //     if (result.cancelled) {
+    //         return;
+    //     }
+    //
+    //     // Set the image URI to state
+    //     setPetPhoto(result.uri);
+    // };
+    //----------------------------------------------------------------------------
+    const pickImage = async () => {
+        // Request permission to access media library
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (permissionResult.granted === false) {
+            Alert.alert('Permission to access camera roll is required!');
+            return;
+        }
+
+        // Launch the image picker
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        // Check if the user cancelled the picker
+        if (result.canceled) {
+            return; // No action needed if the user cancels
+        }
+
+        // // Check if the result contains a URI and set it
+        // if (result.assets && result.assets.length > 0) {
+        //     setPetPhoto(result.assets[0].uri); // Access the uri of the first selected asset
+        // } else {
+        //     Alert.alert('No image selected.'); // Handle case where no image is returned
+        // }
+
+        // Check if the result contains a URI and set it
+        if (result.assets && result.assets.length > 0) {
+            const uri = result.assets[0].uri; // Get the URI of the selected asset
+            setPetPhoto(uri); // Set the photo URI
+        } else {
+            Alert.alert('No image selected.'); // Handle case where no image is returned
+        }
+
+    };
     const handleSubmit = async () => {
         if (!petName || !petAgeMonths || !petType || !petBreed) {
             Alert.alert('Validation Error', 'Please fill in all fields.');
             return;
         }
         const birthDate = calculateBirthDate(petAgeMonths);
+        let imageUrl = null;
 
+        // Upload the photo if it exists
+        if (petPhoto) {
+            try {
+                imageUrl = await PetService.uploadPetImage(petPhoto);
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                Alert.alert('Error', 'Failed to upload image.');
+                return;
+            }
+        }
         const petProfileData = {
             name: petName,
             ownerId: "1",
@@ -80,8 +171,9 @@ export default function CreatePetProfile() {
 
             // ageMonths: petAgeMonths,
             birthDate: birthDate,
-            medicalHistory: petMedicalHistory
+            medicalHistory: petMedicalHistory,
 
+            imageUrl,
         };
 
         try {
@@ -104,6 +196,7 @@ export default function CreatePetProfile() {
         setPetAgeMonths(0);
         setPetBreed('');
         setPetMedicalHistory('');
+        setPetPhoto(null);
     };
 
     const ageInYears = Math.floor(petAgeMonths / 12);
@@ -113,6 +206,13 @@ export default function CreatePetProfile() {
         if (loaded) {
             SplashScreen.hideAsync();
         }
+        // Request media library permission for image picking
+        (async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            }
+        })();
     }, [loaded]);
 
     if (!loaded) {
@@ -141,7 +241,7 @@ export default function CreatePetProfile() {
                     setPetBreed(''); // Reset breed when pet type changes
                 }}
                 prompt="Select a Pet Type" // Add a prompt for better user experience
-                accessibilityLabel="Select Pet Type" // Accessibility label
+                // accessibilityLabel="Select Pet Type" // Accessibility label
             >
                 <Picker.Item label="Select a pet type" value=""/>
                 <Picker.Item label="Dog" value="Dog"/>
@@ -158,7 +258,7 @@ export default function CreatePetProfile() {
                 enabled={!!petType}
 
                 prompt="Select a breed" // Add a prompt for better user experience
-                accessibilityLabel="Select Pet Type" // Accessibility label
+                // accessibilityLabel="Select Pet Type" // Accessibility label
             >
 
                 <Picker.Item label="Select a breed" value=""/>
@@ -188,6 +288,17 @@ export default function CreatePetProfile() {
                 onChangeText={setPetMedicalHistory}
             />
 
+            {/* Photo Picker Button */}
+            <TouchableOpacity onPress={pickImage} style={styles.photoButton}>
+                <Text style={styles.photoButtonText}>{petPhoto ? "Change Photo" : "Select Photo"}</Text>
+            </TouchableOpacity>
+
+            {/* Display Selected Photo */}
+            {/*{petPhoto && (*/}
+            {/*    <Image source={{ uri: petPhoto }} style={styles.image} />*/}
+            {/*)}*/}
+
+            {/* Submission Buttons */}
             <View style={styles.buttonContainer}>
                 <Button title="Create Profile" onPress={handleSubmit} color={Platform.OS === 'android' ? '#1D3D47' : undefined} />
                 <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
@@ -237,6 +348,25 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 40,
         marginBottom: 20,
+    },
+    photoButton: {
+        backgroundColor: '#1D3D47',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    photoButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    petImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        marginTop: 10,
+        alignSelf: 'center',
     },
     buttonContainer: {
         marginTop: 20,
