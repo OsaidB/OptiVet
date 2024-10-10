@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Platform} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import * as SplashScreen from "expo-splash-screen";
@@ -34,21 +34,21 @@ export default function CreatePetProfile() {
 
     const petData = {
         Dog: [
-            {label: 'Select a breed', value: 'Select a breed'},
+            // { label: 'Select a breed', value: '' },
             {label: 'Golden Retriever', value: 'Golden Retriever'},
             {label: 'Bulldog', value: 'Bulldog'},
             {label: 'Beagle', value: 'Beagle'},
             {label: 'Poodle', value: 'Poodle'},
         ],
         Cat: [
-            {label: 'Select a breed', value: 'Select a breed'},
+            // { label: 'Select a breed', value: '' },
             {label: 'Persian', value: 'Persian'},
             {label: 'Siamese', value: 'Siamese'},
             {label: 'Maine Coon', value: 'Maine Coon'},
             {label: 'Bengal', value: 'Bengal'},
         ],
         Bird: [
-            {label: 'Select a breed', value: 'Select a breed'},
+            // { label: 'Select a breed', value: '' },
             {label: 'Parakeet', value: 'Parakeet'},
             {label: 'Canary', value: 'Canary'},
             {label: 'Cockatiel', value: 'Cockatiel'},
@@ -132,7 +132,7 @@ export default function CreatePetProfile() {
             />
 
             {/* Dropdown for selecting Pet Type */}
-            <Text style={styles.label}>Select Pet Type:</Text>
+            {/*<Text style={styles.label}>Select Pet Type:</Text>*/}
             <Picker
                 selectedValue={petType}
                 style={styles.picker}
@@ -140,6 +140,8 @@ export default function CreatePetProfile() {
                     setPetType(itemValue);
                     setPetBreed(''); // Reset breed when pet type changes
                 }}
+                prompt="Select a Pet Type" // Add a prompt for better user experience
+                accessibilityLabel="Select Pet Type" // Accessibility label
             >
                 <Picker.Item label="Select a pet type" value=""/>
                 <Picker.Item label="Dog" value="Dog"/>
@@ -148,22 +150,25 @@ export default function CreatePetProfile() {
             </Picker>
 
             {/* Dropdown for selecting Pet Breed based on Pet Type */}
-            <Text style={styles.label}>Select Pet Breed:</Text>
+            {/*<Text style={styles.label}>Select Pet Breed:</Text>*/}
             <Picker
                 selectedValue={petBreed}
                 style={styles.picker}
                 onValueChange={(itemValue) => setPetBreed(itemValue)}
                 enabled={!!petType}
+
+                prompt="Select a breed" // Add a prompt for better user experience
+                accessibilityLabel="Select Pet Type" // Accessibility label
             >
+
                 <Picker.Item label="Select a breed" value=""/>
                 {petData[petType]?.map((breed, index) => (
-                    <Picker.Item key={index} label={breed.label} value={breed.value || 'Select a breed'}/>
+                    <Picker.Item key={index} label={breed.label} value={breed.value || ''} />
                 ))}
             </Picker>
 
             {/* Slider for selecting Pet Age in Months */}
-            <Text style={styles.label}>Select Pet
-                Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} ({ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''})</Text>
+            <Text style={styles.label}>Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} ({ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''})</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
@@ -171,9 +176,9 @@ export default function CreatePetProfile() {
                 step={1}
                 value={petAgeMonths}
                 onValueChange={setPetAgeMonths}
-                minimumTrackTintColor="#1D3D47"
+                minimumTrackTintColor={Platform.OS === 'android' ? '#FFD700' : '#1D3D47'} // Gold for Android
                 maximumTrackTintColor="#ccc"
-                thumbTintColor="#1D3D47"
+                thumbTintColor={Platform.OS === 'android' ? '#FFD700' : '#1D3D47'} // Gold for Android
             />
 
             <TextInput
@@ -184,7 +189,7 @@ export default function CreatePetProfile() {
             />
 
             <View style={styles.buttonContainer}>
-                <Button title="Create Profile" onPress={handleSubmit}/>
+                <Button title="Create Profile" onPress={handleSubmit} color={Platform.OS === 'android' ? '#1D3D47' : undefined} />
                 <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
                     <Text style={styles.resetButtonText}>Reset</Text>
                 </TouchableOpacity>
@@ -215,11 +220,18 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         paddingLeft: 8,
         borderRadius: 5,
+        backgroundColor: Platform.OS === 'android' ? '#f0f8ff' : 'white', // Light color for Android
     },
     picker: {
         height: 50,
         width: '100%',
         marginBottom: 12,
+        backgroundColor: '#f0f8ff', // Light background for visibility
+        borderColor: '#1D3D47', // Dark border color
+        borderWidth: 2, // Thicker border
+        borderRadius: 5, // Rounded corners
+        padding: 10, // Padding for a more spacious feel
+        color: '#1D3D47', // Text color for visibility
     },
     slider: {
         width: '100%',
