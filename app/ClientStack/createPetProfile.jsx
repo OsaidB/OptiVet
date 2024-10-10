@@ -155,13 +155,21 @@ export default function CreatePetProfile() {
         // Upload the photo if it exists
         if (petPhoto) {
             try {
+                console.log("Uploading image...");
                 imageUrl = await PetService.uploadPetImage(petPhoto);
+                console.log("Image uploaded, URL:", imageUrl);
             } catch (error) {
                 console.error('Error uploading image:', error);
                 Alert.alert('Error', 'Failed to upload image.');
                 return;
             }
         }
+        // Ensure imageUrl is available before continuing
+        if (!imageUrl && petPhoto) {
+            Alert.alert('Error', 'Image upload failed. Please try again.');
+            return;
+        }
+
         const petProfileData = {
             name: petName,
             ownerId: "1",
@@ -173,13 +181,15 @@ export default function CreatePetProfile() {
             birthDate: birthDate,
             medicalHistory: petMedicalHistory,
 
-            imageUrl,
+            imageUrl:imageUrl,
         };
 
+        console.log("(petProfileData):", petProfileData);
         try {
+            console.log("Creating pet profile with data:", petProfileData);
             const response = await PetService.createPet(petProfileData);
 
-            console.log("Pet profile created:", response);
+            console.log("Pet profile created(response):", response);
             Alert.alert('Success', 'Pet profile created successfully!');
             resetForm();
             // navigation.navigate('PetProfiles'); // Navigate back to PetProfiles

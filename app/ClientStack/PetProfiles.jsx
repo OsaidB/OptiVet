@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image } from 'react-native';
 import { Link } from 'expo-router';
 import PetService from "../../Services/PetService";
 
 export default function PetProfiles() {
     const [pets, setPets] = useState([]);
     const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
+    const BASE_URL = 'http://192.168.1.51:8080/api/pets';
 
     useEffect(() => {
         const fetchPets = async () => {
@@ -40,6 +41,14 @@ export default function PetProfiles() {
                 keyExtractor={(item) => item.id.toString()} // Ensure ID is a string for FlatList
                 renderItem={({ item }) => (
                     <View style={styles.petCard}>
+                        {/* Display pet image if available */}
+                        {item.imageUrl && (
+                            <Image
+                                source={{ uri: `${BASE_URL}${item.imageUrl}` }}
+                                style={styles.petImage}
+                                resizeMode="cover"
+                            />
+                        )}
                         <Text style={styles.petName}>{item.name}</Text>
                         <Text>Type: {item.type}</Text>
                         <Text>Breed: {item.breed}</Text>
@@ -76,6 +85,13 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderColor: '#ccc',
         borderWidth: 1,
+        alignItems: 'center', // Center content
+    },
+    petImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50, // Make the image circular
+        marginBottom: 10,
     },
     petName: {
         fontSize: 18,
