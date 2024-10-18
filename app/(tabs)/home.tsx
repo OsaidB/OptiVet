@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Image, StyleSheet, Platform, Text, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
