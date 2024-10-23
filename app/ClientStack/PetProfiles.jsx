@@ -6,7 +6,9 @@ import PetService from "../../Services/PetService";
 export default function PetProfiles() {
     const [pets, setPets] = useState([]);
     const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
-    const BASE_URL = 'http://192.168.1.51:8080/api/pets';
+
+    // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
+    const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
 
     useEffect(() => {
         const fetchPets = async () => {
