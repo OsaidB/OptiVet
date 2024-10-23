@@ -3,24 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { Link } from 'expo-router';
+import AppointmentService from '../../Services/AppointmentService'; // Import the Appointment service
 
 const ManagerScheduleScreen = () => {
-    // Automatically set the date to the current day
     const currentDay = new Date();
     const [selectedTime, setSelectedTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
 
-    // Format the current day and date
-    // const formattedCurrentDay = format(currentDay, 'EEEE, MMMM do'); // Example: Monday, October 21, 2024
+    // Format current day and prepopulate with 3 dummy appointments
     const formattedCurrentDay = format(currentDay, 'EEEE - d / MMMM ');
-    // Prepopulate with 3 dummy appointments for the current day
     const [appointments, setAppointments] = useState([
         { id: '1', date: format(currentDay, 'yyyy-MM-dd'), time: '10:00' },
         { id: '2', date: format(currentDay, 'yyyy-MM-dd'), time: '14:00' },
         { id: '3', date: format(currentDay, 'yyyy-MM-dd'), time: '16:30' }
     ]);
 
-    // Handling time change for web and mobile
+    // Handle time change for web and mobile
     const handleTimeChange = (event, time) => {
         if (Platform.OS === 'web') {
             const [hours, minutes] = event.target.value.split(':');
@@ -35,7 +33,8 @@ const ManagerScheduleScreen = () => {
         }
     };
 
-    const saveAppointmentSlot = () => {
+    // Save appointment slot in the local state and call backend service to save it
+    const saveAppointmentSlot = async () => {
         const formattedDate = format(currentDay, 'yyyy-MM-dd'); // Always set to today's date
         const formattedTime = format(selectedTime, 'HH:mm');
 
@@ -45,15 +44,32 @@ const ManagerScheduleScreen = () => {
             time: formattedTime,
         };
 
+        // Store appointment slot in the local state
         setAppointments([...appointments, newAppointment]);
-        Alert.alert('Success', 'Appointment slot saved successfully!');
+
+        // Prepare the appointment for the backend
+        const appointmentData = {
+            appointmentDate: `${formattedDate}T${formattedTime}:00`,
+            clientId: null, // No client yet, manager is publishing free slots
+            petId: null,    // No pet yet, manager is publishing free slots
+            vetId: 1,       // Assuming vet_id is always 1
+            status: 'AVAILABLE', // The slot is available
+        };
+
+        try {
+            // Call the service to save the appointment in the backend
+            const response = await AppointmentService.createAppointment(appointmentData);
+            Alert.alert('Success', 'Appointment slot saved and published successfully!');
+        } catch (error) {
+            console.error('Error saving appointment slot:', error);
+            Alert.alert('Error', 'Failed to save the appointment slot. Please try again.');
+        }
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Manage Your Schedule</Text>
-            {/* Display current day and date */}
-            <Text style={styles.title}> its {formattedCurrentDay}</Text>
+            <Text style={styles.title}>It's {formattedCurrentDay}</Text>
 
             {/* Time Picker for Web or Mobile */}
             {Platform.OS === 'web' ? (
@@ -65,12 +81,10 @@ const ManagerScheduleScreen = () => {
                 />
             ) : (
                 <TouchableOpacity style={styles.button} onPress={() => setShowTimePicker(true)}>
-                    {/*<Text style={styles.buttonText}>Select Time: {format(selectedTime, 'HH:mm')}</Text>*/}
                     <Text style={styles.buttonText}>Select your available Time for today</Text>
                 </TouchableOpacity>
             )}
 
-            {/* Show DateTimePicker on Mobile */}
             {showTimePicker && Platform.OS !== 'web' && (
                 <DateTimePicker
                     value={selectedTime}
