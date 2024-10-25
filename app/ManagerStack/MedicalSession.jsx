@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MedicalSessionService from '../../Services/MedicalSessionService';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { TextInput as PaperTextInput, Button } from 'react-native-paper';
 
 const MedicalSession = () => {
+    const router = useRouter();
+    const { petId: initialPetId, ownerId: initialOwnerId } = useLocalSearchParams(); // Retrieve petId and ownerId from params
+
     const [sessionDate, setSessionDate] = useState(new Date());
-    const [petId, setPetId] = useState('');
-    const [ownerId, setOwnerId] = useState('');
+
+    const [petId, setPetId] = useState(initialPetId || ''); // Initialize with petId from params
+    const [ownerId, setOwnerId] = useState(initialOwnerId || ''); // Initialize with ownerId from params
+
     const [veterinarianId, setVeterinarianId] = useState('');
     const [loggedInVetId, setLoggedInVetId] = useState('');
 
@@ -78,86 +85,155 @@ const MedicalSession = () => {
             <View style={styles.container}>
                 <Text style={styles.title}>Create Medical Session</Text>
 
-                {/* Cross-platform date picker */}
-                {Platform.OS === 'web' ? (
-                    <input
-                        type="datetime-local"
-                        value={sessionDate.toISOString().substring(0, 16)}
-                        onChange={handleWebDateChange}
-                        style={styles.webDatePicker}
-                    />
-                ) : (
-                    <TouchableOpacity onPress={showDatePicker} style={styles.datePickerButton}>
-                        <Text style={styles.datePickerText}>
-                            {sessionDate ? sessionDate.toLocaleDateString() : 'Select Session Date'}
-                        </Text>
-                    </TouchableOpacity>
-                )}
+                {/* Session Date Picker */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Session Date</Text>
+                    {Platform.OS === 'web' ? (
+                        <input
+                            type="datetime-local"
+                            value={sessionDate.toISOString().substring(0, 16)}
+                            onChange={handleWebDateChange}
+                            style={styles.webDatePicker}
+                        />
+                    ) : (
+                        <TouchableOpacity onPress={showDatePicker} style={styles.datePickerButton}>
+                            <Text style={styles.datePickerText}>
+                                {sessionDate ? sessionDate.toLocaleDateString() : 'Select Session Date'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                    {Platform.OS !== 'web' && (
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="datetime"
+                            onConfirm={handleConfirmDate}
+                            onCancel={hideDatePicker}
+                            date={sessionDate}
+                        />
+                    )}
+                </View>
 
-                {Platform.OS !== 'web' && (
-                    <DateTimePickerModal
-                        isVisible={isDatePickerVisible}
-                        mode="datetime"
-                        onConfirm={handleConfirmDate}
-                        onCancel={hideDatePicker}
-                        date={sessionDate}
+                {/* Basic Information */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Basic Information</Text>
+                    <PaperTextInput
+                        label="Pet ID"
+                        value={petId.toString()}
+                        onChangeText={setPetId}
+                        mode="outlined"
+                        style={styles.input}
                     />
-                )}
+                    <PaperTextInput
+                        label="Owner ID"
+                        value={ownerId.toString()}
+                        onChangeText={setOwnerId}
+                        mode="outlined"
+                        style={styles.input}
+                    />
+                </View>
 
-                {/* Input fields for session details */}
-                <TextInput style={styles.input} placeholder="Pet ID" value={petId} onChangeText={setPetId} />
-                <TextInput style={styles.input} placeholder="Owner ID" value={ownerId} onChangeText={setOwnerId} />
-                <TextInput style={styles.input} placeholder="Diagnosis" value={diagnosis} onChangeText={setDiagnosis} />
-                <TextInput style={styles.input} placeholder="Treatment" value={treatment} onChangeText={setTreatment} />
-                <TextInput style={styles.input} placeholder="Symptoms" value={symptoms} onChangeText={setSymptoms} />
-                <TextInput style={styles.input} placeholder="Treatment Plan" value={treatmentPlan} onChangeText={setTreatmentPlan} />
-                <TextInput style={styles.input} placeholder="Medications Prescribed" value={medicationsPrescribed} onChangeText={setMedicationsPrescribed} />
-                <TextInput style={styles.input} placeholder="Weight (kg)" value={weight} onChangeText={setWeight} />
-                <TextInput style={styles.input} placeholder="Temperature (°C)" value={temperature} onChangeText={setTemperature} />
-                <TextInput style={styles.input} placeholder="Heart Rate (BPM)" value={heartRate} onChangeText={setHeartRate} />
-                <TextInput style={styles.input} placeholder="Veterinarian Notes" value={veterinarianNotes} onChangeText={setVeterinarianNotes} />
-                <TextInput style={styles.input} placeholder="Tests Ordered" value={testsOrdered} onChangeText={setTestsOrdered} />
-                <TextInput style={styles.input} placeholder="Test Results Image URL" value={testResultsImageUrl} onChangeText={setTestResultsImageUrl} />
-                <TextInput style={styles.input} placeholder="Next Appointment Date (YYYY-MM-DD)" value={nextAppointmentDate} onChangeText={setNextAppointmentDate} />
-                <TextInput style={styles.input} placeholder="Post Treatment Instructions" value={postTreatmentInstructions} onChangeText={setPostTreatmentInstructions} />
+                {/* Medical Details */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Medical Details</Text>
+                    <PaperTextInput label="Diagnosis" value={diagnosis} onChangeText={setDiagnosis} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Treatment" value={treatment} onChangeText={setTreatment} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Symptoms" value={symptoms} onChangeText={setSymptoms} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Treatment Plan" value={treatmentPlan} onChangeText={setTreatmentPlan} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Medications Prescribed" value={medicationsPrescribed} onChangeText={setMedicationsPrescribed} mode="outlined" style={styles.input} />
+                </View>
+
+                {/* Vital Signs */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Vital Signs</Text>
+                    <PaperTextInput label="Weight (kg)" value={weight} onChangeText={setWeight} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Temperature (°C)" value={temperature} onChangeText={setTemperature} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Heart Rate (BPM)" value={heartRate} onChangeText={setHeartRate} mode="outlined" style={styles.input} />
+                </View>
+
+                {/* Additional Notes */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Additional Notes</Text>
+                    <PaperTextInput label="Veterinarian Notes" value={veterinarianNotes} onChangeText={setVeterinarianNotes} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Tests Ordered" value={testsOrdered} onChangeText={setTestsOrdered} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Test Results Image URL" value={testResultsImageUrl} onChangeText={setTestResultsImageUrl} mode="outlined" style={styles.input} />
+                </View>
+
+                {/* Follow-Up Actions */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Follow-Up Actions</Text>
+                    <PaperTextInput label="Next Appointment Date (YYYY-MM-DD)" value={nextAppointmentDate} onChangeText={setNextAppointmentDate} mode="outlined" style={styles.input} />
+                    <PaperTextInput label="Post Treatment Instructions" value={postTreatmentInstructions} onChangeText={setPostTreatmentInstructions} mode="outlined" style={styles.input} />
+                </View>
 
                 {/* Button to create the session */}
-                <Button title="Create Session" onPress={handleCreateSession} />
+                <Button mode="contained" onPress={handleCreateSession} style={styles.createButton}>
+                    Create Session
+                </Button>
             </View>
         </ScrollView>
     );
+
+
 };
 
 const styles = StyleSheet.create({
     scrollContainer: {
         flex: 1,
+        backgroundColor: '#f9f9f9',
     },
     container: {
         flex: 1,
         padding: 20,
         justifyContent: 'center',
+        backgroundColor: '#ffffff',
+        borderRadius: 10,
+        margin: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 5,
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
-        marginBottom: 20,
+        color: '#333',
+        marginBottom: 25,
         textAlign: 'center',
     },
+    section: {
+        marginBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 8,
+        color: '#444',
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#666',
+        marginBottom: 5,
+    },
     input: {
-        height: 40,
-        borderColor: 'gray',
+        height: 50,
+        borderColor: '#ddd',
         borderWidth: 1,
-        marginBottom: 10,
-        paddingHorizontal: 10,
-        borderRadius: 5,
+        marginBottom: 15,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        backgroundColor: '#f0f8ff',
+        fontSize: 16,
+        color: '#333',
     },
     datePickerButton: {
-        backgroundColor: '#f0f8ff',
-        padding: 10,
-        borderRadius: 5,
+        backgroundColor: '#e6f7ff',
+        padding: 12,
+        borderRadius: 8,
         marginBottom: 15,
         alignItems: 'center',
-        borderColor: 'gray',
+        borderColor: '#ddd',
         borderWidth: 1,
     },
     datePickerText: {
@@ -166,14 +242,29 @@ const styles = StyleSheet.create({
     },
     webDatePicker: {
         width: '100%',
-        height: 40,
-        borderRadius: 5,
-        borderColor: 'gray',
+        height: 50,
+        borderRadius: 8,
+        borderColor: '#ddd',
         borderWidth: 1,
         padding: 10,
         marginBottom: 15,
         fontSize: 16,
+        backgroundColor: '#f0f8ff',
+    },
+    createButton: {
+        marginTop: 20,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        backgroundColor: '#6200ee',
+        elevation: 3,
+    },
+    createButtonText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#ffffff',
     },
 });
+
 
 export default MedicalSession;

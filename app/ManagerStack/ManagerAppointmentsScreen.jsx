@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import axios from 'axios';
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 const ManagerAppointmentsScreen = () => {
     const [appointments, setAppointments] = useState([
         {
             id: 1,
+            petId: 101, // Add petId here
+            ownerId: 201, // Add ownerId here
             petName: 'Buddy',
             date: '2024-10-24',
             time: '10:00 AM',
@@ -15,6 +16,8 @@ const ManagerAppointmentsScreen = () => {
         },
         {
             id: 2,
+            petId: 102,
+            ownerId: 202,
             petName: 'Whiskers',
             date: '2024-10-25',
             time: '02:00 PM',
@@ -22,21 +25,25 @@ const ManagerAppointmentsScreen = () => {
             details: 'Routine vaccination appointment for Whiskers.',
         },
     ]);
-    const [loading, setLoading] = useState(false);
-    const [selectedAppointment, setSelectedAppointment] = useState(null); // For selected appointment
-    const [modalVisible, setModalVisible] = useState(false); // For controlling modal visibility
-    const router = useRouter(); // Use the router to navigate programmatically
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const router = useRouter();
 
-    // Handle appointment click to show modal
     const handleAppointmentPress = (appointment) => {
-        setSelectedAppointment(appointment); // Set the clicked appointment
-        setModalVisible(true); // Open the modal
+        setSelectedAppointment(appointment);
+        setModalVisible(true);
     };
 
-    // Close modal and navigate to MedicalSession screen
+    // Pass petId and ownerId as route parameters to MedicalSession screen
     const handleStartMedicalSession = () => {
-        setModalVisible(false); // Close the modal
-        router.push('/ManagerStack/MedicalSession'); // Navigate to MedicalSession
+        if (selectedAppointment) {
+            const { petId, ownerId } = selectedAppointment;
+            setModalVisible(false);
+            router.push({
+                pathname: '/ManagerStack/MedicalSession',
+                params: { petId, ownerId },
+            });
+        }
     };
 
     const renderAppointment = ({ item }) => (
@@ -53,32 +60,23 @@ const ManagerAppointmentsScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Your Appointments</Text>
-            {loading ? (
-                <Text>Loading appointments...</Text>
-            ) : appointments.length > 0 ? (
-                <FlatList
-                    data={appointments}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={renderAppointment}
-                />
-            ) : (
-                <Text>No appointments found.</Text>
-            )}
+            <FlatList
+                data={appointments}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderAppointment}
+            />
 
-            {/* Modal for displaying detailed appointment info */}
             <Modal
                 visible={modalVisible}
                 transparent={true}
                 animationType="slide"
                 onRequestClose={() => setModalVisible(false)}
             >
-                {/* TouchableOpacity to close the modal when pressing outside */}
                 <TouchableOpacity
                     style={styles.modalContainer}
-                    activeOpacity={1} // Prevents the background from being clickable
-                    onPressOut={() => setModalVisible(false)} // Closes modal when pressing outside
+                    activeOpacity={1}
+                    onPressOut={() => setModalVisible(false)}
                 >
-                    {/* Inner TouchableOpacity to prevent modal content from closing */}
                     <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
                         {selectedAppointment && (
                             <>
@@ -89,7 +87,6 @@ const ManagerAppointmentsScreen = () => {
                                 <Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>
                                 <Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>
 
-                                {/* Link to Start a Medical Session */}
                                 <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
                                     <Text style={styles.buttonText}>Start a Medical Session</Text>
                                 </TouchableOpacity>
@@ -132,7 +129,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
         backgroundColor: 'white',
