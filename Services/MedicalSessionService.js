@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8080/api/sessions'; // Adjust as necessary for your API endpoint
+// const BASE_URL = 'http://192.168.1.51:8080/api/sessions'; //Osaid
+const BASE_URL = 'http://192.168.56.1:8080/api/sessions'; //murrar
 
 const MedicalSessionService = {
     // Create a new medical session
