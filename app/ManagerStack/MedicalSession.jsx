@@ -90,7 +90,6 @@ const MedicalSession = () => {
 
         let testResultsImageUrl = null;
 
-        // Upload the test result image if it exists
         if (testResultsImageUri) {
             try {
                 console.log("Uploading test results image...");
@@ -98,7 +97,11 @@ const MedicalSession = () => {
                 console.log("Image uploaded, URL:", testResultsImageUrl);
             } catch (error) {
                 console.error('Error uploading test results image:', error);
-                Alert.alert('Error', 'Failed to upload test results image.');
+                if (Platform.OS !== 'web') {
+                    Alert.alert('Error', 'Failed to upload test results image.');
+                } else {
+                    window.alert('Error: Failed to upload test results image.');
+                }
                 return;
             }
         }
@@ -125,13 +128,27 @@ const MedicalSession = () => {
         };
 
         try {
-            const response = await MedicalSessionService.createSession(newMedicalSession, veterinarianId);
-            Alert.alert('Success', 'Medical session created successfully!');
+            await MedicalSessionService.createSession(newMedicalSession, veterinarianId);
+
+            // Handle success message and navigation based on the platform
+            if (Platform.OS === 'web') {
+                window.alert('Medical session created successfully!');
+                router.push("../ManagerStack/ManagerAppointmentsScreen");
+            } else {
+                Alert.alert('Success', 'Medical session created successfully!', [
+                    { text: 'OK', onPress: () => router.push("../ManagerStack/ManagerAppointmentsScreen") }
+                ]);
+            }
         } catch (error) {
             console.error('Error creating medical session:', error);
-            Alert.alert('Error', 'Failed to create medical session.');
+            if (Platform.OS === 'web') {
+                window.alert('Error: Failed to create medical session.');
+            } else {
+                Alert.alert('Error', 'Failed to create medical session.');
+            }
         }
     };
+
 
     return (
         <ScrollView style={styles.scrollContainer}>
@@ -314,11 +331,6 @@ const styles = StyleSheet.create({
 
 
 
-    rowContainer: {
-        flexDirection: "row",
-        alignItems: "center",   // Aligns items vertically centered within the row
-        justifyContent: "space-between",  // Adjusts spacing between items if needed
-    },
 
     container: {
         flex: 1,
@@ -431,7 +443,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 8,
         alignItems: 'center',
-        marginVertical: 10,
+        // marginVertical: 10,
+    },
+    rowContainer: {
+        flexDirection: "row",
+        alignItems: "center",   // Aligns items vertically centered within the row
+        justifyContent: "space-between",  // Adjusts spacing between items if needed
     },
     photoButtonText: {
         color: 'white',
