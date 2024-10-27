@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 
-// const API_URL = 'http://192.168.1.51:8080/api/appointments'; //Osaid
-const API_URL = 'http://192.168.56.1:8080/api/appointments'; //murrar
+const API_URL = 'http://192.168.1.51:8080/api/appointments'; //Osaid
+// const API_URL = 'http://192.168.56.1:8080/api/appointments'; //murrar
 const AppointmentService = {
     // Create a new appointment
     createAppointment: async (appointmentData) => {

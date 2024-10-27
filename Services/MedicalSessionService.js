@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URL = 'http://192.168.1.51:8080/api/sessions'; //Osaid
-const BASE_URL = 'http://192.168.56.1:8080/api/sessions'; //murrar
+const BASE_URL = 'http://192.168.1.51:8080/api/medical-sessions'; //Osaid
+// const BASE_URL = 'http://192.168.56.1:8080/api/medical-sessions'; //murrar
 
 const MedicalSessionService = {
     // Create a new medical session

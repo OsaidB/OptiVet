@@ -4,12 +4,15 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MedicalSessionService from '../../Services/MedicalSessionService';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { TextInput as PaperTextInput, Button } from 'react-native-paper';
+import * as ImagePicker from 'expo-image-picker';
+import PetService from "../../Services/PetService";
 
 const MedicalSession = () => {
     const router = useRouter();
     const { petId: initialPetId, ownerId: initialOwnerId } = useLocalSearchParams(); // Retrieve petId and ownerId from params
 
     const [sessionDate, setSessionDate] = useState(new Date());
+    const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date());
 
     const [petId, setPetId] = useState(initialPetId || ''); // Initialize with petId from params
     const [ownerId, setOwnerId] = useState(initialOwnerId || ''); // Initialize with ownerId from params
@@ -27,35 +30,85 @@ const MedicalSession = () => {
     const [heartRate, setHeartRate] = useState('');
     const [veterinarianNotes, setVeterinarianNotes] = useState('');
     const [testsOrdered, setTestsOrdered] = useState('');
-    const [testResultsImageUrl, setTestResultsImageUrl] = useState('');
-    const [nextAppointmentDate, setNextAppointmentDate] = useState('');
+
+    // const [testResultsImageUrl, setTestResultsImageUrl] = useState(null);
+    const [testResultsImageUri, setTestResultsImageUri] = useState(null);
+    // const [nextAppointmentDate, setNextAppointmentDate] = useState('');
     const [postTreatmentInstructions, setPostTreatmentInstructions] = useState('');
 
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [isSessionDatePickerVisible, setSessionDatePickerVisibility] = useState(false);
+    const [isNextAppointmentDatePickerVisible, setNextAppointmentDatePickerVisibility] = useState(false);
 
     useEffect(() => {
         setLoggedInVetId(1); // Temporary static ID
         setVeterinarianId(loggedInVetId);
     }, [loggedInVetId]);
 
-    const showDatePicker = () => setDatePickerVisibility(true);
-    const hideDatePicker = () => setDatePickerVisibility(false);
-
-    const handleConfirmDate = (selectedDate) => {
-        setSessionDate(selectedDate);
-        hideDatePicker();
+    const showNextAppointmentDatePicker = () => setNextAppointmentDatePickerVisibility(true);
+    const hideNextAppointmentDatePicker = () => setNextAppointmentDatePickerVisibility(false);
+    const handleConfirmNextAppointmentDate = (selectedDate) => {
+        setNextAppointmentDate(selectedDate);
+        hideNextAppointmentDatePicker();
     };
 
-    const handleWebDateChange = (event) => {
-        setSessionDate(new Date(event.target.value));
+    const showSessionDatePicker = () => setSessionDatePickerVisibility(true);
+    const hideSessionDatePicker = () => setSessionDatePickerVisibility(false);
+    const handleConfirmSessionDate = (selectedDate) => {
+        setSessionDate(selectedDate);
+        hideSessionDatePicker();
+    };
+
+    const handleWebDateChange = (event, setter) => {
+        // setSessionDate(new Date(event.target.value));
+        setter(new Date(event.target.value));
+    };
+
+    const pickImage = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissionResult.granted === false) {
+            Alert.alert('Permission to access media is required!');
+            return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            // setTestResultsImageUrl(result.assets[0].uri);
+            setTestResultsImageUri(result.assets[0].uri);
+        } else {
+            Alert.alert('No image selected.');
+        }
     };
 
     const handleCreateSession = async () => {
         const formattedSessionDate = sessionDate.toISOString();
+        const formattedNextAppointmentDate = nextAppointmentDate.toISOString();
+
+        let testResultsImageUrl = null;
+
+        // Upload the test result image if it exists
+        if (testResultsImageUri) {
+            try {
+                console.log("Uploading test results image...");
+                testResultsImageUrl = await PetService.uploadImage(testResultsImageUri);
+                console.log("Image uploaded, URL:", testResultsImageUrl);
+            } catch (error) {
+                console.error('Error uploading test results image:', error);
+                Alert.alert('Error', 'Failed to upload test results image.');
+                return;
+            }
+        }
+
         const newMedicalSession = {
             sessionDate: formattedSessionDate,
-            petId: Number(petId),
-            ownerId: Number(ownerId),
+            // petId: Number(petId),
+            // ownerId: Number(ownerId),
+            petId: 1,
+            ownerId: 1,
             diagnosis,
             treatment,
             symptoms,
@@ -67,7 +120,7 @@ const MedicalSession = () => {
             veterinarianNotes,
             testsOrdered,
             testResultsImageUrl,
-            nextAppointmentDate,
+            nextAppointmentDate: formattedNextAppointmentDate,
             postTreatmentInstructions,
         };
 
@@ -92,11 +145,11 @@ const MedicalSession = () => {
                         <input
                             type="datetime-local"
                             value={sessionDate.toISOString().substring(0, 16)}
-                            onChange={handleWebDateChange}
+                            onChange={(e) => handleWebDateChange(e, setSessionDate)}
                             style={styles.webDatePicker}
                         />
                     ) : (
-                        <TouchableOpacity onPress={showDatePicker} style={styles.datePickerButton}>
+                        <TouchableOpacity onPress={showSessionDatePicker} style={styles.datePickerButton}>
                             <Text style={styles.datePickerText}>
                                 {sessionDate ? sessionDate.toLocaleDateString() : 'Select Session Date'}
                             </Text>
@@ -104,10 +157,10 @@ const MedicalSession = () => {
                     )}
                     {Platform.OS !== 'web' && (
                         <DateTimePickerModal
-                            isVisible={isDatePickerVisible}
+                            isVisible={isSessionDatePickerVisible}
                             mode="datetime"
-                            onConfirm={handleConfirmDate}
-                            onCancel={hideDatePicker}
+                            onConfirm={handleConfirmSessionDate}
+                            onCancel={hideSessionDatePicker}
                             date={sessionDate}
                         />
                     )}
@@ -150,20 +203,88 @@ const MedicalSession = () => {
                     <PaperTextInput label="Heart Rate (BPM)" value={heartRate} onChangeText={setHeartRate} mode="outlined" style={styles.input} />
                 </View>
 
-                {/* Additional Notes */}
+                {/* Additional Notes Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Additional Notes</Text>
-                    <PaperTextInput label="Veterinarian Notes" value={veterinarianNotes} onChangeText={setVeterinarianNotes} mode="outlined" style={styles.input} />
-                    <PaperTextInput label="Tests Ordered" value={testsOrdered} onChangeText={setTestsOrdered} mode="outlined" style={styles.input} />
-                    <PaperTextInput label="Test Results Image URL" value={testResultsImageUrl} onChangeText={setTestResultsImageUrl} mode="outlined" style={styles.input} />
+
+                    <PaperTextInput
+                        label="Veterinarian Notes"
+                        value={veterinarianNotes}
+                        onChangeText={setVeterinarianNotes}
+                        mode="outlined"
+                        style={styles.input}
+                        accessibilityLabel="Veterinarian Notes Input"
+                    />
+
+                    <PaperTextInput
+                        label="Tests Ordered"
+                        value={testsOrdered}
+                        onChangeText={setTestsOrdered}
+                        mode="outlined"
+                        style={styles.input}
+                        accessibilityLabel="Tests Ordered Input"
+                    />
+
+                    <View style={[styles.rowContainer, styles.input]}>
+                        <Text style={styles.sectionTitle}>Test Results:</Text>
+
+                        {/* Image Picker Button for Test Results */}
+                        <TouchableOpacity
+                            onPress={pickImage}
+                            style={styles.photoButton}
+                            accessibilityRole="button"
+                            accessibilityLabel="Test Results Image Picker"
+                        >
+                            <Text style={styles.photoButtonText}>
+                                {testResultsImageUri ? "Change Image" : "Select Test Results Image"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
+
 
                 {/* Follow-Up Actions */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Follow-Up Actions</Text>
-                    <PaperTextInput label="Next Appointment Date (YYYY-MM-DD)" value={nextAppointmentDate} onChangeText={setNextAppointmentDate} mode="outlined" style={styles.input} />
-                    <PaperTextInput label="Post Treatment Instructions" value={postTreatmentInstructions} onChangeText={setPostTreatmentInstructions} mode="outlined" style={styles.input} />
+
+                    {/* Next Appointment Date Picker */}
+                    <View style={styles.datePickerContainer}>
+                        <Text style={styles.inputLabel}>Next Appointment Date</Text>
+                        {Platform.OS === 'web' ? (
+                            <input
+                                type="date"
+                                value={nextAppointmentDate ? nextAppointmentDate.toISOString().substring(0, 10) : ""}
+                                onChange={(e) => handleWebDateChange(e, setNextAppointmentDate)}
+                                style={styles.webDatePicker}
+                            />
+                        ) : (
+                            <TouchableOpacity onPress={showNextAppointmentDatePicker} style={styles.datePickerButton}>
+                                <Text style={styles.datePickerText}>
+                                    {nextAppointmentDate ? nextAppointmentDate.toLocaleDateString() : 'Select Next Appointment Date'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                        {Platform.OS !== 'web' && (
+                            <DateTimePickerModal
+                                isVisible={isNextAppointmentDatePickerVisible}
+                                mode="date"
+                                onConfirm={handleConfirmNextAppointmentDate}
+                                onCancel={hideNextAppointmentDatePicker}
+                                date={nextAppointmentDate || new Date()}
+                            />
+                        )}
+                    </View>
+
+                    {/* Post Treatment Instructions */}
+                    <PaperTextInput
+                        label="Post Treatment Instructions"
+                        value={postTreatmentInstructions}
+                        onChangeText={setPostTreatmentInstructions}
+                        mode="outlined"
+                        style={styles.input}
+                    />
                 </View>
+
 
                 {/* Button to create the session */}
                 <Button mode="contained" onPress={handleCreateSession} style={styles.createButton}>
@@ -181,6 +302,24 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f9f9f9',
     },
+
+    datePickerContainer: {
+        marginBottom: 10,
+    },
+    inputLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+
+
+
+    rowContainer: {
+        flexDirection: "row",
+        alignItems: "center",   // Aligns items vertically centered within the row
+        justifyContent: "space-between",  // Adjusts spacing between items if needed
+    },
+
     container: {
         flex: 1,
         padding: 20,
@@ -227,30 +366,52 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    datePickerButton: {
-        backgroundColor: '#e6f7ff',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 15,
-        alignItems: 'center',
-        borderColor: '#ddd',
+    // datePickerButton: {
+    //     backgroundColor: '#e6f7ff',
+    //     padding: 12,
+    //     borderRadius: 8,
+    //     marginBottom: 15,
+    //     alignItems: 'center',
+    //     borderColor: '#ddd',
+    //     borderWidth: 1,
+    // },
+    // datePickerText: {
+    //     fontSize: 16,
+    //     color: '#333',
+    // },
+    // webDatePicker: {
+    //     width: '100%',
+    //     height: 50,
+    //     borderRadius: 8,
+    //     borderColor: '#ddd',
+    //     borderWidth: 1,
+    //     padding: 10,
+    //     marginBottom: 15,
+    //     fontSize: 16,
+    //     backgroundColor: '#f0f8ff',
+    // },
+
+    webDatePicker: {
+        height: 40,
+        borderColor: '#ccc',
         borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        fontSize: 16,
+    },
+    datePickerButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 5,
+        alignItems: 'center',
     },
     datePickerText: {
         fontSize: 16,
         color: '#333',
     },
-    webDatePicker: {
-        width: '100%',
-        height: 50,
-        borderRadius: 8,
-        borderColor: '#ddd',
-        borderWidth: 1,
-        padding: 10,
-        marginBottom: 15,
-        fontSize: 16,
-        backgroundColor: '#f0f8ff',
-    },
+
+
     createButton: {
         marginTop: 20,
         paddingVertical: 12,
@@ -263,6 +424,18 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         color: '#ffffff',
+    },
+    photoButton: {
+        backgroundColor: '#1D3D47',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    photoButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
 
