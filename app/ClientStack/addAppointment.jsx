@@ -1,63 +1,100 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
-import { Link } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Picker, StyleSheet, TouchableOpacity } from 'react-native';
+import AppointmentService from '../../Services/AppointmentService'; // Import AppointmentService
+import PetService from '../../Services/PetService'; // Assuming you have this service
+import UserService from '../../Services/UserService';
+import axios from "axios"; // Assuming you have this service for vets
 
 export default function AddAppointment() {
     const [selectedPet, setSelectedPet] = useState('');
-    const [appointmentDate, setAppointmentDate] = useState(new Date());
-    const [appointmentTime, setAppointmentTime] = useState(new Date());
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [selectedVet, setSelectedVet] = useState('');
+    const [selectedSlot, setSelectedSlot] = useState('');
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [vets, setVets] = useState([]);
+    const [pets, setPets] = useState([]);
+
+    // Fetch pets for client with ID = 1
+    useEffect(() => {
+        const fetchPets = async () => {
+            try {
+                const petData = await PetService.getPetsByOwnerId(1); // Use PetService to fetch pets
+                setPets(petData);
+            } catch (error) {
+                console.error('Error fetching pets:', error);
+            }
+        };
+        fetchPets();
+    }, []);
+
+    // Fetch vets
+// Fetch vets
+    useEffect(() => {
+        const fetchVets = async () => {
+            try {
+                const response = await axios.get('http://192.168.56.1:8080/api/users/roles/MANAGER');
+                setVets(response.data);
+            } catch (error) {
+                console.error('Error fetching vets:', error);
+            }
+        };
+        fetchVets();
+    }, []);
 
 
-    // Example pets list - this would typically come from your state or API
-    const pets = [
-        { id: '1', name: 'Buddy' },
-        { id: '2', name: 'Max' },
-        { id: '3', name: 'Bella' },
-    ];
+    // Fetch available slots for the selected vet
+    useEffect(() => {
+        if (selectedVet) {
+            const fetchAvailableSlots = async () => {
+                try {
+                    const slotData = await AppointmentService.getAvailableSlots(selectedVet); // Use AppointmentService
+                    setAvailableSlots(slotData);
+                } catch (error) {
+                    console.error('Error fetching available slots:', error);
+                    setAvailableSlots([]);
+                }
+            };
+            fetchAvailableSlots();
+        } else {
+            setAvailableSlots([]);
+        }
+    }, [selectedVet]);
 
-    const handleSubmit = () => {
-        // Handle appointment submission logic here
-        console.log({
-            pet: selectedPet,
-            date: appointmentDate.toDateString(),
-            time: appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        });
+    const handleSubmit = async () => {
+        if (!selectedPet || !selectedVet || !selectedSlot) {
+            console.error('All fields must be selected');
+            return;
+        }
 
-        // Clear the input fields
-        setSelectedPet('');
-        setAppointmentDate(new Date());
-        setAppointmentTime(new Date());
-    };
+        const selectedSlotObj = availableSlots.find(slot => slot.id === Number(selectedSlot));
 
-    const showDatePickerHandler = () => {
-        setShowDatePicker(true);
-    };
+        if (!selectedSlotObj || !selectedSlotObj.appointmentDate) {
+            console.error('Invalid slot selection');
+            return;
+        }
 
-    const showTimePickerHandler = () => {
-        setShowTimePicker(true);
-    };
+        try {
+            await AppointmentService.createAppointment({
+                status: 'SCHEDULED',
+                vetId: selectedVet,
+                clientId: 1,
+                petId: selectedPet,
+                appointmentDate: selectedSlotObj.appointmentDate
+            });
 
-    const onChangeDate = (event, selectedDate) => {
-        const currentDate = selectedDate || appointmentDate;
-        setShowDatePicker(false);
-        setAppointmentDate(currentDate);
-    };
-
-    const onChangeTime = (event, selectedTime) => {
-        const currentTime = selectedTime || appointmentTime;
-        setShowTimePicker(false);
-        setAppointmentTime(currentTime);
+            setSelectedPet('');
+            setSelectedVet('');
+            setSelectedSlot('');
+            console.log('Appointment successfully scheduled');
+        } catch (error) {
+            console.error('Error scheduling appointment:', error);
+        }
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Add Appointment</Text>
 
-            {/* Dropdown for selecting a pet */}
+            {/* Pet Selection */}
             <Text style={styles.label}>Select Pet:</Text>
             <Picker
                 selectedValue={selectedPet}
@@ -66,74 +103,44 @@ export default function AddAppointment() {
             >
                 <Picker.Item label="Select a pet" value="" />
                 {pets.map((pet) => (
-                    <Picker.Item key={pet.id} label={pet.name} value={pet.name} />
+                    <Picker.Item key={pet.id} label={pet.name} value={pet.id} />
                 ))}
             </Picker>
 
-            {/* Date Picker */}
-            <Text style={styles.label}>Appointment Date:</Text>
-            {Platform.OS === 'web' ? (
-                <TextInput
-                    style={styles.input}
-                    placeholder="YYYY-MM-DD"
-                    value={appointmentDate.toISOString().split('T')[0]} // Format date for input
-                    onChangeText={(text) => setAppointmentDate(new Date(text))}
-                />
-            ) : (
-                <TouchableOpacity style={styles.input} onPress={showDatePickerHandler}>
-                    <Text>{appointmentDate.toDateString()}</Text>
-                </TouchableOpacity>
-            )}
-            {showDatePicker && (
-                <DateTimePicker
-                    value={appointmentDate}
-                    mode="date"
-                    is24Hour={true}
-                    display="default"
-                    onChange={onChangeDate}
-                />
-            )}
+            {/* Vet Selection */}
+            <Text style={styles.label}>Select Vet:</Text>
+            <Picker
+                selectedValue={selectedVet}
+                onValueChange={(itemValue) => {
+                    setSelectedVet(itemValue);
+                    setAvailableSlots([]); // Clear slots when changing the vet
+                }}
+                style={styles.picker}
+            >
+                <Picker.Item label="Select a vet" value="" />
+                {vets.map((vet) => (
+                    <Picker.Item key={vet.userId} label={`Dr. ${vet.firstName} ${vet.lastName}`} value={vet.userId} />
+                ))}
+            </Picker>
 
-            {/* Time Picker */}
-            <Text style={styles.label}>Appointment Time:</Text>
-            {Platform.OS === 'web' ? (
-                <TextInput
-                    style={styles.input}
-                    placeholder="HH:MM"
-                    value={appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    onChangeText={(text) => {
-                        const [hour, minute] = text.split(':').map(Number);
-                        const newTime = new Date(appointmentTime);
-                        newTime.setHours(hour);
-                        newTime.setMinutes(minute);
-                        setAppointmentTime(newTime);
-                    }}
-                />
-            ) : (
-                <TouchableOpacity style={styles.input} onPress={showTimePickerHandler}>
-                    <Text>{appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                </TouchableOpacity>
-            )}
-            {showTimePicker && (
-                <DateTimePicker
-                    value={appointmentTime}
-                    mode="time"
-                    is24Hour={true}
-                    display="default"
-                    onChange={onChangeTime}
-                />
-            )}
+            {/* Available Slot Selection */}
+            <Text style={styles.label}>Select Available Slot:</Text>
+            <Picker
+                selectedValue={selectedSlot}
+                onValueChange={(itemValue) => setSelectedSlot(itemValue)}
+                style={styles.picker}
+                enabled={availableSlots.length > 0}
+            >
+                <Picker.Item label="Select an available slot" value="" />
+                {availableSlots.map((slot) => (
+                    <Picker.Item key={slot.id} label={`${slot.appointmentDate}`} value={slot.id} />
+                ))}
+            </Picker>
 
+            {/* Submit Button */}
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>Submit Appointment</Text>
             </TouchableOpacity>
-
-            {/* Link to go back to the Manage Appointments screen */}
-            <Link href="/ClientStack/manageAppointments" asChild>
-                <TouchableOpacity style={styles.backButton}>
-                    <Text style={styles.backButtonText}>Back to Manage Appointments</Text>
-                </TouchableOpacity>
-            </Link>
         </View>
     );
 }
@@ -152,15 +159,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 8,
     },
-    input: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
+    picker: {
+        height: 50,
+        width: '100%',
         marginBottom: 12,
-        paddingLeft: 8,
-        borderRadius: 5,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     button: {
         backgroundColor: '#1D3D47',
@@ -174,19 +176,5 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
-    },
-    backButton: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
-    backButtonText: {
-        color: '#1D3D47',
-        fontSize: 16,
-        textDecorationLine: 'underline',
-    },
-    picker: {
-        height: 50,
-        width: '100%',
-        marginBottom: 12,
     },
 });

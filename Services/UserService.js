@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const USERS_API_BASE_URL = 'http://10.10.30.77:8080/api/users';
-const USERS_API_BASE_URL = 'http://localhost:8080/api/users';
+const USERS_API_BASE_URL = 'http://192.168.56.1:8080/api/users';
 //
 const BASE_URL = 'http://localhost:8080';
 // const BASE_URL = 'http://10.10.30.77:8080';
@@ -79,6 +79,11 @@ class PetService {
                 'X-Auth-Token': token
             }
         });
+    }
+
+    getManagerUsers() {
+        const token = localStorage.getItem("token");
+        return axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`);
     }
 
     // AddUser login

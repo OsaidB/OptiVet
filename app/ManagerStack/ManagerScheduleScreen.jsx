@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { Link } from 'expo-router';
-import AppointmentService from '../../Services/AppointmentService'; // Import the Appointment service
+import AppointmentService from '../../Services/AppointmentService';
 
 const ManagerScheduleScreen = () => {
     const currentDay = new Date();
     const [selectedTime, setSelectedTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
+    const [availableSlots, setAvailableSlots] = useState([]);
 
-    // Format current day and prepopulate with 3 dummy appointments
     const formattedCurrentDay = format(currentDay, 'EEEE - d / MMMM ');
-    const [appointments, setAppointments] = useState([
-        { id: '1', date: format(currentDay, 'yyyy-MM-dd'), time: '10:00' },
-        { id: '2', date: format(currentDay, 'yyyy-MM-dd'), time: '14:00' },
-        { id: '3', date: format(currentDay, 'yyyy-MM-dd'), time: '16:30' }
-    ]);
+
+    // Fetch available slots from backend for vetId 1
+    useEffect(() => {
+        const fetchAvailableSlots = async () => {
+            try {
+                const slots = await AppointmentService.getAvailableSlots(1);
+                setAvailableSlots(slots);
+            } catch (error) {
+                console.error('Error fetching available slots:', error);
+            }
+        };
+        fetchAvailableSlots();
+    }, []);
 
     // Handle time change for web and mobile
     const handleTimeChange = (event, time) => {
@@ -33,36 +41,58 @@ const ManagerScheduleScreen = () => {
         }
     };
 
-    // Save appointment slot in the local state and call backend service to save it
+    // Save appointment slot and call backend to save it
     const saveAppointmentSlot = async () => {
-        const formattedDate = format(currentDay, 'yyyy-MM-dd'); // Always set to today's date
+        const formattedDate = format(currentDay, 'yyyy-MM-dd');
         const formattedTime = format(selectedTime, 'HH:mm');
-
-        const newAppointment = {
-            id: Math.random().toString(),
-            date: formattedDate,
-            time: formattedTime,
-        };
-
-        // Store appointment slot in the local state
-        setAppointments([...appointments, newAppointment]);
-
-        // Prepare the appointment for the backend
         const appointmentData = {
             appointmentDate: `${formattedDate}T${formattedTime}:00`,
-            clientId: null, // No client yet, manager is publishing free slots
-            petId: null,    // No pet yet, manager is publishing free slots
-            vetId: 1,       // Assuming vet_id is always 1
-            status: 'AVAILABLE', // The slot is available
+            vetId: 1,
+            status: 'AVAILABLE',
         };
 
         try {
-            // Call the service to save the appointment in the backend
-            const response = await AppointmentService.createAppointment(appointmentData);
+            await AppointmentService.createAppointment(appointmentData);
             Alert.alert('Success', 'Appointment slot saved and published successfully!');
+            setAvailableSlots([...availableSlots, appointmentData]);
         } catch (error) {
-            console.error('Error saving appointment slot:', error);
+            console.error('Error saving appointment slot:', error.response?.data || error.message);
             Alert.alert('Error', 'Failed to save the appointment slot. Please try again.');
+        }
+    };
+
+    const updateAppointmentSlot = async () => {
+        if (!editingSlotId) return;
+
+        const formattedDate = format(currentDay, 'yyyy-MM-dd');
+        const formattedTime = format(selectedTime, 'HH:mm');
+        const appointmentData = {
+            appointmentDate: `${formattedDate}T${formattedTime}:00`,
+        };
+
+        try {
+            const updatedSlot = await AppointmentService.updateAppointment(editingSlotId, appointmentData);
+            setAvailableSlots(
+                availableSlots.map(slot => slot.id === editingSlotId ? updatedSlot : slot)
+            );
+            Alert.alert('Updated', 'Appointment slot has been updated successfully!');
+        } catch (error) {
+            console.error(`Error updating appointment with ID: ${editingSlotId}`, error);
+            Alert.alert('Error', 'Failed to update the appointment slot. Please try again.');
+        } finally {
+            setEditingSlotId(null);
+            setShowTimePicker(false);
+        }
+    };
+
+    const deleteAppointmentSlot = async (appointmentId) => {
+        try {
+            await AppointmentService.deleteAppointment(appointmentId);
+            setAvailableSlots(availableSlots.filter(slot => slot.id !== appointmentId));
+            Alert.alert('Deleted', 'Appointment slot has been deleted.');
+        } catch (error) {
+            console.error(`Error deleting appointment with ID: ${appointmentId}`, error);
+            Alert.alert('Error', 'Failed to delete the appointment slot. Please try again.');
         }
     };
 
@@ -71,7 +101,6 @@ const ManagerScheduleScreen = () => {
             <Text style={styles.title}>Manage Your Schedule</Text>
             <Text style={styles.title}>It's {formattedCurrentDay}</Text>
 
-            {/* Time Picker for Web or Mobile */}
             {Platform.OS === 'web' ? (
                 <input
                     type="time"
@@ -94,26 +123,31 @@ const ManagerScheduleScreen = () => {
                 />
             )}
 
-            {/* Save Appointment Slot Button */}
             <TouchableOpacity style={styles.saveButton} onPress={saveAppointmentSlot}>
                 <Text style={styles.saveButtonText}>Save Appointment Slot</Text>
             </TouchableOpacity>
 
-            {/* List of Scheduled Appointment Slots */}
             <View style={styles.appointmentsContainer}>
                 <Text style={styles.subtitle}>Scheduled Appointment Slots (Today):</Text>
-                {appointments.length === 0 ? (
+                {availableSlots.length === 0 ? (
                     <Text>No slots scheduled yet.</Text>
                 ) : (
-                    appointments.map((appointment) => (
-                        <View key={appointment.id} style={styles.appointmentCard}>
-                            <Text>{appointment.date} - {appointment.time}</Text>
+                    availableSlots.map((slot, index) => (
+                        <View key={index} style={styles.appointmentCard}>
+                            <Text>
+                                {format(new Date(slot.appointmentDate), 'yyyy-MM-dd HH:mm')}
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.deleteButton}
+                                onPress={() => deleteAppointmentSlot(slot.id)}
+                            >
+                                <Text style={styles.deleteButtonText}>Delete</Text>
+                            </TouchableOpacity>
                         </View>
                     ))
                 )}
             </View>
 
-            {/* Navigation Link */}
             <Link href="/" asChild>
                 <TouchableOpacity style={styles.backButton}>
                     <Text style={styles.backButtonText}>Back to Dashboard</Text>
@@ -127,13 +161,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        justifyContent: 'center',
+        justifyContent: 'center'
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        textAlign: 'center',
+        textAlign: 'center'
     },
     button: {
         backgroundColor: '#1D3D47',
@@ -141,11 +175,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 8,
         marginVertical: 10,
-        alignItems: 'center',
+        alignItems: 'center'
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 16
     },
     saveButton: {
         backgroundColor: '#1D3D47',
@@ -153,20 +187,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 8,
         marginTop: 20,
-        alignItems: 'center',
+        alignItems: 'center'
     },
     saveButtonText: {
         color: 'white',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: 'bold'
     },
     appointmentsContainer: {
-        marginTop: 30,
+        marginTop: 30
     },
     subtitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 10
     },
     appointmentCard: {
         padding: 10,
@@ -175,6 +209,19 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         marginVertical: 5,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    deleteButton: {
+        backgroundColor: '#FF6347',
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 5
+    },
+    deleteButtonText: {
+        color: 'white',
+        fontSize: 14
     },
     backButton: {
         backgroundColor: '#555',
@@ -182,11 +229,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 8,
         marginTop: 30,
-        alignItems: 'center',
+        alignItems: 'center'
     },
     backButtonText: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 16
     },
     webTimePicker: {
         marginVertical: 10,
@@ -194,7 +241,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 8,
-        width: '100%',
+        width: '100%'
     },
 });
 
