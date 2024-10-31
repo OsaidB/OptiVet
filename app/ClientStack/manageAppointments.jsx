@@ -38,11 +38,25 @@ export default function ManageAppointments() {
             return;
         }
 
+        // Find the current appointment data
+        const currentAppointment = appointments.find(appointment => appointment.id === appointmentId);
+        if (!currentAppointment) {
+            console.error("Appointment not found");
+            return;
+        }
+console.log(currentAppointment);
+        // Update only the status to 'AVAILABLE' while retaining clientId and petId
         const updatedData = {
+            appointmentDate:currentAppointment.appointmentDate,
+            // clientId: currentAppointment.clientId,
             clientId: null,
+            // petId: currentAppointment.petId,
             petId: null,
+            vetId: currentAppointment.vetId,
             status: 'AVAILABLE',
         };
+        console.log(appointmentId);
+        console.log("updatedData:",updatedData);
 
         console.log(`Updating appointment with ID: ${appointmentId}`, updatedData); // Log data before sending
 
