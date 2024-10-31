@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import baseURL from './config'; // Adjust the path as necessary
-const API_URL=baseURL;
+const API_URL= `${baseURL.USED_BASE_URL}/api/clients`;
 
 const ClientService = {
     // Fetch a client by their ID

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import baseURL from './config'; // Adjust the path as necessary
-const BASE_URL=baseURL;
+const BASE_URL= `${baseURL.USED_BASE_URL}/api/medical-sessions`;
 
 const MedicalSessionService = {
     // Create a new medical session

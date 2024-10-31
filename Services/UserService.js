@@ -1,220 +1,159 @@
 import axios from 'axios';
-
 import baseURL from './config'; // Adjust the path as necessary
-const API_URL=baseURL;
 
-const USERS_API_BASE_URL = 'http://10.10.30.77:8080/api/users';
-// const USERS_API_BASE_URL = 'http://192.168.56.1:8080/api/users';
-//
-const BASE_URL = 'http://localhost:8080';
-// const BASE_URL = 'http://10.10.30.77:8080';
+const USERS_API_BASE_URL = `${baseURL.USED_BASE_URL}/api/users`;
+
+const UserService = {
+
+    fetchVets: async () => {
+        try {
+            const response = await axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`);
+            return response.data; // Return the data for use in the component
+        } catch (error) {
+            console.error('Error fetching vets:', error);
+            throw error; // Rethrow the error for handling in the component
+        }
+    },
+    // Add other user-related methods as needed
 
 
-class PetService {
 
     // Fetch all users
-    getAllUsers() {
+    getAllUsers: async () => {
         const token = localStorage.getItem("token");
-        return axios.get(USERS_API_BASE_URL, {
-            headers: {
-                'X-Auth-Token': token
-            }
-        });
-    }
-
-    // // Create a new user
-    // createUser(user) {
-    //     const token = localStorage.getItem("token");
-    //     return axios.post(USERS_API_BASE_URL, user, {
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'X-Auth-Token': token
-    //         }
-    //     });
-    // }
+        try {
+            const response = await axios.get(USERS_API_BASE_URL, {
+                headers: {
+                    'X-Auth-Token': token
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            throw error;
+        }
+    },
 
     // Fetch a user by its ID
-    getUserById(userId) {
+    getUserById: async (userId) => {
         const token = localStorage.getItem("token");
-        return axios.get(`${USERS_API_BASE_URL}/${userId}`, {
-            headers: {
-                'X-Auth-Token': token
-            }
-        });
-    }
+        try {
+            const response = await axios.get(`${USERS_API_BASE_URL}/${userId}`, {
+                headers: {
+                    'X-Auth-Token': token
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching user with ID: ${userId}`, error);
+            throw error;
+        }
+    },
 
-    // Fetch a user by its ID
-    getUserByName(email) {
+    // Fetch a user by email
+    getUserByName: async (email) => {
         const token = localStorage.getItem("token");
-        return axios.get(`${BASE_URL}/users/${email}`, {
-            headers: {
-                'X-Auth-Token': token
-            }
-        });
-    }
+        try {
+            const response = await axios.get(`${USERS_API_BASE_URL}/users/${email}`, {
+                headers: {
+                    'X-Auth-Token': token
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user by email:', error);
+            throw error;
+        }
+    },
 
     // Update a user by its ID
-    updateUser(userId, user) {
+    updateUser: async (userId, userData) => {
         const token = localStorage.getItem("token");
-        return axios.put(`${USERS_API_BASE_URL}/${userId}`, user, {
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Auth-Token': token
-            }
-        });
-    }
+        try {
+            const response = await axios.put(`${USERS_API_BASE_URL}/${userId}`, userData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Auth-Token': token
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating user with ID: ${userId}`, error);
+            throw error;
+        }
+    },
 
     // Delete a user by its ID
-    deleteUser(userId) {
+    deleteUser: async (userId) => {
         const token = localStorage.getItem("token");
-        return axios.delete(`${USERS_API_BASE_URL}/${userId}`, {
-            headers: {
-                'X-Auth-Token': token
-            }
-        });
-    }
+        try {
+            await axios.delete(`${USERS_API_BASE_URL}/${userId}`, {
+                headers: {
+                    'X-Auth-Token': token
+                }
+            });
+        } catch (error) {
+            console.error(`Error deleting user with ID: ${userId}`, error);
+            throw error;
+        }
+    },
 
     // Fetch users by role ID
-    getUsersByRoleId(roleId) {
-        const token = localStorage.getItem("token");
-        return axios.get(`${USERS_API_BASE_URL}/roles/${roleId}`, {
-            headers: {
-                'X-Auth-Token': token
-            }
-        });
-    }
-
-    getManagerUsers() {
-        const token = localStorage.getItem("token");
-        return axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`);
-    }
-
-    // AddUser login
-    // async login(password, email) {
-    //     try {
-    //         const response = await axios.post(`${BASE_URL}/auth`, {password, email});
-    //         return response.data;
-    //     } catch (err) {
-    //         throw err;
-    //     }
-    // }
-
-// // Register a new user
-//     async register(userData) {
-//         try {
-//             // Ensure the user data includes the necessary fields
-//             const response = await axios.post(`${BASE_URL}/auth/register`, userData, {
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 }
-//             });
-//             return response.data;
-//         } catch (err) {
-//             throw err;
-//         }
-//     }
-
-
-    // Get all users
-    static async getAllUsers() {
+    getUsersByRoleId: async (roleId) => {
         const token = localStorage.getItem("token");
         try {
-            const response = await axios.get(`${BASE_URL}/users`, {
+            const response = await axios.get(`${USERS_API_BASE_URL}/roles/${roleId}`, {
                 headers: {
                     'X-Auth-Token': token
                 }
             });
             return response.data;
-        } catch (err) {
-            throw err;
+        } catch (error) {
+            console.error(`Error fetching users by role ID: ${roleId}`, error);
+            throw error;
         }
-    }
+    },
 
-    // Get your profile
-    static async getYourProfile() {
+    // Fetch manager users
+    getManagerUsers: async () => {
         const token = localStorage.getItem("token");
         try {
-            const response = await axios.get(`${BASE_URL}/adminuser/get-profile`, {
+            const response = await axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`, {
                 headers: {
                     'X-Auth-Token': token
                 }
             });
             return response.data;
-        } catch (err) {
-            throw err;
+        } catch (error) {
+            console.error('Error fetching manager users:', error);
+            throw error;
         }
-    }
+    },
 
-    // Fetch a user by ID (admin only)
-    static async getUserById(userId) {
-        const token = localStorage.getItem("token");
-        try {
-            const response = await axios.get(`${BASE_URL}/admin/get-users/${userId}`, {
-                headers: {
-                    'X-Auth-Token': token
-                }
-            });
-            return response.data;
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    // Delete a user by ID (admin only)
-    static async deleteUser(userId) {
-        const token = localStorage.getItem("token");
-        try {
-            const response = await axios.delete(`${BASE_URL}/admin/delete/${userId}`, {
-                headers: {
-                    'X-Auth-Token': token
-                }
-            });
-            return response.data;
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    // Update a user by ID (admin only)
-    static async updateUser(userId, userData) {
-        const token = localStorage.getItem("token");
-        try {
-            const response = await axios.put(`${BASE_URL}/admin/update/${userId}`, userData, {
-                headers: {
-                    'X-Auth-Token': token
-                }
-            });
-            return response.data;
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    /** AUTHENTICATION CHECKER **/
-
-    static logout() {
+    // Authentication methods
+    logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
-    }
+    },
 
-    static isAuthenticated() {
+    isAuthenticated: () => {
         const token = localStorage.getItem('token');
         return !!token;
-    }
+    },
 
-    static isAdmin() {
+    isAdmin: () => {
         const role = localStorage.getItem('role');
         return role === 'ADMIN';
-    }
+    },
 
-    static isUser() {
+    isUser: () => {
         const role = localStorage.getItem('role');
         return role === 'USER';
-    }
+    },
 
-    static adminOnly() {
-        return this.isAuthenticated() && this.isAdmin();
+    adminOnly: () => {
+        return UserService.isAuthenticated() && UserService.isAdmin();
     }
-}
+};
 
-export default new PetService();
+export default UserService;
