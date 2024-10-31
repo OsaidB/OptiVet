@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 
-// const API_URL = 'http://192.168.1.51:8080/api/appointments'; // Osaid
-const API_URL = 'http://192.168.56.1:8080/api/appointments'; // Murrar's lap ip
-//const API_URL = 'http://192.168.1.52/api/appointments'; // Murrar's phone ip
+import baseURL from './config'; // Adjust the path as necessary
+const API_URL=baseURL;
+
 const AppointmentService = {
     // Create a new appointment
 

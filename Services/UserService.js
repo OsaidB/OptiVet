@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// const USERS_API_BASE_URL = 'http://10.10.30.77:8080/api/users';
-const USERS_API_BASE_URL = 'http://192.168.56.1:8080/api/users';
+import baseURL from './config'; // Adjust the path as necessary
+const API_URL=baseURL;
+
+const USERS_API_BASE_URL = 'http://10.10.30.77:8080/api/users';
+// const USERS_API_BASE_URL = 'http://192.168.56.1:8080/api/users';
 //
 const BASE_URL = 'http://localhost:8080';
 // const BASE_URL = 'http://10.10.30.77:8080';

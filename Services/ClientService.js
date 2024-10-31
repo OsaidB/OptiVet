@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Define your API base URL for clients
-const API_URL = 'http://192.168.56.1:8080/api/clients'; // Adjust the URL as needed
+import baseURL from './config'; // Adjust the path as necessary
+const API_URL=baseURL;
 
 const ClientService = {
     // Fetch a client by their ID
