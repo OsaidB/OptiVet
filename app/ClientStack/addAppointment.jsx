@@ -3,7 +3,6 @@ import { View, Text, Picker, StyleSheet, TouchableOpacity } from 'react-native';
 import AppointmentService from '../../Services/AppointmentService'; // Import AppointmentService
 import PetService from '../../Services/PetService'; // Assuming you have this service
 import UserService from '../../Services/UserService';
-import axios from "axios"; // Assuming you have this service for vets
 
 export default function AddAppointment() {
     const [selectedPet, setSelectedPet] = useState('');
@@ -31,8 +30,8 @@ export default function AddAppointment() {
     useEffect(() => {
         const fetchVets = async () => {
             try {
-                const response = await axios.get('http://192.168.56.1:8080/api/users/roles/MANAGER');
-                setVets(response.data);
+                const vetsData = await UserService.fetchVets(); // Call the service method
+                setVets(vetsData); // Set the fetched data to state
             } catch (error) {
                 console.error('Error fetching vets:', error);
             }
