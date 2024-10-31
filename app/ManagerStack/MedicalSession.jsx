@@ -9,7 +9,7 @@ import PetService from "../../Services/PetService";
 
 const MedicalSession = () => {
     const router = useRouter();
-    const { petId: initialPetId, ownerId: initialOwnerId } = useLocalSearchParams(); // Retrieve petId and ownerId from params
+    const { petId: initialPetId, clientId: initialOwnerId } = useLocalSearchParams(); // Retrieve petId and ownerId from params
 
     const [sessionDate, setSessionDate] = useState(new Date());
     const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date());

@@ -6,6 +6,13 @@ const API_URL = 'http://192.168.56.1:8080/api/appointments'; // Murrar's lap ip
 //const API_URL = 'http://192.168.1.52/api/appointments'; // Murrar's phone ip
 const AppointmentService = {
     // Create a new appointment
+
+    // getAppointmentsByDateAndVet: (vetId, date) => {
+    //     return axios.get(`${API_URL}/vet/${vetId}/date`, {
+    //         params: { date: date.toISOString() }
+    //     });
+    // },
+
     createAppointment: async (appointmentData) => {
         try {
             const response = await axios.post(`${API_URL}`, appointmentData);
@@ -19,7 +26,7 @@ const AppointmentService = {
     // Fetch all appointments
     getAllAppointments: async () => {
         try {
-            const response = await axios.get(`${API_URL}/appointments`);
+            const response = await axios.get(`${API_URL}`);
             return response.data;
         } catch (error) {
             console.error('Error fetching appointments:', error);
@@ -83,6 +90,18 @@ const AppointmentService = {
             throw error;
         }
     },
+
+    getScheduledAppointments: async (vetId) => {
+        try {
+            const response = await axios.get(`${API_URL}/appointments`, { params: { vetId, status: "SCHEDULED" } });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching scheduled appointments for vet ID: ${vetId}`, error);
+            throw error;
+        }
+    },
+
+
 };
 
 export default AppointmentService;

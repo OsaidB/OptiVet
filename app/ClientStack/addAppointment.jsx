@@ -66,27 +66,31 @@ export default function AddAppointment() {
         }
 
         const selectedSlotObj = availableSlots.find(slot => slot.id === Number(selectedSlot));
-
         if (!selectedSlotObj || !selectedSlotObj.appointmentDate) {
             console.error('Invalid slot selection');
             return;
         }
 
         try {
-            await AppointmentService.createAppointment({
-                status: 'SCHEDULED',
-                vetId: selectedVet,
-                clientId: 1,
-                petId: selectedPet,
-                appointmentDate: selectedSlotObj.appointmentDate
-            });
-
+            if (selectedSlot) {
+                // Update existing appointment
+                await AppointmentService.updateAppointment(selectedSlot, {
+                    status: 'SCHEDULED',
+                    vetId: selectedVet,
+                    clientId: 1,
+                    petId: selectedPet,
+                    appointmentDate: selectedSlotObj.appointmentDate
+                });
+                console.log('Appointment successfully updated');
+            } else {
+                console.error('No appointment ID provided for update');
+            }
+            // Clear form
             setSelectedPet('');
             setSelectedVet('');
             setSelectedSlot('');
-            console.log('Appointment successfully scheduled');
         } catch (error) {
-            console.error('Error scheduling appointment:', error);
+            console.error('Error updating appointment:', error);
         }
     };
 

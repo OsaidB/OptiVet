@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import AppointmentService from '../../Services/AppointmentService';
-import PetService from '../../Services/PetService'; // Import PetService
+import PetService from '../../Services/PetService';
 
 export default function ManageAppointments() {
     const [appointments, setAppointments] = useState([]);
@@ -10,7 +10,6 @@ export default function ManageAppointments() {
     const clientId = 1; // Assuming the client ID is 1
 
     useEffect(() => {
-        // Fetch appointments and pets when the component mounts
         const fetchAppointments = async () => {
             try {
                 const appointmentData = await AppointmentService.getAppointmentsByClient(clientId);
@@ -32,6 +31,39 @@ export default function ManageAppointments() {
 
         fetchAppointments();
     }, []);
+
+    const handleDeleteAppointment = async (appointmentId) => {
+        if (!appointmentId) {
+            console.error("Appointment ID is missing");
+            return;
+        }
+
+        const updatedData = {
+            clientId: null,
+            petId: null,
+            status: 'AVAILABLE',
+        };
+
+        console.log(`Updating appointment with ID: ${appointmentId}`, updatedData); // Log data before sending
+
+        try {
+            const result = await AppointmentService.updateAppointment(appointmentId, updatedData);
+            Alert.alert('Success', 'Appointment updated to available successfully.');
+            setAppointments((prevAppointments) =>
+                prevAppointments.map((appointment) =>
+                    appointment.id === appointmentId
+                        ? { ...appointment, ...updatedData }
+                        : appointment
+                )
+            );
+        } catch (error) {
+            console.error(`Error updating appointment with ID: ${appointmentId}`, error.response?.data || error);
+            Alert.alert('Error', 'Failed to update the appointment. Please try again.');
+        }
+    };
+
+
+
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -58,6 +90,14 @@ export default function ManageAppointments() {
                         <Text style={styles.appointmentText}>
                             {pets[item.petId] ? pets[item.petId] : 'Unknown Pet'} - {formatDate(item.appointmentDate)}
                         </Text>
+
+                        {/* Delete Button */}
+                        <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleDeleteAppointment(item.id)}
+                        >
+                            <Text style={styles.deleteButtonText}>Delete</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             />
@@ -89,9 +129,22 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderColor: '#ccc',
         borderWidth: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     appointmentText: {
         fontSize: 16,
+    },
+    deleteButton: {
+        backgroundColor: '#ff4d4d',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+    },
+    deleteButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
     button: {
         backgroundColor: '#1D3D47',

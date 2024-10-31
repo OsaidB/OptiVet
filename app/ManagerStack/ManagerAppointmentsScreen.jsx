@@ -1,47 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useRouter } from "expo-router";
+import AppointmentService from '../../Services/AppointmentService';
+import PetService from '../../Services/PetService';
+import ClientService from '../../Services/ClientService';
 
 const ManagerAppointmentsScreen = () => {
-    const [appointments, setAppointments] = useState([
-        {
-            id: 1,
-            petId: 101, // Add petId here
-            ownerId: 201, // Add ownerId here
-            petName: 'Buddy',
-            date: '2024-10-24',
-            time: '10:00 AM',
-            ownerName: 'John Doe',
-            details: 'General checkup for Buddy. No major health issues expected.',
-        },
-        {
-            id: 2,
-            petId: 102,
-            ownerId: 202,
-            petName: 'Whiskers',
-            date: '2024-10-25',
-            time: '02:00 PM',
-            ownerName: 'Jane Smith',
-            details: 'Routine vaccination appointment for Whiskers.',
-        },
-    ]);
+    const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchScheduledAppointments = async () => {
+            try {
+                const vetId = 1; // Update this ID as needed
+                const scheduledAppointments = await AppointmentService.getScheduledAppointments(vetId);
+
+                // Fetch pet and client details for each appointment
+                const detailedAppointments = await Promise.all(
+                    scheduledAppointments.map(async (appointment) => {
+                        const petData = await PetService.getPetById(appointment.petId);
+                        // const clientData = await ClientService.getClientById(appointment.clientId); // Fetch owner details
+
+                        return {
+                            ...appointment,
+                            petName: petData?.name || 'Unknown Pet',
+                            // ownerName: clientData?.firstName || 'Unknown Owner', // Use the owner's first name
+                        };
+                    })
+                );
+
+                setAppointments(detailedAppointments);
+            } catch (error) {
+                console.error('Error fetching scheduled appointments:', error);
+            }
+        };
+
+
+        fetchScheduledAppointments();
+    }, []);
 
     const handleAppointmentPress = (appointment) => {
         setSelectedAppointment(appointment);
         setModalVisible(true);
     };
 
-    // Pass petId and ownerId as route parameters to MedicalSession screen
     const handleStartMedicalSession = () => {
         if (selectedAppointment) {
-            const { petId, ownerId } = selectedAppointment;
+            const { petId, clientId } = selectedAppointment;
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, ownerId },
+                params: { petId, clientId },
             });
         }
     };
@@ -50,9 +61,9 @@ const ManagerAppointmentsScreen = () => {
         <TouchableOpacity onPress={() => handleAppointmentPress(item)}>
             <View style={styles.appointmentItem}>
                 <Text style={styles.appointmentText}>Pet: {item.petName}</Text>
-                <Text style={styles.appointmentText}>Date: {item.date}</Text>
-                <Text style={styles.appointmentText}>Time: {item.time}</Text>
-                <Text style={styles.appointmentText}>Owner: {item.ownerName}</Text>
+                <Text style={styles.appointmentText}>Date: {new Date(item.appointmentDate).toLocaleDateString()}</Text>
+                <Text style={styles.appointmentText}>Time: {new Date(item.appointmentDate).toLocaleTimeString()}</Text>
+                {/*<Text style={styles.appointmentText}>Owner: {item.ownerName}</Text>*/}
             </View>
         </TouchableOpacity>
     );
@@ -82,10 +93,10 @@ const ManagerAppointmentsScreen = () => {
                             <>
                                 <Text style={styles.modalTitle}>Appointment Details</Text>
                                 <Text style={styles.modalText}>Pet: {selectedAppointment.petName}</Text>
-                                <Text style={styles.modalText}>Date: {selectedAppointment.date}</Text>
-                                <Text style={styles.modalText}>Time: {selectedAppointment.time}</Text>
-                                <Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>
-                                <Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>
+                                <Text style={styles.modalText}>Date: {new Date(selectedAppointment.appointmentDate).toLocaleDateString()}</Text>
+                                <Text style={styles.modalText}>Time: {new Date(selectedAppointment.appointmentDate).toLocaleTimeString()}</Text>
+                                {/*<Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>*/}
+                                {/*<Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>*/}
 
                                 <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
                                     <Text style={styles.buttonText}>Start a Medical Session</Text>

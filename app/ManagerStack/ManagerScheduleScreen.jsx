@@ -41,47 +41,37 @@ const ManagerScheduleScreen = () => {
         }
     };
 
-    // Save appointment slot and call backend to save it
+    // Save appointment slot after checking for existing slots
     const saveAppointmentSlot = async () => {
         const formattedDate = format(currentDay, 'yyyy-MM-dd');
         const formattedTime = format(selectedTime, 'HH:mm');
+        const appointmentDateTime = `${formattedDate}T${formattedTime}:00`;
+
+        // Check if slot already exists in availableSlots array
+        const isSlotExisting = availableSlots.some(slot =>
+            format(new Date(slot.appointmentDate), 'yyyy-MM-dd HH:mm') === `${formattedDate} ${formattedTime}`
+        );
+
+        if (isSlotExisting) {
+            Alert.alert('Error', 'An appointment slot for this date and time already exists.');
+            console.log('Error', 'An appointment slot for this date and time already exists.');
+            return;
+        }
+
+        // Slot doesn't exist; proceed to create it
         const appointmentData = {
-            appointmentDate: `${formattedDate}T${formattedTime}:00`,
+            appointmentDate: appointmentDateTime,
             vetId: 1,
             status: 'AVAILABLE',
         };
 
         try {
-            await AppointmentService.createAppointment(appointmentData);
+            const newSlot = await AppointmentService.createAppointment(appointmentData);
             Alert.alert('Success', 'Appointment slot saved and published successfully!');
-            setAvailableSlots([...availableSlots, appointmentData]);
+            setAvailableSlots([...availableSlots, newSlot]);
         } catch (error) {
             console.error('Error saving appointment slot:', error.response?.data || error.message);
             Alert.alert('Error', 'Failed to save the appointment slot. Please try again.');
-        }
-    };
-
-    const updateAppointmentSlot = async () => {
-        if (!editingSlotId) return;
-
-        const formattedDate = format(currentDay, 'yyyy-MM-dd');
-        const formattedTime = format(selectedTime, 'HH:mm');
-        const appointmentData = {
-            appointmentDate: `${formattedDate}T${formattedTime}:00`,
-        };
-
-        try {
-            const updatedSlot = await AppointmentService.updateAppointment(editingSlotId, appointmentData);
-            setAvailableSlots(
-                availableSlots.map(slot => slot.id === editingSlotId ? updatedSlot : slot)
-            );
-            Alert.alert('Updated', 'Appointment slot has been updated successfully!');
-        } catch (error) {
-            console.error(`Error updating appointment with ID: ${editingSlotId}`, error);
-            Alert.alert('Error', 'Failed to update the appointment slot. Please try again.');
-        } finally {
-            setEditingSlotId(null);
-            setShowTimePicker(false);
         }
     };
 
@@ -95,6 +85,7 @@ const ManagerScheduleScreen = () => {
             Alert.alert('Error', 'Failed to delete the appointment slot. Please try again.');
         }
     };
+
 
     return (
         <View style={styles.container}>
