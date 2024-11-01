@@ -5,10 +5,8 @@ import PetService from "../../Services/PetService";
 
 export default function PetProfiles() {
     const [pets, setPets] = useState([]);
-    const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
-
-    // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
-    const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
+    const ownerId = 3; // Replace this with the actual owner ID, e.g., from authentication
+    const BASE_URL = 'http://192.168.1.51:8080/api/pets';
 
     useEffect(() => {
         const fetchPets = async () => {
@@ -56,6 +54,12 @@ export default function PetProfiles() {
                         <Text>Breed: {item.breed}</Text>
                         <Text>Age: {calculateAge(item.birthDate)}</Text>
                         <Text>Medical History: {item.medicalHistory}</Text>
+
+                        <Link href="../ClientStack/MedicalHistory" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Medical History</Text>
+                </TouchableOpacity>
+            </Link>
                     </View>
                 )}
             />
@@ -66,6 +70,9 @@ export default function PetProfiles() {
                     <Text style={styles.buttonText}>Add New Pet</Text>
                 </TouchableOpacity>
             </Link>
+
+
+
         </View>
     );
 }

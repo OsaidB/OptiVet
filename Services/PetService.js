@@ -2,8 +2,8 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
-const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
-
+//const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
+const BASE_URL = 'http://localhost:8080/api/pets'; //Sweiti
 
 const PetService = {
     // Create a new pet
