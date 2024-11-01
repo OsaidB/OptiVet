@@ -156,7 +156,7 @@ export default function CreatePetProfile() {
         if (petPhoto) {
             try {
                 console.log("Uploading image...");
-                imageUrl = await PetService.uploadPetImage(petPhoto);
+                imageUrl = await PetService.uploadImage(petPhoto);
                 console.log("Image uploaded, URL:", imageUrl);
             } catch (error) {
                 console.error('Error uploading image:', error);

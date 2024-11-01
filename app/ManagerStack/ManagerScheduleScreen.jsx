@@ -1,26 +1,149 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { format } from 'date-fns';
+import { Link } from 'expo-router';
+import AppointmentService from '../../Services/AppointmentService';
 
 const ManagerScheduleScreen = () => {
-    const [appointments, setAppointments] = useState([
-        { id: '1', time: '10:00 AM', patient: 'Bella', owner: 'John Doe' },
-        { id: '2', time: '11:30 AM', patient: 'Max', owner: 'Jane Smith' },
-    ]);
+    const currentDay = new Date();
+    const [selectedTime, setSelectedTime] = useState(new Date());
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [availableSlots, setAvailableSlots] = useState([]);
 
-    const renderAppointment = ({ item }) => (
-        <View style={styles.appointment}>
-            <Text>{item.time} - {item.patient} (Owner: {item.owner})</Text>
-        </View>
-    );
+    const formattedCurrentDay = format(currentDay, 'EEEE - d / MMMM ');
+
+    // Fetch available slots from backend for vetId 1
+    useEffect(() => {
+        const fetchAvailableSlots = async () => {
+            try {
+                const slots = await AppointmentService.getAvailableSlots(1);
+                setAvailableSlots(slots);
+            } catch (error) {
+                console.error('Error fetching available slots:', error);
+            }
+        };
+        fetchAvailableSlots();
+    }, []);
+
+    // Handle time change for web and mobile
+    const handleTimeChange = (event, time) => {
+        if (Platform.OS === 'web') {
+            const [hours, minutes] = event.target.value.split(':');
+            const timeDate = new Date();
+            timeDate.setHours(hours, minutes);
+            setSelectedTime(timeDate);
+        } else {
+            setShowTimePicker(false);
+            if (time) {
+                setSelectedTime(time);
+            }
+        }
+    };
+
+    // Save appointment slot after checking for existing slots
+    const saveAppointmentSlot = async () => {
+        const formattedDate = format(currentDay, 'yyyy-MM-dd');
+        const formattedTime = format(selectedTime, 'HH:mm');
+        const appointmentDateTime = `${formattedDate}T${formattedTime}:00`;
+
+        // Check if slot already exists in availableSlots array
+        const isSlotExisting = availableSlots.some(slot =>
+            format(new Date(slot.appointmentDate), 'yyyy-MM-dd HH:mm') === `${formattedDate} ${formattedTime}`
+        );
+
+        if (isSlotExisting) {
+            Alert.alert('Error', 'An appointment slot for this date and time already exists.');
+            console.log('Error', 'An appointment slot for this date and time already exists.');
+            return;
+        }
+
+        // Slot doesn't exist; proceed to create it
+        const appointmentData = {
+            appointmentDate: appointmentDateTime,
+            vetId: 1,
+            status: 'AVAILABLE',
+        };
+
+        try {
+            const newSlot = await AppointmentService.createAppointment(appointmentData);
+            Alert.alert('Success', 'Appointment slot saved and published successfully!');
+            setAvailableSlots([...availableSlots, newSlot]);
+        } catch (error) {
+            console.error('Error saving appointment slot:', error.response?.data || error.message);
+            Alert.alert('Error', 'Failed to save the appointment slot. Please try again.');
+        }
+    };
+
+    const deleteAppointmentSlot = async (appointmentId) => {
+        try {
+            await AppointmentService.deleteAppointment(appointmentId);
+            setAvailableSlots(availableSlots.filter(slot => slot.id !== appointmentId));
+            Alert.alert('Deleted', 'Appointment slot has been deleted.');
+        } catch (error) {
+            console.error(`Error deleting appointment with ID: ${appointmentId}`, error);
+            Alert.alert('Error', 'Failed to delete the appointment slot. Please try again.');
+        }
+    };
+
 
     return (
         <View style={styles.container}>
-            <Text style={styles.heading}>Appointment Schedule</Text>
-            <FlatList
-                data={appointments}
-                renderItem={renderAppointment}
-                keyExtractor={item => item.id}
-            />
+            <Text style={styles.title}>Manage Your Schedule</Text>
+            <Text style={styles.title}>It's {formattedCurrentDay}</Text>
+
+            {Platform.OS === 'web' ? (
+                <input
+                    type="time"
+                    value={format(selectedTime, 'HH:mm')}
+                    onChange={handleTimeChange}
+                    style={styles.webTimePicker}
+                />
+            ) : (
+                <TouchableOpacity style={styles.button} onPress={() => setShowTimePicker(true)}>
+                    <Text style={styles.buttonText}>Select your available Time for today</Text>
+                </TouchableOpacity>
+            )}
+
+            {showTimePicker && Platform.OS !== 'web' && (
+                <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    display="default"
+                    onChange={handleTimeChange}
+                />
+            )}
+
+            <TouchableOpacity style={styles.saveButton} onPress={saveAppointmentSlot}>
+                <Text style={styles.saveButtonText}>Save Appointment Slot</Text>
+            </TouchableOpacity>
+
+            <View style={styles.appointmentsContainer}>
+                <Text style={styles.subtitle}>Scheduled Appointment Slots (Today):</Text>
+                {availableSlots.length === 0 ? (
+                    <Text>No slots scheduled yet.</Text>
+                ) : (
+                    availableSlots.map((slot, index) => (
+                        <View key={index} style={styles.appointmentCard}>
+                            <Text>
+                                {format(new Date(slot.appointmentDate), 'yyyy-MM-dd HH:mm')}
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.deleteButton}
+                                onPress={() => deleteAppointmentSlot(slot.id)}
+                            >
+                                <Text style={styles.deleteButtonText}>Delete</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))
+                )}
+            </View>
+
+            <Link href="/" asChild>
+                <TouchableOpacity style={styles.backButton}>
+                    <Text style={styles.backButtonText}>Back to Dashboard</Text>
+                </TouchableOpacity>
+            </Link>
         </View>
     );
 };
@@ -29,17 +152,87 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#fff',
+        justifyContent: 'center'
     },
-    heading: {
+    title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
+        textAlign: 'center'
     },
-    appointment: {
+    button: {
+        backgroundColor: '#1D3D47',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginVertical: 10,
+        alignItems: 'center'
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16
+    },
+    saveButton: {
+        backgroundColor: '#1D3D47',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginTop: 20,
+        alignItems: 'center'
+    },
+    saveButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    appointmentsContainer: {
+        marginTop: 30
+    },
+    subtitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10
+    },
+    appointmentCard: {
         padding: 10,
-        borderBottomColor: '#ccc',
-        borderBottomWidth: 1,
+        backgroundColor: '#f9f9f9',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        marginVertical: 5,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    deleteButton: {
+        backgroundColor: '#FF6347',
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 5
+    },
+    deleteButtonText: {
+        color: 'white',
+        fontSize: 14
+    },
+    backButton: {
+        backgroundColor: '#555',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginTop: 30,
+        alignItems: 'center'
+    },
+    backButtonText: {
+        color: 'white',
+        fontSize: 16
+    },
+    webTimePicker: {
+        marginVertical: 10,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        width: '100%'
     },
 });
 
