@@ -7,12 +7,11 @@ import * as FileSystem from 'expo-file-system';
 import * as SplashScreen from "expo-splash-screen";
 import {useFonts} from "expo-font";
 import PetService from "../../Services/PetService";
-// import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-import { useRouter } from 'expo-router'; // Import useRouter
+import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
 
 export default function CreatePetProfile() {
-    // const navigation = useNavigation(); // Get the navigation object
-    const router = useRouter(); // Get the router object
+    const router = useRouter();
+    const { clientId } = useLocalSearchParams(); // Retrieve clientId using useLocalSearchParams
 
     const [petType, setPetType] = useState('');
     const [petName, setPetName] = useState('');
@@ -34,6 +33,11 @@ export default function CreatePetProfile() {
     const [loaded] = useFonts({
         SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
     });
+
+    // Log clientId whenever it changes
+    useEffect(() => {
+        console.log("Current client ID:", clientId);
+    }, [clientId]);
 
     const petData = {
         Dog: [
@@ -172,7 +176,8 @@ export default function CreatePetProfile() {
 
         const petProfileData = {
             name: petName,
-            ownerId: "1",
+            // ownerId: "1",
+            ownerId: clientId, // Use the passed clientId here
 
             type: petType,
             breed: petBreed,

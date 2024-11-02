@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import PetService from "../../Services/PetService";
 
 export default function PetProfiles() {
+    const { clientId } = useLocalSearchParams(); // Retrieve clientId dynamically
     const [pets, setPets] = useState([]);
-    const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
+    // const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
 
     // // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
     // const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
@@ -13,7 +14,7 @@ export default function PetProfiles() {
     useEffect(() => {
         const fetchPets = async () => {
             try {
-                const fetchedPets = await PetService.getPetsByOwnerId(ownerId); // Using the new method
+                const fetchedPets = await PetService.getPetsByOwnerId(clientId); // Use dynamic clientId
                 setPets(fetchedPets);
             } catch (error) {
                 console.error("Error fetching pets:", error);
@@ -22,7 +23,7 @@ export default function PetProfiles() {
         };
 
         fetchPets();
-    }, []);
+    }, [clientId]);
 
     const calculateAge = (birthDate) => {
         const today = new Date();
@@ -60,8 +61,8 @@ export default function PetProfiles() {
                 )}
             />
 
-            {/* Button to navigate to Create Pet Profile */}
-            <Link href="/ClientStack/createPetProfile" asChild>
+            {/* Button to navigate to Create Pet Profile with clientId */}
+            <Link href={{ pathname: "/ClientStack/createPetProfile", params: { clientId } }} asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Add New Pet</Text>
                 </TouchableOpacity>

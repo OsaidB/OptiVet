@@ -1,15 +1,41 @@
-import React from 'react';
-import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { Link } from 'expo-router';
+import ClientService from '../../Services/ClientService';
 
 const ClientStack = () => {
+    const [clientInfo, setClientInfo] = useState(null);
+    const clientId = 3; // Temporary static client ID
+
+    useEffect(() => {
+        const fetchClientInfo = async () => {
+            try {
+                const data = await ClientService.getClientById(clientId);
+                setClientInfo(data);
+            } catch (error) {
+                console.error("Error fetching client info:", error);
+                Alert.alert('Error', 'Failed to load client information.');
+            }
+        };
+
+        fetchClientInfo();
+    }, []);
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Client Dashboard</Text>
-            <Text>Welcome to your dashboard!</Text>
+            {clientInfo ? (
+                <>
+                    <Text>Welcome, {clientInfo.firstName} {clientInfo.lastName}!</Text>
+                    <Text>Email: {clientInfo.email}</Text>
+                    <Text>Phone: {clientInfo.phoneNumber}</Text>
+                </>
+            ) : (
+                <Text>Loading client information...</Text>
+            )}
 
             {/* Button to navigate to Pet Profiles */}
-            <Link href="/ClientStack/PetProfiles" asChild>
+            <Link href={{ pathname: "/ClientStack/PetProfiles", params: { clientId } }} asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>View Your Pet Profiles</Text>
                 </TouchableOpacity>
