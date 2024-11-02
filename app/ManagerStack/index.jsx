@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Link } from 'expo-router';
-import ManagerAppointmentsScreen from "./ManagerAppointmentsScreen";
 
 const ManagerStack = () => {
     return (
@@ -18,6 +17,13 @@ const ManagerStack = () => {
             <Link href="ManagerStack/ManagerAppointmentsScreen" asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>View Your Appointments</Text>
+                </TouchableOpacity>
+            </Link>
+
+            {/* Button for walk-in clients */}
+            <Link href="ManagerStack/WalkInClientsScreen" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Handle Walk-in Clients</Text>
                 </TouchableOpacity>
             </Link>
         </View>
