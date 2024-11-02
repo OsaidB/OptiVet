@@ -67,6 +67,20 @@ const PetService = {
             throw error;
         }
     },
+
+    // Serve pet image by filename
+    serveImage: async (fileName) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/uploads/${fileName}`, {
+                responseType: 'blob',
+            });
+            return URL.createObjectURL(response.data);
+        } catch (error) {
+            console.error("Error serving pet image:", error);
+            throw error;
+        }
+    },
+
     // Get a pet by its ID
     getPetById: async (petId) => {
         try {
