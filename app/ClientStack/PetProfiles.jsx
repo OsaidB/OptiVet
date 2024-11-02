@@ -11,6 +11,7 @@ export default function PetProfiles() {
     // // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
     // const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
 
+
     useEffect(() => {
         const fetchPets = async () => {
             try {
@@ -57,6 +58,12 @@ export default function PetProfiles() {
                         <Text>Breed: {item.breed}</Text>
                         <Text>Age: {calculateAge(item.birthDate)}</Text>
                         <Text>Medical History: {item.medicalHistory}</Text>
+
+                        <Link href="../ClientStack/MedicalHistory" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Medical History</Text>
+                </TouchableOpacity>
+            </Link>
                     </View>
                 )}
             />
@@ -67,6 +74,9 @@ export default function PetProfiles() {
                     <Text style={styles.buttonText}>Add New Pet</Text>
                 </TouchableOpacity>
             </Link>
+
+
+
         </View>
     );
 }

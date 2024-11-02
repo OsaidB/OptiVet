@@ -1,9 +1,15 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
 
+<<<<<<< HEAD
+// const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
+//const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
+const BASE_URL = 'http://localhost:8080/api/pets'; //Sweiti
+=======
 import baseURL from './config'; // Adjust the path as necessary
 const BASE_URL= `${baseURL.USED_BASE_URL}/api/pets`;
 
+>>>>>>> b3c62381bb20b70f9bb41ad12844b4974f7fe25c
 
 const PetService = {
     // Create a new pet
