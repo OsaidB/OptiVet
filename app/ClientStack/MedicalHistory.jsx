@@ -15,7 +15,7 @@ export default function MedicalHistory() {
 
     const [dietaryPreferencesText, setDietaryPreferencesText] = useState('');
     const [notesText, setNotesText] = useState('');
-    const petId = 30;
+    const petId = 2;
 
     // Fetches and sets each piece of medical history data
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function MedicalHistory() {
                 setAllergies(await MedicalHistoryService.getAllergies(petId));
                 setConditions(await MedicalHistoryService.getChronicConditions(petId));
                 setVaccinations(await MedicalHistoryService.getVaccinations(petId));
-                setSurgeries(await MedicalHistoryService.getSurgeries(petId));
+                setSurgeries(await MedicalHistoryService.getSurgeories(petId));
 
                 const medicalHistory = await MedicalHistoryService.getMedicalHistory(petId);
                 setDietaryPreferencesText(medicalHistory.dietaryPreferences || '');
@@ -51,7 +51,7 @@ export default function MedicalHistory() {
     const deleteChronicCondition = (id) => handleDeleteItem(id, conditions, setConditions, MedicalHistoryService.deleteChronicConditionById);
     const deleteAllergy = (id) => handleDeleteItem(id, allergies, setAllergies, MedicalHistoryService.deleteAllergyById);
     const deleteVaccination = (id) => handleDeleteItem(id, vaccinations, setVaccinations, MedicalHistoryService.deleteVaccinationById);
-    const deleteSurgery = (id) => handleDeleteItem(id, surgeries, setSurgeries, MedicalHistoryService.deleteSurgeryById);
+    const deleteSurgery = (id) => handleDeleteItem(id, surgeries, setSurgeries, MedicalHistoryService.deleteSurgeoryById);
 
     // Generalized add handler to add items to lists
     const handleAddItem = async (text, setText, setItems, serviceMethod, type) => {
@@ -72,14 +72,14 @@ export default function MedicalHistory() {
     const addChronicCondition = () => handleAddItem(conditionText, setConditionText, setConditions, MedicalHistoryService.createChronicConditionByPetId, "chronicCondition");
     const addAllergy = () => handleAddItem(allergyText, setAllergyText, setAllergies, MedicalHistoryService.createAllergyByPetId, "allergy");
     const addVaccination = () => handleAddItem(vaccinationText, setVaccinationText, setVaccinations, MedicalHistoryService.createVaccinationByPetId, "vaccination");
-    const addSurgery = () => handleAddItem(surgeryText, setSurgeryText, setSurgeries, MedicalHistoryService.createSurgeryByPetId, "surgery");
+    const addSurgery = () => handleAddItem(surgeryText, setSurgeryText, setSurgeries, MedicalHistoryService.createSurgeoryByPetId, "surgeory");
 
     // Updates dietary preferences and notes
     const updateMedicalHistory = async () => {
         try {
             const updatedHistory = await MedicalHistoryService.updateMedicalHistory({
-                dietaryPreferences: dietaryPreferencesText.trim() || null,
-                notes: notesText.trim() || null,
+                dietaryPreferences: dietaryPreferencesText || null,
+                notes: notesText || null,
             }, petId);
             setDietaryPreferencesText(updatedHistory.dietaryPreferences);
             setNotesText(updatedHistory.notes);
@@ -251,102 +251,111 @@ export default function MedicalHistory() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#9EABA2', // Main background color
+        backgroundColor: '#F7F3FC', // Very light lavender for a clean background
         padding: 20,
     },
     sectionContainer: {
-        backgroundColor: '#A36361', // Primary color for section background
-        borderRadius: 12,
-        padding: 15,
+        backgroundColor: '#EDE7F6', // Light lavender with a slight tint for subtle contrast
+        borderRadius: 15,
+        padding: 20,
         marginVertical: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 5,
+        elevation: 2,
     },
     sectionTitle: {
         fontSize: 22,
-        color: '#FFFFFF',
-        marginBottom: 10,
+        color: '#4A3B53', // Soft, deep lavender for primary text
+        marginBottom: 15,
         fontWeight: '700',
-        paddingLeft: 10,
     },
     inputRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal: 10,
-        marginBottom: 10,
+        marginBottom: 15,
     },
     textInput: {
         flex: 3,
-        height: 45,
-        borderColor: '#BDD1C5', // Light green for input borders
+        height: 40,
+        borderColor: '#D1C4E9', // Light purple for input borders
         borderWidth: 1.5,
-        borderRadius: 8,
-        color: '#FFFFFF',
-        backgroundColor: '#E8B298', // Light peach color for input background
-        paddingHorizontal: 10,
-        marginRight: 10,
+        borderRadius: 10,
+        color: '#4A3B53', // Darker text for readability
+        backgroundColor: '#FAF8FC', // Slightly off-white to soften the input area
+        paddingHorizontal: 12,
         fontSize: 16,
+        marginRight: 10,
     },
     addButton: {
         flex: 1,
-        backgroundColor: '#D3A29D', // Accent color for button background
-        borderRadius: 8,
+        backgroundColor: '#D4A5A5', // Soft peach-pink for button backgrounds
+        borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 10,
-        height: 45,
+        paddingVertical: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 3,
+        elevation: 3,
     },
     buttonText: {
-        color: '#1A1A1A',
-        fontWeight: 'bold',
-        fontSize: 14,
+        color: '#4A3B53', // Darker text color on buttons
+        fontWeight: '600',
+        fontSize: 15,
     },
     scrollView: {
         maxHeight: 150,
-        backgroundColor: '#BDD1C5', // Light green for scroll view background
-        borderRadius: 8,
-        paddingVertical: 10,
+        backgroundColor: '#EFE3F4', // Very light lavender-pink for list background
+        borderRadius: 10,
+        paddingVertical: 8,
         paddingHorizontal: 10,
-        marginHorizontal: 10,
+        marginTop: 10,
     },
     listItemContainer: {
-        backgroundColor: '#E8B298', // Light peach color for list items
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
+        backgroundColor: '#D9CDE4', // Soft muted purple for items
+        borderRadius: 10,
+        padding: 12,
         marginBottom: 8,
-        marginHorizontal: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
     itemText: {
-        color: '#A36361', // Primary color for text within list items
+        color: '#4A3B53',
         fontSize: 16,
-        marginBottom: 5,
+        fontWeight: '500',
     },
     deleteButton: {
-        backgroundColor: '#EECC8C', // Light yellow for delete button
-        borderRadius: 8,
+        backgroundColor: '#E8A2A2', // Soft muted pink for delete button
+        borderRadius: 10,
         paddingVertical: 5,
+        marginTop: 10,
         alignItems: 'center',
-        marginTop: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     deleteButtonText: {
-        color: '#1A1A1A',
-        fontWeight: 'bold',
-        fontSize: 14,
+        color: '#4A3B53',
+        fontWeight: '700',
     },
     textArea: {
-        color: '#FFFFFF',
+        color: '#4A3B53',
         borderWidth: 1.5,
-        borderColor: '#BDD1C5', // Light green border for text areas
-        borderRadius: 8,
-        padding: 10,
-        marginHorizontal: 10,
-        marginVertical: 10,
-        fontSize: 16,
+        borderColor: '#D1C4E9', // Light purple for border
+        borderRadius: 10,
+        padding: 12,
+        fontSize: 15,
         height: 90,
-        backgroundColor: '#E8B298', // Light peach for text area background
+        backgroundColor: '#FAF8FC', // Soft off-white background
+        marginTop: 10,
     },
 });
+

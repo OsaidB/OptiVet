@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-
-// const API_URL = 'http://192.168.1.51:8080/api/medicalHistories'; //Osaid
-//const API_URL = 'http://192.168.56.1:8080/api/medicalHistories'; //murrar
-const API_URL= 'http://localhost:8080/api/medicalHistories'; //Sweiti
+import baseURL from './config'; // Adjust the path as necessary
+const API_URL= `${baseURL.USED_BASE_URL}/api/medicalHistories`;
 
 const MedicalHistoryService = {
     
