@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import ClientService from '../../Services/ClientService';
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router"; // Import useRouter
 
 const WalkInClientsScreen = () => {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [clients, setClients] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
 
-    // Fetch all clients with pets from the backend on component mount
     useEffect(() => {
         const fetchClients = async () => {
             try {
@@ -25,7 +25,6 @@ const WalkInClientsScreen = () => {
         fetchClients();
     }, []);
 
-    // Filter clients based on search query
     const handleSearch = (query) => {
         setSearchQuery(query);
         const filtered = clients.filter(client =>
@@ -54,14 +53,14 @@ const WalkInClientsScreen = () => {
     const renderClient = ({ item }) => (
         <View style={styles.clientItem}>
             <Text style={styles.clientText}>Client: {item.firstName} {item.lastName}</Text>
-            <Text style={styles.clientText}>Pets:</Text>
-            {item.pets.map((pet) => (
-                <TouchableOpacity key={pet.id} style={styles.petItem} onPress={() => handlePetPress(pet)}>
-                    <Text style={styles.petText}>• {pet.name}</Text>
-                </TouchableOpacity>
-            ))}
-
-            {/* Link to Add New Pet */}
+            <Text style={styles.sectionTitle}>Pets:</Text>
+            <View style={styles.petListContainer}>
+                {item.pets.map((pet) => (
+                    <TouchableOpacity key={pet.id} style={styles.petItem} onPress={() => handlePetPress(pet)}>
+                        <Text style={styles.petText}>{pet.name}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
             <Link href={{ pathname: "/ClientStack/createPetProfile", params: { clientId: item.id } }} asChild>
                 <TouchableOpacity style={styles.addPetButton}>
                     <Text style={styles.buttonText}>Add New Pet</Text>
@@ -73,23 +72,17 @@ const WalkInClientsScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Walk-in Check-in</Text>
-
-            {/* Search Input */}
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search by client or pet name..."
                 value={searchQuery}
                 onChangeText={handleSearch}
             />
-
-            {/* List of filtered clients with their pets */}
             <FlatList
                 data={filteredClients}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderClient}
             />
-
-            {/* Modal for Pet Details */}
             <Modal
                 visible={modalVisible}
                 transparent={true}
@@ -137,6 +130,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
+        color: '#333',
     },
     searchInput: {
         height: 40,
@@ -146,32 +140,60 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginBottom: 20,
         width: '100%',
+        backgroundColor: '#f8f8f8',
     },
     clientItem: {
-        backgroundColor: '#E5E5E5',
+        backgroundColor: '#ffffff',
         padding: 15,
         marginVertical: 10,
-        borderRadius: 8,
+        borderRadius: 12,
         width: '100%',
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 5,
+        elevation: 3,
     },
-    petItem: {
-        paddingLeft: 20,
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#444',
         marginVertical: 5,
     },
     clientText: {
-        fontSize: 16,
-        color: 'black',
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 10,
+    },
+    petListContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    petItem: {
+        backgroundColor: '#D3E4F0',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 8,
+        margin: 5,
+        elevation: 1,
     },
     petText: {
         fontSize: 14,
-        color: 'black',
+        fontWeight: '500',
+        color: '#1A374D',
     },
     addPetButton: {
         backgroundColor: '#007BFF',
-        padding: 10,
-        marginVertical: 10,
-        borderRadius: 5,
+        paddingVertical: 10,
+        marginTop: 10,
+        borderRadius: 8,
         alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     modalContainer: {
         flex: 1,
@@ -182,30 +204,28 @@ const styles = StyleSheet.create({
     modalContent: {
         backgroundColor: 'white',
         padding: 20,
-        borderRadius: 10,
+        borderRadius: 12,
         width: '80%',
         alignItems: 'center',
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
+        color: '#333',
         marginBottom: 10,
     },
     modalText: {
         fontSize: 16,
+        color: '#555',
         marginBottom: 5,
     },
     button: {
         backgroundColor: '#007BFF',
-        padding: 10,
-        marginVertical: 10,
-        borderRadius: 5,
+        paddingVertical: 12,
+        marginTop: 10,
+        borderRadius: 8,
         width: '80%',
         alignItems: 'center',
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
     },
 });
 

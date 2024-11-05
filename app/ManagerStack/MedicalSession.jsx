@@ -183,24 +183,24 @@ const MedicalSession = () => {
                     )}
                 </View>
 
-                {/* Basic Information */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Basic Information</Text>
-                    <PaperTextInput
-                        label="Pet ID"
-                        value={petId.toString()}
-                        onChangeText={setPetId}
-                        mode="outlined"
-                        style={styles.input}
-                    />
-                    <PaperTextInput
-                        label="Owner ID"
-                        value={ownerId.toString()}
-                        onChangeText={setOwnerId}
-                        mode="outlined"
-                        style={styles.input}
-                    />
-                </View>
+                {/*/!* Basic Information *!/*/}
+                {/*<View style={styles.section}>*/}
+                {/*    <Text style={styles.sectionTitle}>Basic Information</Text>*/}
+                {/*    <PaperTextInput*/}
+                {/*        label="Pet ID"*/}
+                {/*        value={petId.toString()}*/}
+                {/*        onChangeText={setPetId}*/}
+                {/*        mode="outlined"*/}
+                {/*        style={styles.input}*/}
+                {/*    />*/}
+                {/*    <PaperTextInput*/}
+                {/*        label="Owner ID"*/}
+                {/*        value={ownerId.toString()}*/}
+                {/*        onChangeText={setOwnerId}*/}
+                {/*        mode="outlined"*/}
+                {/*        style={styles.input}*/}
+                {/*    />*/}
+                {/*</View>*/}
 
                 {/* Medical Details */}
                 <View style={styles.section}>
