@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Link } from 'expo-router';
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
@@ -7,30 +7,37 @@ import PetService from '../../Services/PetService';
 export default function ManageAppointments() {
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState({});
+    const [refreshing, setRefreshing] = useState(false);
     const clientId = 1; // Assuming the client ID is 1
 
+    const fetchAppointments = async () => {
+        try {
+            const appointmentData = await AppointmentService.getAppointmentsByClient(clientId);
+            setAppointments(appointmentData);
+
+            // Fetch pet details using PetService
+            const petData = await PetService.getPetsByOwnerId(clientId);
+
+            // Convert the array of pets into an object for easier access
+            const petMap = {};
+            petData.forEach(pet => {
+                petMap[pet.id] = pet.name; // Map pet ID to pet name
+            });
+            setPets(petMap);
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
+
     useEffect(() => {
-        const fetchAppointments = async () => {
-            try {
-                const appointmentData = await AppointmentService.getAppointmentsByClient(clientId);
-                setAppointments(appointmentData);
-
-                // Fetch pet details using PetService
-                const petData = await PetService.getPetsByOwnerId(clientId);
-
-                // Convert the array of pets into an object for easier access
-                const petMap = {};
-                petData.forEach(pet => {
-                    petMap[pet.id] = pet.name; // Map pet ID to pet name
-                });
-                setPets(petMap);
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-            }
-        };
-
         fetchAppointments();
     }, []);
+
+    const handleRefresh = async () => {
+        setRefreshing(true); // Start the refreshing indicator
+        await fetchAppointments(); // Fetch new data
+        setRefreshing(false); // Stop the refreshing indicator
+    };
 
     const handleDeleteAppointment = async (appointmentId) => {
         if (!appointmentId) {
@@ -38,46 +45,29 @@ export default function ManageAppointments() {
             return;
         }
 
-        // Find the current appointment data
         const currentAppointment = appointments.find(appointment => appointment.id === appointmentId);
         if (!currentAppointment) {
             console.error("Appointment not found");
             return;
         }
-console.log(currentAppointment);
-        // Update only the status to 'AVAILABLE' while retaining clientId and petId
+
         const updatedData = {
-            appointmentDate:currentAppointment.appointmentDate,
-            // clientId: currentAppointment.clientId,
+            appointmentDate: currentAppointment.appointmentDate,
             clientId: null,
-            // petId: currentAppointment.petId,
             petId: null,
             vetId: currentAppointment.vetId,
             status: 'AVAILABLE',
         };
-        console.log(appointmentId);
-        console.log("updatedData:",updatedData);
-
-        console.log(`Updating appointment with ID: ${appointmentId}`, updatedData); // Log data before sending
 
         try {
-            const result = await AppointmentService.updateAppointment(appointmentId, updatedData);
+            await AppointmentService.updateAppointment(appointmentId, updatedData);
             Alert.alert('Success', 'Appointment updated to available successfully.');
-            setAppointments((prevAppointments) =>
-                prevAppointments.map((appointment) =>
-                    appointment.id === appointmentId
-                        ? { ...appointment, ...updatedData }
-                        : appointment
-                )
-            );
+            fetchAppointments(); // Refresh appointments list after deletion
         } catch (error) {
             console.error(`Error updating appointment with ID: ${appointmentId}`, error.response?.data || error);
             Alert.alert('Error', 'Failed to update the appointment. Please try again.');
         }
     };
-
-
-
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -95,7 +85,7 @@ console.log(currentAppointment);
         <View style={styles.container}>
             <Text style={styles.title}>Manage Appointments</Text>
 
-            {/* List of Appointments */}
+            {/* List of Appointments with Pull-to-Refresh */}
             <FlatList
                 data={appointments}
                 keyExtractor={(item) => item.id.toString()}
@@ -114,6 +104,9 @@ console.log(currentAppointment);
                         </TouchableOpacity>
                     </View>
                 )}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                }
             />
 
             {/* Button to Add a New Appointment */}
@@ -130,47 +123,69 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        backgroundColor: '#F5F5F5',
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
+        color: '#1D3D47',
+        textAlign: 'center',
         marginBottom: 20,
     },
     appointmentCard: {
-        padding: 10,
-        marginVertical: 8,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 8,
-        borderColor: '#ccc',
+        backgroundColor: '#FFFFFF',
+        padding: 15,
+        marginVertical: 10,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+        borderColor: '#E0E0E0',
         borderWidth: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     appointmentText: {
-        fontSize: 16,
+        fontSize: 18,
+        color: '#333',
+        flex: 1,
+        marginRight: 10,
     },
     deleteButton: {
-        backgroundColor: '#ff4d4d',
-        paddingVertical: 6,
-        paddingHorizontal: 12,
+        backgroundColor: '#FF5252',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
         borderRadius: 8,
+        shadowColor: '#FF5252',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 2,
     },
     deleteButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: '#FFFFFF',
+        fontWeight: '600',
+        fontSize: 14,
     },
     button: {
         backgroundColor: '#1D3D47',
-        paddingVertical: 12,
+        paddingVertical: 14,
         paddingHorizontal: 20,
-        borderRadius: 8,
-        marginTop: 20,
+        borderRadius: 10,
+        marginTop: 30,
         alignItems: 'center',
+        shadowColor: '#007BFF',
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 5,
     },
     buttonText: {
-        color: 'white',
-        fontSize: 16,
+        color: '#FFFFFF',
+        fontSize: 18,
         fontWeight: 'bold',
     },
 });

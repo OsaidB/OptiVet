@@ -5,7 +5,7 @@ import ClientService from '../../Services/ClientService';
 
 const ClientStack = () => {
     const [clientInfo, setClientInfo] = useState(null);
-    const clientId = 3; // Temporary static client ID
+    const clientId = 1; // Temporary static client ID
 
     useEffect(() => {
         const fetchClientInfo = async () => {

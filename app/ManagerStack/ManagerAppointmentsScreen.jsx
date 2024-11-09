@@ -3,7 +3,6 @@ import { Text, View, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react
 import { useRouter } from "expo-router";
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
-import ClientService from '../../Services/ClientService';
 
 const ManagerAppointmentsScreen = () => {
     const [appointments, setAppointments] = useState([]);
@@ -117,59 +116,86 @@ const ManagerAppointmentsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#F5F5F5',
         padding: 20,
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
+        color: '#333',
         marginBottom: 20,
+        textAlign: 'center',
     },
     appointmentItem: {
-        backgroundColor: '#E5E5E5',
-        padding: 15,
+        backgroundColor: '#FFFFFF',
+        padding: 20,
         marginVertical: 10,
-        borderRadius: 8,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 4,
         width: '100%',
     },
     appointmentText: {
         fontSize: 16,
+        color: '#444',
+        marginBottom: 5,
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        paddingHorizontal: 20,
     },
     modalContent: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
+        backgroundColor: '#FFF',
+        padding: 25,
+        borderRadius: 15,
+        width: '90%',
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 8,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 10,
+        color: '#007BFF',
+        marginBottom: 15,
     },
     modalText: {
-        fontSize: 16,
-        marginBottom: 5,
+        fontSize: 18,
+        color: '#333',
+        marginBottom: 8,
+        textAlign: 'center',
     },
     button: {
         backgroundColor: '#007BFF',
-        padding: 10,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
         marginVertical: 10,
-        borderRadius: 5,
-        width: '80%',
+        borderRadius: 8,
+        width: '100%',
         alignItems: 'center',
+        shadowColor: '#007BFF',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 5,
     },
     buttonText: {
         color: 'white',
         fontSize: 16,
+        fontWeight: 'bold',
     },
 });
+
+
+
 
 export default ManagerAppointmentsScreen;
