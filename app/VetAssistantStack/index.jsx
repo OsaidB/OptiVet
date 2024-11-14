@@ -43,14 +43,15 @@ const VetAssistantStack = () => {
 
     const handleViewChecklist = () => {
         if (selectedPet) {
-            const { id: petId, ownerId: clientId } = selectedPet;
+            const { id: petId, ownerId: clientId, name: petName } = selectedPet;
             setModalVisible(false);
             router.push({
                 pathname: '/VetAssistantStack/DailyChecklist',
-                params: { petId, clientId },
+                params: { petId, clientId, petName },
             });
         }
     };
+
 
     const renderClient = ({ item }) => (
         <View style={styles.clientItem}>
