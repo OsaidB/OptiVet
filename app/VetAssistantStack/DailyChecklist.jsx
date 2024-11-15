@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch } from 'react-native';
 import { useRouter, useLocalSearchParams } from "expo-router";
-// import ChecklistService from '../../Services/ChecklistService';
+import DailyChecklistService from '../../Services/DailyChecklistService';
 
 const DailyChecklist = () => {
     const router = useRouter();
     const { petId, petName, clientId } = useLocalSearchParams();
-    const [healthStatus, setHealthStatus] = useState('');
-    const [feedingNotes, setFeedingNotes] = useState('');
-    const [groomingNotes, setGroomingNotes] = useState('');
-    const [otherObservations, setOtherObservations] = useState('');
-    const [isCritical, setIsCritical] = useState(false);
 
-    // Get the current date
+    const [eatingWell, setEatingWell] = useState(false);
+    const [drinkingWater, setDrinkingWater] = useState(false);
+    const [activeBehavior, setActiveBehavior] = useState(false);
+    const [normalVitalSigns, setNormalVitalSigns] = useState(false);
+    const [healthObservations, setHealthObservations] = useState('');
+    const [weightChange, setWeightChange] = useState('');
+    const [injuriesOrWounds, setInjuriesOrWounds] = useState('');
+    const [feedingCompleted, setFeedingCompleted] = useState(false);
+    const [cleanedLivingSpace, setCleanedLivingSpace] = useState(false);
+    const [poopNormal, setPoopNormal] = useState(false);
+    const [poopNotes, setPoopNotes] = useState('');
+    const [criticalIssueFlag, setCriticalIssueFlag] = useState(false);
+    const [criticalNotes, setCriticalNotes] = useState('');
+
     const today = new Date();
     const formattedDate = today.toLocaleDateString(undefined, {
         weekday: 'long',
@@ -21,20 +29,29 @@ const DailyChecklist = () => {
         day: 'numeric',
     });
 
-    // Function to handle checklist submission
     const handleSubmitChecklist = async () => {
         try {
             const checklistData = {
+                date: today.toISOString(),
                 petId,
-                healthStatus,
-                feedingNotes,
-                groomingNotes,
-                otherObservations,
-                isCritical,
+                eatingWell,
+                drinkingWater,
+                activeBehavior,
+                normalVitalSigns,
+                healthObservations,
+                weightChange,
+                injuriesOrWounds,
+                feedingCompleted,
+                cleanedLivingSpace,
+                poopNormal,
+                poopNotes,
+                criticalIssueFlag,
+                criticalNotes,
             };
-            // await ChecklistService.submitChecklist(checklistData);
+
+            await DailyChecklistService.submitChecklist(checklistData);
             Alert.alert('Success', 'Checklist submitted successfully!');
-            router.back(); // Go back to the previous screen
+            router.back();
         } catch (error) {
             console.error("Error submitting checklist:", error);
             Alert.alert('Error', 'Failed to submit checklist.');
@@ -45,60 +62,102 @@ const DailyChecklist = () => {
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Daily Checklist for {petName} - Today, {formattedDate}</Text>
 
-            {/* Health Status */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Health Status</Text>
+            {/* Health Observations */}
+            <View style={styles.section}>
+                <Text style={styles.label}>Is {petName} eating well?</Text>
+                <Switch value={eatingWell} onValueChange={setEatingWell} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.label}>Is {petName} drinking enough water?</Text>
+                <Switch value={drinkingWater} onValueChange={setDrinkingWater} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.label}>Is {petName} showing active behavior?</Text>
+                <Switch value={activeBehavior} onValueChange={setActiveBehavior} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.label}>Are {petName}'s vital signs normal?</Text>
+                <Switch value={normalVitalSigns} onValueChange={setNormalVitalSigns} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.label}>Health Observations</Text>
                 <TextInput
-                    value={healthStatus}
-                    onChangeText={setHealthStatus}
-                    placeholder="Enter health status..."
+                    value={healthObservations}
+                    onChangeText={setHealthObservations}
+                    placeholder="Enter health observations..."
                     style={styles.input}
                 />
             </View>
 
-            {/* Feeding Notes */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Feeding Notes</Text>
+            {/* Feeding and Living Space */}
+            <View style={styles.section}>
+                <Text style={styles.label}>Is feeding completed?</Text>
+                <Switch value={feedingCompleted} onValueChange={setFeedingCompleted} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.label}>Is living space cleaned?</Text>
+                <Switch value={cleanedLivingSpace} onValueChange={setCleanedLivingSpace} />
+            </View>
+
+            {/* Poop Observations */}
+            <View style={styles.section}>
+                <Text style={styles.label}>Is poop normal?</Text>
+                <Switch value={poopNormal} onValueChange={setPoopNormal} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.label}>Poop Notes</Text>
                 <TextInput
-                    value={feedingNotes}
-                    onChangeText={setFeedingNotes}
-                    placeholder="Enter feeding notes..."
+                    value={poopNotes}
+                    onChangeText={setPoopNotes}
+                    placeholder="Enter any notes on poop..."
                     style={styles.input}
                 />
             </View>
 
-            {/* Grooming Notes */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Grooming Notes</Text>
+            {/* Weight and Injuries */}
+            <View style={styles.section}>
+                <Text style={styles.label}>Weight Change</Text>
                 <TextInput
-                    value={groomingNotes}
-                    onChangeText={setGroomingNotes}
-                    placeholder="Enter grooming notes..."
+                    value={weightChange}
+                    onChangeText={setWeightChange}
+                    placeholder="Enter any weight changes..."
                     style={styles.input}
                 />
             </View>
 
-            {/* Other Observations */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Other Observations</Text>
+            <View style={styles.section}>
+                <Text style={styles.label}>Injuries or Wounds</Text>
                 <TextInput
-                    value={otherObservations}
-                    onChangeText={setOtherObservations}
-                    placeholder="Enter any other observations..."
+                    value={injuriesOrWounds}
+                    onChangeText={setInjuriesOrWounds}
+                    placeholder="Describe any injuries or wounds..."
                     style={styles.input}
                 />
             </View>
 
-            {/* Mark as Critical */}
-            <View style={styles.criticalContainer}>
-                <Text style={styles.label}>Mark as Critical</Text>
-                <TouchableOpacity
-                    style={[styles.criticalButton, isCritical ? styles.criticalButtonActive : null]}
-                    onPress={() => setIsCritical(!isCritical)}
-                >
-                    <Text style={styles.criticalButtonText}>{isCritical ? "Marked as Critical" : "Mark as Critical"}</Text>
-                </TouchableOpacity>
+            {/* Critical Issue Flag */}
+            <View style={styles.section}>
+                <Text style={styles.label}>Mark as Critical Issue</Text>
+                <Switch value={criticalIssueFlag} onValueChange={setCriticalIssueFlag} />
             </View>
+
+            {criticalIssueFlag && (
+                <View style={styles.section}>
+                    <Text style={styles.label}>Critical Notes</Text>
+                    <TextInput
+                        value={criticalNotes}
+                        onChangeText={setCriticalNotes}
+                        placeholder="Enter critical notes..."
+                        style={styles.input}
+                    />
+                </View>
+            )}
 
             {/* Submit Button */}
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmitChecklist}>
@@ -121,7 +180,7 @@ const styles = StyleSheet.create({
         color: '#333',
         textAlign: 'center',
     },
-    inputContainer: {
+    section: {
         marginBottom: 15,
     },
     label: {
@@ -138,30 +197,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: '#fff',
     },
-    criticalContainer: {
-        marginVertical: 20,
-        alignItems: 'center',
-    },
-    criticalButton: {
-        backgroundColor: '#ddd',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    criticalButtonActive: {
-        backgroundColor: '#FF6B6B', // Red color for critical state
-    },
-    criticalButtonText: {
-        fontSize: 16,
-        color: '#333',
-        fontWeight: 'bold',
-    },
     submitButton: {
         backgroundColor: '#007BFF',
         paddingVertical: 15,
         borderRadius: 8,
         alignItems: 'center',
+        marginTop: 20,
     },
     submitButtonText: {
         color: '#fff',
