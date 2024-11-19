@@ -197,8 +197,15 @@ export default function CreatePetProfile() {
             console.log("Pet profile created(response):", response);
             Alert.alert('Success', 'Pet profile created successfully!');
             resetForm();
-            // navigation.navigate('PetProfiles'); // Navigate back to PetProfiles
-            router.push('/ClientStack/PetProfiles'); // Navigate back to PetProfiles
+            // // navigation.navigate('PetProfiles'); // Navigate back to PetProfiles
+            // router.push('/ClientStack/PetProfiles'); // Navigate back to PetProfiles
+
+            // Pass clientId while navigating back to PetProfiles
+            router.push({
+                pathname: '/ClientStack/PetProfiles',
+                params: { clientId }, // Include clientId in params
+            });
+
         } catch (error) {
             console.error("Error creating pet profile:", error);
             Alert.alert('Error', 'Failed to create pet profile.');
