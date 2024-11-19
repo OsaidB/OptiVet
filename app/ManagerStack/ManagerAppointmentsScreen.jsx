@@ -43,15 +43,17 @@ const ManagerAppointmentsScreen = () => {
     const handleAppointmentPress = (appointment) => {
         setSelectedAppointment(appointment);
         setModalVisible(true);
+        console.log(appointment.id);
     };
 
     const handleStartMedicalSession = () => {
         if (selectedAppointment) {
+            let appointmentId = selectedAppointment.id;
             const { petId, clientId } = selectedAppointment;
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, clientId },
+                params: { petId, clientId, appointmentId },
             });
         }
     };

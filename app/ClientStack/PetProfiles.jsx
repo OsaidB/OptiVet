@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, Platform} from 'react-native';
 import { Link, useLocalSearchParams } from 'expo-router';
 import PetService from "../../Services/PetService";
 
@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginTop: 20,
         alignItems: 'center',
+        marginBottom: Platform.OS === 'android' ? 40 : 0,
     },
     buttonText: {
         color: 'white',

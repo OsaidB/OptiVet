@@ -17,6 +17,17 @@ const PetService = {
         }
     },
 
+    // Get pets by residency
+    getPetsByResidency: async (residency) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/residency/${residency}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching pets by residency:", error);
+            throw error;
+        }
+    },
+
     // // Upload pet image
     // uploadPetImage: async (imageUri) => {
     //     try {

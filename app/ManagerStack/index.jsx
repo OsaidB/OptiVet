@@ -26,6 +26,13 @@ const ManagerStack = () => {
                     <Text style={styles.buttonText}>Handle Walk-in Clients</Text>
                 </TouchableOpacity>
             </Link>
+
+            <Link href="ManagerStack/MsgsScreen" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Important Messages</Text>
+                </TouchableOpacity>
+            </Link>
+
         </View>
     );
 }

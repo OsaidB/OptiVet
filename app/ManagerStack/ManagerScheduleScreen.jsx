@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform, ScrollView, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform, ScrollView, Modal, SafeAreaView} from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { format, parseISO } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +14,7 @@ const ManagerScheduleScreen = () => {
     const [showCalendar, setShowCalendar] = useState(false);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showCustomTimePicker, setShowCustomTimePicker] = useState(false);
+    const [showTimePickerModal, setShowTimePickerModal] = useState(false);
 
     useEffect(() => {
         const fetchAvailableSlots = async () => {
@@ -42,10 +42,14 @@ const ManagerScheduleScreen = () => {
 
     const handleTimeChange = (event, time) => {
         if (time) setSelectedTime(time);
+        setShowTimePickerModal(false);
     };
 
-    const handleConfirmTime = () => {
-        setShowCustomTimePicker(false);
+    const handleWebTimeChange = (event) => {
+        const [hours, minutes] = event.target.value.split(':');
+        const updatedTime = new Date(selectedTime);
+        updatedTime.setHours(hours, minutes);
+        setSelectedTime(updatedTime);
     };
 
     const handleAddAppointment = async () => {
@@ -89,144 +93,155 @@ const ManagerScheduleScreen = () => {
         }
     };
 
-    return (
-        <View style={styles.container}>
-            {/* Month Selector */}
-            <View style={styles.monthSelector}>
-                <Text style={styles.monthText}>{format(new Date(selectedDate), 'MMMM yyyy')}</Text>
-                <TouchableOpacity onPress={() => setShowCalendar(!showCalendar)}>
-                    <Ionicons name="chevron-down" size={24} color="#1D3D47" />
-                </TouchableOpacity>
-            </View>
+    const renderDialog = () => (
+        <Modal
+            visible={showAddDialog}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setShowAddDialog(false)}
+        >
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Create Appointment</Text>
 
-            {/* Calendar Toggle */}
-            {showCalendar && (
-                <Calendar
-                    current={selectedDate}
-                    onDayPress={handleDateSelect}
-                    markedDates={{
-                        [selectedDate]: { selected: true, marked: true, selectedColor: '#1D3D47' },
-                    }}
-                    theme={{
-                        selectedDayBackgroundColor: '#1D3D47',
-                        todayTextColor: '#FF6347',
-                        arrowColor: '#1D3D47',
-                    }}
-                />
-            )}
+                    {/* Date Selection */}
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+                        <Text style={styles.buttonText}>{format(new Date(selectedDate), 'dd MMMM yyyy')}</Text>
+                        <Ionicons name="calendar-outline" size={20} color="#1D3D47" />
+                    </TouchableOpacity>
 
-            {/* Appointments Display */}
-            <ScrollView style={styles.appointmentsContainer}>
-                <Text style={styles.subtitle}>Appointments on {selectedDate}:</Text>
-                {filteredSlots.length === 0 ? (
-                    <Text>No appointments scheduled.</Text>
-                ) : (
-                    filteredSlots.map((slot, index) => (
-                        <View key={index} style={styles.appointmentCard}>
-                            <Text>{format(parseISO(slot.appointmentDate), 'HH:mm')}</Text>
-                            {/* Delete Button */}
-                            <TouchableOpacity
-                                style={styles.deleteButton}
-                                onPress={() => deleteAppointmentSlot(slot.id)}
-                            >
-                                <Ionicons name="trash-outline" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                    ))
-                )}
-            </ScrollView>
+                    {showDatePicker && (
+                        <Calendar
+                            current={selectedDate}
+                            onDayPress={handleDateSelect}
+                            markedDates={{
+                                [selectedDate]: { selected: true, marked: true, selectedColor: '#1D3D47' },
+                            }}
+                            theme={{
+                                selectedDayBackgroundColor: '#1D3D47',
+                                todayTextColor: '#FF6347',
+                                arrowColor: '#1D3D47',
+                            }}
+                        />
+                    )}
 
-            {/* Floating Add Button */}
-            <TouchableOpacity style={styles.addButton} onPress={() => setShowAddDialog(true)}>
-                <Ionicons name="add" size={32} color="white" />
-            </TouchableOpacity>
-
-            {/* Add Appointment Dialog */}
-            <Modal
-                visible={showAddDialog}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setShowAddDialog(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Create Appointment</Text>
-
-                        {/* Date Picker Button with Icon */}
-                        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-                            <Text style={styles.buttonText}>
-                                {showDatePicker ? 'Select Date' : format(new Date(selectedDate), 'dd MMMM yyyy')}
-                            </Text>
-                            <Ionicons name="calendar-outline" size={20} color="#1D3D47" />
-                        </TouchableOpacity>
-
-                        {showDatePicker && (
-                            <Calendar
-                                current={selectedDate}
-                                onDayPress={handleDateSelect}
-                                markedDates={{
-                                    [selectedDate]: { selected: true, marked: true, selectedColor: '#1D3D47' },
-                                }}
-                                theme={{
-                                    selectedDayBackgroundColor: '#1D3D47',
-                                    todayTextColor: '#FF6347',
-                                    arrowColor: '#1D3D47',
-                                }}
-                            />
-                        )}
-
-                        {/* Time Picker Button with Icon */}
-                        <TouchableOpacity onPress={() => setShowCustomTimePicker(true)} style={styles.dateButton}>
-                            <Text style={styles.buttonText}>
-                                {format(selectedTime, 'HH:mm')}
-                            </Text>
+                    {/* Time Selection */}
+                    {Platform.OS === 'ios' || Platform.OS === 'android' ? (
+                        <TouchableOpacity onPress={() => setShowTimePickerModal(true)} style={styles.dateButton}>
+                            <Text style={styles.buttonText}>{format(selectedTime, 'HH:mm')}</Text>
                             <Ionicons name="time-outline" size={20} color="#1D3D47" />
                         </TouchableOpacity>
-
-                        {showCustomTimePicker && (
-                            <DateTimePicker
-                                value={selectedTime}
-                                mode="time"
-                                display="spinner"
-                                is24Hour={true}
-                                onChange={handleTimeChange}
-                                textColor="black"
-                                style={{ height: 135 }}
+                    ) : (
+                        <View style={[styles.webTimePickerContainer, { flexDirection: 'row', alignItems: 'center' }]}>
+                            <input
+                                type="time"
+                                value={format(selectedTime, 'HH:mm')}
+                                onChange={handleWebTimeChange}
+                                className="time-picker"
+                                required
                             />
-                        )}
+                        </View>
+                    )}
 
-                        {/* Confirm Time Button */}
-                        {showCustomTimePicker && (
-                            <TouchableOpacity style={styles.confirmTimeButton} onPress={handleConfirmTime}>
-                                <Text style={styles.confirmTimeButtonText}>Confirm Time</Text>
-                            </TouchableOpacity>
-                        )}
+                    {showTimePickerModal && (
+                        <DateTimePicker
+                            value={selectedTime}
+                            mode="time"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            is24Hour={true}
+                            onChange={handleTimeChange}
+                            textColor={'black'}
+                        />
+                    )}
 
-                        {/* Add Appointment Button */}
-                        <TouchableOpacity style={styles.saveButton} onPress={handleAddAppointment}>
-                            <Text style={styles.saveButtonText}>Add Appointment</Text>
-                        </TouchableOpacity>
+                    <TouchableOpacity style={styles.saveButton} onPress={handleAddAppointment}>
+                        <Text style={styles.saveButtonText}>Add Appointment</Text>
+                    </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAddDialog(false)}>
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAddDialog(false)}>
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
                 </View>
-            </Modal>
-        </View>
+            </View>
+        </Modal>
+    );
+
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <View style={styles.monthSelector}>
+                    <Text style={styles.monthText}>{format(new Date(selectedDate), 'MMMM yyyy')}</Text>
+                    <TouchableOpacity onPress={() => setShowCalendar(!showCalendar)}>
+                        <Ionicons name="chevron-down" size={24} color="#1D3D47" />
+                    </TouchableOpacity>
+                </View>
+
+                {showCalendar && (
+                    <Calendar
+                        current={selectedDate}
+                        onDayPress={handleDateSelect}
+                        markedDates={{
+                            [selectedDate]: { selected: true, marked: true, selectedColor: '#1D3D47' },
+                        }}
+                        theme={{
+                            selectedDayBackgroundColor: '#1D3D47',
+                            todayTextColor: '#FF6347',
+                            arrowColor: '#1D3D47',
+                        }}
+                    />
+                )}
+
+                {renderDialog()}
+
+                <ScrollView style={styles.appointmentsContainer}>
+                    <Text style={styles.subtitle}>Appointments on {selectedDate}:</Text>
+                    {filteredSlots.length === 0 ? (
+                        <Text>No appointments scheduled.</Text>
+                    ) : (
+                        filteredSlots.map((slot, index) => (
+                            <View
+                                key={index}
+                                style={[
+                                    styles.appointmentCard,
+                                    { backgroundColor: index % 2 === 0 ? '#add0d9' : '#1D3D47' },
+                                ]}
+                            >
+                                <Text style={styles.appointmentTime}>
+                                    {format(parseISO(slot.appointmentDate), 'HH:mm')}
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={() => deleteAppointmentSlot(slot.id)}
+                                >
+                                    <Ionicons name="trash-outline" size={20} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        ))
+                    )}
+                </ScrollView>
+
+                <TouchableOpacity style={styles.addButton} onPress={() => setShowAddDialog(true)}>
+                    <Ionicons name="add" size={32} color="white" />
+                </TouchableOpacity>
+            </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
     container: {
         flex: 1,
-        padding: 20,
+        padding: 16,
     },
     monthSelector: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 10,
+        alignItems: 'center',
+        marginBottom: 10,
     },
     monthText: {
         fontSize: 24,
@@ -234,7 +249,8 @@ const styles = StyleSheet.create({
     },
     appointmentsContainer: {
         flex: 1,
-        marginTop: 10,
+        marginVertical: 10,
+        marginBottom: 93
     },
     subtitle: {
         fontSize: 18,
@@ -243,94 +259,79 @@ const styles = StyleSheet.create({
     },
     appointmentCard: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 10,
-        backgroundColor: '#add0d9',
+        alignItems: 'center',
+        padding: 12,
         borderRadius: 8,
         marginVertical: 5,
-
+    },
+    appointmentTime: {
+        fontSize: 16,
+        color: '#fff',
     },
     deleteButton: {
-        backgroundColor: '#1D3D47',
         padding: 8,
         borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     addButton: {
         position: 'absolute',
         bottom: 20,
         right: 20,
-        backgroundColor: '#1D3D47',
         width: 60,
         height: 60,
         borderRadius: 30,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: '#1D3D47',
+        marginBottom: Platform.OS === 'android' ? 40 : 0,
     },
     modalContainer: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
+        width: '90%',
         backgroundColor: 'white',
+        borderRadius: 10,
         padding: 20,
-        paddingTop: 40,
-        borderRadius: 8,
-        width: '80%',
         alignItems: 'center',
     },
     modalTitle: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 15,
     },
     dateButton: {
-        backgroundColor: '#f0f0f0',
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 8,
-        marginTop: 15,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        marginBottom: 10,
         width: '100%',
     },
     buttonText: {
         fontSize: 16,
-        color: '#1D3D47',
-    },
-    confirmTimeButton: {
-        marginTop: 10,
-        padding: 10,
-        backgroundColor: '#1D3D47',
-        borderRadius: 8,
-    },
-    confirmTimeButtonText: {
-        color: 'white',
-        fontSize: 16,
     },
     saveButton: {
-        backgroundColor: '#1D3D47',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
         marginTop: 20,
-        alignItems: 'center',
+        backgroundColor: '#1D3D47',
+        borderRadius: 8,
+        padding: 12,
         width: '100%',
+        alignItems: 'center',
     },
     saveButtonText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     cancelButton: {
         marginTop: 10,
-        alignItems: 'center',
-        width: '100%',
     },
     cancelButtonText: {
         color: '#FF6347',
