@@ -15,8 +15,15 @@ export default function PetProfiles() {
     useEffect(() => {
         const fetchPets = async () => {
             try {
-                const fetchedPets = await PetService.getPetsByOwnerId(clientId); // Use dynamic clientId
-                setPets(fetchedPets);
+                const fetchedPets = await PetService.getPetsByOwnerId(clientId);
+
+                // Map pets to ensure the image URL is constructed properly
+                const petsWithImages = fetchedPets.map((pet) => ({
+                    ...pet,
+                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                }));
+
+                setPets(petsWithImages);
             } catch (error) {
                 console.error("Error fetching pets:", error);
                 Alert.alert('Error', 'Failed to load pet profiles.');
@@ -46,12 +53,14 @@ export default function PetProfiles() {
                 renderItem={({ item }) => (
                     <View style={styles.petCard}>
                         {/* Display pet image if available */}
-                        {item.imageUrl && (
+                        {item.imageUrl ? (
                             <Image
-                                source={{ uri: item.imageUrl }} // Use the image URL directly
+                                source={{ uri: item.imageUrl }} // Use the full image URL
                                 style={styles.petImage}
                                 resizeMode="cover"
                             />
+                        ) : (
+                            <Text>No image available</Text>
                         )}
                         <Text style={styles.petName}>{item.name}</Text>
                         <Text>Type: {item.type}</Text>
@@ -60,10 +69,10 @@ export default function PetProfiles() {
                         <Text>Medical History: {item.medicalHistory}</Text>
 
                         <Link href="../ClientStack/MedicalHistory" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Medical History</Text>
-                </TouchableOpacity>
-            </Link>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={styles.buttonText}>Medical History</Text>
+                            </TouchableOpacity>
+                        </Link>
                     </View>
                 )}
             />
