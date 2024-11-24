@@ -4,34 +4,77 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  Alert,
+  // Alert,
   TouchableOpacity,
   View,
   ScrollView,
 } from 'react-native';
 import { Link } from 'expo-router';
+import Toast from 'react-native-toast-message';
 import AuthService from '../Services/authService'; // Adjust path if necessary
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Changed to 'email'
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false); // For loading state
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
+    console.log('email:', email);
+    console.log('password:', password);
+
+    if (!email.trim() || !password.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please enter both email and password.',
+      });
       return;
     }
+
     setLoading(true);
+
     try {
-      const data = await AuthService.login(password, username); // Call login API
+      const newToken = await AuthService.login(password, email); // Call login API
       setLoading(false);
-      Alert.alert('Login Successful', `Welcome ${data.username || 'User'}!`);
-      // You can store the token in local storage or state for further use
-      // localStorage.setItem('token', data.token);
+
+      if (newToken?.token) {
+        console.log('Login successful, token:', newToken.token);
+        Toast.show({
+          type: 'success',
+          text1: 'Login Successful',
+          text2: 'Welcome to the app!',
+        });
+
+        // Uncomment to store the token locally
+        // await AsyncStorage.setItem('token', newToken.token);
+
+        // Navigate to the home screen
+        navigation.navigate('Home'); // Replace 'Home' with your actual main screen name
+      } else {
+        console.log('Response Message:', newToken.message); // Log message
+        console.log('Response Description:', newToken.description); // Log description
+        Toast.show({
+          type: 'error',
+          text1: 'Login Failed',
+          text2: newToken?.message || 'Invalid credentials.',
+        });
+      }
     } catch (error) {
       setLoading(false);
-      Alert.alert('Login Failed', error.response?.data?.message || 'An error occurred.');
+
+      const responseData = error.response?.data;
+      const errorMessage = responseData?.message || 'An error occurred during login.';
+      const errorDescription = responseData?.description || 'Please try again later.';
+
+      console.log('Error Message:', errorMessage);
+      console.log('Error Description:', errorDescription);
+
+      // Show the error in a toast
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: `${errorMessage}\n${errorDescription}`,
+      });
     }
   };
 
@@ -67,11 +110,12 @@ const LoginScreen = () => {
         <View style={styles.inputContainer}>
           <TextInput
               style={styles.input}
-              placeholder="Email or Username"
-              value={username}
-              onChangeText={setUsername}
+              placeholder="Email"
+              value={email} // Updated to use 'email'
+              onChangeText={setEmail} // Updated to use 'setEmail'
               autoCorrect={false}
               autoCapitalize="none"
+              keyboardType="email-address"
           />
           <TextInput
               style={styles.input}
@@ -79,15 +123,15 @@ const LoginScreen = () => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              autoCorrect={false}
-              autoCapitalize="none"
+              // autoCorrect={false}
+              // autoCapitalize="none"
           />
         </View>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-              style={styles.button}
+              style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleLogin}
               disabled={loading}
           >
@@ -105,6 +149,9 @@ const LoginScreen = () => {
           <Text>Don't have an account?  </Text>
           <Text style={styles.signup}>Sign Up</Text>
         </Text>
+
+        {/* Toast Notification */}
+        <Toast />
       </ScrollView>
   );
 };

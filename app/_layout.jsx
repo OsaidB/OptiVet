@@ -1,13 +1,14 @@
-import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
-import {useFonts} from 'expo-font';
-import {Stack, Slot} from 'expo-router';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import {useColorScheme} from '@/hooks/useColorScheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import Toast from 'react-native-toast-message'; // Import Toast
+import CustomToast from './Toast.config'; // Import custom Toast config
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -28,12 +29,13 @@ export default function RootLayout() {
     }
 
     return (
-        // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <ThemeProvider value={DefaultTheme}>
             <Stack>
-                <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-                <Stack.Screen name="+not-found"/>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
             </Stack>
+            {/* Render Toast only on the client */}
+            {typeof window !== 'undefined' && <Toast config={CustomToast} />}
         </ThemeProvider>
     );
 }
