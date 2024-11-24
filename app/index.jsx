@@ -10,16 +10,28 @@ import {
   ScrollView,
 } from 'react-native';
 import { Link } from 'expo-router';
+import AuthService from '../Services/authService'; // Adjust path if necessary
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // For loading state
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!username || !password) {
-      Alert.alert('Error', 'Please enter both username and password.');
-    } else {
-      Alert.alert('Login Successful', 'Welcome back!');
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await AuthService.login(password, username); // Call login API
+      setLoading(false);
+      Alert.alert('Login Successful', `Welcome ${data.username || 'User'}!`);
+      // You can store the token in local storage or state for further use
+      // localStorage.setItem('token', data.token);
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Login Failed', error.response?.data?.message || 'An error occurred.');
     }
   };
 
@@ -60,7 +72,6 @@ const LoginScreen = () => {
               onChangeText={setUsername}
               autoCorrect={false}
               autoCapitalize="none"
-              accessibilityLabel="Email or Username"
           />
           <TextInput
               style={styles.input}
@@ -70,14 +81,17 @@ const LoginScreen = () => {
               secureTextEntry
               autoCorrect={false}
               autoCapitalize="none"
-              accessibilityLabel="Password"
           />
         </View>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Login</Text>
+          <TouchableOpacity
+              style={styles.button}
+              onPress={handleLogin}
+              disabled={loading}
+          >
+            <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
           </TouchableOpacity>
           <Link href="/(tabs)/home" asChild>
             <TouchableOpacity style={styles.button}>
