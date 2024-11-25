@@ -28,12 +28,18 @@ const ManagerStack = () => {
             </Link>
 
 
-{/* 
+            {/* 
             <Link href="ManagerStack/AddProduct" asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Add Product!</Text>
                 </TouchableOpacity>
             </Link> */}
+
+            <Link href="ManagerStack/MsgsScreen" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Important Messages</Text>
+                </TouchableOpacity>
+            </Link>
 
 
             <Link href="ManagerStack/Products" asChild>
