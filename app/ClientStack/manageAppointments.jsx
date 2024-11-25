@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Platform} from 'react-native';
 import { Link } from 'expo-router';
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
@@ -21,7 +21,7 @@ export default function ManageAppointments() {
             // Convert the array of pets into an object for easier access
             const petMap = {};
             petData.forEach(pet => {
-                petMap[pet.id] = pet.name; // Map pet ID to pet name
+                petMap[pet.id] = { name: pet.name, type: pet.type };
             });
             setPets(petMap);
         } catch (error) {
@@ -61,7 +61,7 @@ export default function ManageAppointments() {
 
         try {
             await AppointmentService.updateAppointment(appointmentId, updatedData);
-            Alert.alert('Success', 'Appointment updated to available successfully.');
+            Alert.alert('Success', 'Appointment deleted successfully.');
             fetchAppointments(); // Refresh appointments list after deletion
         } catch (error) {
             console.error(`Error updating appointment with ID: ${appointmentId}`, error.response?.data || error);
@@ -92,7 +92,7 @@ export default function ManageAppointments() {
                 renderItem={({ item }) => (
                     <View style={styles.appointmentCard}>
                         <Text style={styles.appointmentText}>
-                            {pets[item.petId] ? pets[item.petId] : 'Unknown Pet'} - {formatDate(item.appointmentDate)}
+                            Your {pets[item.petId]?.type}, {pets[item.petId] ? pets[item.petId].name : 'Unknown Pet'} - {formatDate(item.appointmentDate)}
                         </Text>
 
                         {/* Delete Button */}
@@ -108,6 +108,7 @@ export default function ManageAppointments() {
                     <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
                 }
             />
+
 
             {/* Button to Add a New Appointment */}
             <Link href="/ClientStack/addAppointment" asChild>
@@ -182,6 +183,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 10,
         elevation: 5,
+        marginBottom: Platform.OS === 'android' ? 40 : 0,
     },
     buttonText: {
         color: '#FFFFFF',

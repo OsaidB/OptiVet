@@ -37,7 +37,7 @@ const AppointmentService = {
     // Get appointment by ID
     getAppointmentById: async (appointmentId) => {
         try {
-            const response = await axios.get(`${API_URL}/appointments/${appointmentId}`);
+            const response = await axios.get(`${API_URL}/${appointmentId}`);
             return response.data;
         } catch (error) {
             console.error(`Error fetching appointment with ID: ${appointmentId}`, error);

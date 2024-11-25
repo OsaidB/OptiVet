@@ -82,7 +82,8 @@ export default function AddAppointment() {
 
         if (futureSlots.length > 0) {
             const closestSlot = futureSlots[0];
-            setClosestSlotHint(`Closest available slot: ${format(parseISO(closestSlot.appointmentDate), 'yyyy-MM-dd h:mm a')}`);
+            setClosestSlotHint(`Closest available slot: ${format(parseISO(closestSlot.appointmentDate), 'yyyy-MM-dd')} at ${format(parseISO(closestSlot.appointmentDate), 'h:mm a')}`);
+
         } else {
             setClosestSlotHint('No upcoming slots are available.');
         }
@@ -222,21 +223,75 @@ export default function AddAppointment() {
 }
 
 const styles = StyleSheet.create({
-    container: { padding: 20 },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-    label: { fontSize: 18, marginVertical: 10 },
-    petList: { marginBottom: 20 },
-    vetList: { marginBottom: 20 },
+    container: {
+        padding: 20
+    },
 
-    petCard: { width: 120, padding: 10, marginRight: 10, alignItems: 'center', borderRadius: 10, borderWidth: 1 },
-    selectedCard: { backgroundColor: '#D3F9D8' },
-    petImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 8 },
-    petName: { fontSize: 14, fontWeight: 'bold' },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center'
+    },
+
+    label: {
+        fontSize: 18,
+        marginVertical: 10
+    },
+
+    petList: {
+        marginBottom: 20
+    },
+
+    vetList: {
+        marginBottom: 20
+    },
+
+    petCard: {
+        width: 120,
+        padding: 10,
+        marginRight: 10,
+        alignItems: 'center',
+        borderRadius: 10,
+        borderWidth: 1
+    },
+
+    selectedCard: {
+        backgroundColor: '#D3F9D8'
+    },
+
+    petImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        marginBottom: 8
+    },
+
+    petName: {
+        fontSize: 14,
+        fontWeight: 'bold'
+    },
+
+
+    slotCard: {
+        padding: 15,
+        marginBottom: 10,
+        marginRight: 10, // Add space between slot cards
+        borderRadius: 10,
+        borderWidth: 1,
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+    },
+    slotList: {
+        paddingHorizontal: 15,
+    },
+
     vetCard: { width: 280, padding: 15, paddingVertical: 20, marginBottom: 15, marginHorizontal: 10, borderRadius: 20, borderWidth: 1, alignItems: 'center' },
     vetName: { fontSize: 16, fontWeight: 'bold' },
     vetSpecialty: { fontSize: 14, color: '#666' },
-    slotCard: { padding: 15, marginBottom: 10, borderRadius: 10, borderWidth: 1, alignItems: 'center' },
-    slotText: { fontSize: 14 },
+    //slotCard: { padding: 15, marginBottom: 10, borderRadius: 10, borderWidth: 1, alignItems: 'center' },
+    slotText: { fontSize: 20, paddingHorizontal: 5, alignItems: 'center' },
+    //slotList: {paddingHorizontal:10},
     button: { padding: 15, backgroundColor: '#1D3D47', alignItems: 'center', borderRadius: 10, marginTop: 20 },
     buttonText: { color: '#fff', fontWeight: 'bold' },
     hintText: { fontSize: 14, color: '#888', textAlign: 'center', marginVertical: 10 },

@@ -6,16 +6,19 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { TextInput as PaperTextInput, Button } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import PetService from "../../Services/PetService";
+import AppointmentService from '../../Services/AppointmentService';
+
 
 const MedicalSession = () => {
     const router = useRouter();
-    const { petId: initialPetId, clientId: initialOwnerId } = useLocalSearchParams(); // Retrieve petId and ownerId from params
+    const { petId: initialPetId, clientId: initialOwnerId, appointmentId:initialAppointmentId}= useLocalSearchParams(); // Retrieve petId and ownerId from params
 
     const [sessionDate, setSessionDate] = useState(new Date());
     const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date());
 
     const [petId, setPetId] = useState(initialPetId || ''); // Initialize with petId from params
     const [ownerId, setOwnerId] = useState(initialOwnerId || ''); // Initialize with ownerId from params
+    const [appointmentId, setAppointmentId] = useState(initialAppointmentId || ''); // Initialize with ownerId from params
 
     const [veterinarianId, setVeterinarianId] = useState('');
     const [loggedInVetId, setLoggedInVetId] = useState('');
@@ -84,6 +87,69 @@ const MedicalSession = () => {
         }
     };
 
+    const updateAppointmentStatus = async (appointmentId) => {
+        if (!appointmentId) {
+            console.error("Appointment ID is missing");
+            return;
+        }
+
+        //const currentAppointment = appointmentId.find(appointment => appointment.id === appointmentId);
+        const currentAppointment = await AppointmentService.getAppointmentById(appointmentId);
+        if (!currentAppointment) {
+            console.error("Appointment not found");
+            return;
+        }
+
+        const updatedData = {
+            appointmentDate: currentAppointment.appointmentDate,
+            clientId: currentAppointment.clientId,
+            petId: currentAppointment.petId,
+            vetId: currentAppointment.vetId,
+            status: 'DONE',
+        };
+
+        try {
+            await AppointmentService.updateAppointment(appointmentId, updatedData);
+            Alert.alert('Success', 'Appointment deleted successfully.');
+            // fetchAppointments(); // Refresh appointments list after deletion
+        } catch (error) {
+            console.error(`Error updating appointment with ID: ${appointmentId}`, error.response?.data || error);
+            Alert.alert('Error', 'Failed to update the appointment. Please try again.');
+        }
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+        }).format(date);
+    };
+
+    // const updateAppointmentStatus = async (appointmentId) => {
+    //     if (!appointmentId) {
+    //         console.error("Appointment ID is missing");
+    //         return;
+    //     }
+    //
+    //     try {
+    //         const updatedData = { status: 'DONE' };
+    //         await AppointmentService.updateAppointment(appointmentId, updatedData);
+    //         console.log(`Appointment ${appointmentId} status updated to DONE`);
+    //     } catch (error) {
+    //         console.error(`Error updating appointment status with ID: ${appointmentId}`, error.response?.data || error);
+    //         if (Platform.OS !== 'web') {
+    //             Alert.alert('Error', 'Failed to update appointment status.');
+    //         } else {
+    //             window.alert('Error: Failed to update appointment status.');
+    //         }
+    //     }
+    // };
+
     const handleCreateSession = async () => {
         const formattedSessionDate = sessionDate.toISOString();
         const formattedNextAppointmentDate = nextAppointmentDate.toISOString();
@@ -110,7 +176,7 @@ const MedicalSession = () => {
             sessionDate: formattedSessionDate,
             // petId: Number(petId),
             // ownerId: Number(ownerId),
-            petId: 1,
+            petId: 2,
             ownerId: 1,
             diagnosis,
             treatment,
@@ -129,6 +195,8 @@ const MedicalSession = () => {
 
         try {
             await MedicalSessionService.createSession(newMedicalSession, veterinarianId);
+
+            await updateAppointmentStatus(appointmentId);
 
             // Handle success message and navigation based on the platform
             if (Platform.OS === 'web') {

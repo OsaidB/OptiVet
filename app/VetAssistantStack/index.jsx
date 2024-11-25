@@ -1,39 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
-import ClientService from '../../Services/ClientService';
+import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Alert, Platform } from 'react-native';
+import PetService from '../../Services/PetService';
 import { useRouter } from "expo-router";
+
+const categories = [
+    { id: '1', label: 'All', value: 'ALL' },
+    { id: '2', label: 'Inpatient', value: 'INPATIENT_CARE' },
+    { id: '3', label: 'Unclaimed', value: 'UNCLAIMED' },
+    { id: '4', label: 'Abandoned', value: 'ABANDONED' },
+];
 
 const VetAssistantStack = () => {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
-    const [clients, setClients] = useState([]);
-    const [filteredClients, setFilteredClients] = useState([]);
+    const [pets, setPets] = useState([]);
+    const [filteredPets, setFilteredPets] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
 
-    // Fetch all clients with pets from the backend on component mount
+    // Fetch all pets on initial mount
     useEffect(() => {
-        const fetchClients = async () => {
-            try {
-                const clientData = await ClientService.getAllClients();
-                setClients(clientData);
-                setFilteredClients(clientData);
-            } catch (error) {
-                console.error("Error fetching clients:", error);
-            }
-        };
-
-        fetchClients();
+        fetchPets();
     }, []);
 
-    // Filter clients based on search query
+    // Fetch all pets
+    const fetchPets = async () => {
+        try {
+            const petData = await PetService.getAllPets();
+            setPets(petData);
+            setFilteredPets(petData);
+        } catch (error) {
+            console.error("Error fetching pets:", error);
+            Alert.alert("Error", "Failed to fetch pets data");
+        }
+    };
+
+    // Fetch pets by residency type
+    const fetchPetsByResidency = async (category) => {
+        if (category === 'ALL') {
+            fetchPets(); // Fetch all pets if "All" is selected
+        } else {
+            try {
+                const petsByResidency = await PetService.getPetsByResidency(category);
+                setFilteredPets(petsByResidency);
+            } catch (error) {
+                console.error("Error fetching pets by residency:", error);
+                Alert.alert("Error", "Failed to fetch pets by residency type");
+            }
+        }
+    };
+
     const handleSearch = (query) => {
         setSearchQuery(query);
-        const filtered = clients.filter(client =>
-            `${client.firstName} ${client.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
-            client.pets.some(pet => pet.name.toLowerCase().includes(query.toLowerCase()))
+        const filtered = pets.filter(pet =>
+            pet.name.toLowerCase().includes(query.toLowerCase()) ||
+            pet.owner?.firstName.toLowerCase().includes(query.toLowerCase())
         );
-        setFilteredClients(filtered);
+        setFilteredPets(filtered);
+    };
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        fetchPetsByResidency(category);
     };
 
     const handlePetPress = (pet) => {
@@ -52,66 +81,84 @@ const VetAssistantStack = () => {
         }
     };
 
-
-    const renderClient = ({ item }) => (
-        <View style={styles.clientItem}>
-            <Text style={styles.clientText}>Client: {item.firstName} {item.lastName}</Text>
-            <Text style={styles.sectionTitle}>Pets:</Text>
-            <View style={styles.petListContainer}>
-                {item.pets.map((pet) => (
-                    <TouchableOpacity key={pet.id} style={styles.petItem} onPress={() => handlePetPress(pet)}>
-                        <Text style={styles.petText}>{pet.name}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-        </View>
+    const renderPet = ({ item }) => (
+        <TouchableOpacity style={styles.petCard} onPress={() => handlePetPress(item)}>
+            <Image
+                source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }}
+                style={styles.petImage}
+            />
+            <Text style={styles.petName}>{item.name}</Text>
+        </TouchableOpacity>
     );
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Vet Assistant Dashboard</Text>
+
+            {/* Search Bar */}
             <TextInput
                 style={styles.searchInput}
-                placeholder="Search by client or pet name..."
+                placeholder="Search by pet or owner name..."
                 value={searchQuery}
                 onChangeText={handleSearch}
             />
+
+            {/* Category List */}
             <FlatList
-                data={filteredClients}
+                data={categories}
+                horizontal
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={renderClient}
+                renderItem={({ item }) => (
+                    <TouchableOpacity
+                        style={[
+                            styles.categoryItem,
+                            selectedCategory === item.value && styles.selectedCategoryItem
+                        ]}
+                        onPress={() => handleCategorySelect(item.value)}
+                    >
+                        <Text style={[
+                            styles.categoryText,
+                            selectedCategory === item.value && styles.selectedCategoryText
+                        ]}>
+                            {item.label}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.categoryListContainer}
             />
+
+            {/* Pets List */}
+            <FlatList
+                data={filteredPets}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderPet}
+                ListEmptyComponent={<Text style={styles.noDataText}>No pets found</Text>}
+                numColumns={2}
+            />
+
+            {/* Modal for Pet Details */}
             <Modal
                 visible={modalVisible}
                 transparent={true}
                 animationType="slide"
                 onRequestClose={() => setModalVisible(false)}
             >
-                <TouchableOpacity
-                    style={styles.modalContainer}
-                    activeOpacity={1}
-                    onPressOut={() => setModalVisible(false)}
-                >
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
+                <TouchableOpacity style={styles.modalContainer} onPressOut={() => setModalVisible(false)}>
+                    <View style={styles.modalContent}>
                         {selectedPet && (
                             <>
                                 <Text style={styles.modalTitle}>Pet Details</Text>
-                                <Text style={styles.modalText}>Name: {selectedPet.name}</Text>
-                                <Text style={styles.modalText}>Type: {selectedPet.type}</Text>
-                                <Text style={styles.modalText}>Breed: {selectedPet.breed}</Text>
-                                <Text style={styles.modalText}>Birth Date: {selectedPet.birthDate}</Text>
-                                <Text style={styles.modalText}>Medical History: {selectedPet.medicalHistory}</Text>
-
+                                <Text>Name: {selectedPet.name}</Text>
+                                <Text>Type: {selectedPet.type}</Text>
+                                <Text>Breed: {selectedPet.breed}</Text>
+                                <Text>Birth Date: {selectedPet.birthDate}</Text>
                                 <TouchableOpacity style={styles.button} onPress={handleViewChecklist}>
                                     <Text style={styles.buttonText}>View Daily Checklist</Text>
                                 </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
-                                    <Text style={styles.buttonText}>Close</Text>
-                                </TouchableOpacity>
                             </>
                         )}
-                    </TouchableOpacity>
+                    </View>
                 </TouchableOpacity>
             </Modal>
         </View>
@@ -122,7 +169,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        alignItems: 'center',
+        backgroundColor: '#F5F5F5',
     },
     title: {
         fontSize: 24,
@@ -137,49 +184,45 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 10,
         marginBottom: 20,
-        width: '100%',
         backgroundColor: '#f8f8f8',
     },
-    clientItem: {
-        backgroundColor: '#ffffff',
-        padding: 15,
-        marginVertical: 10,
-        borderRadius: 12,
-        width: '100%',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 5,
-        elevation: 3,
+    categoryListContainer: {
+        marginBottom: 20,
     },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#444',
-        marginVertical: 5,
+    categoryItem: {
+        backgroundColor: '#D3E4F0',
+        padding: 10,
+        borderRadius: 20,
+        marginRight: 8,
     },
-    clientText: {
-        fontSize: 18,
-        fontWeight: '600',
+    selectedCategoryItem: {
+        backgroundColor: '#007BFF',
+    },
+    categoryText: {
+        fontSize: 14,
         color: '#333',
+    },
+    selectedCategoryText: {
+        color: '#fff',
+    },
+    petCard: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 10,
+        margin: 8,
+        alignItems: 'center',
+        width: '45%',
+        elevation: 2,
+    },
+    petImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         marginBottom: 10,
     },
-    petListContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    petItem: {
-        backgroundColor: '#D3E4F0',
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 8,
-        margin: 5,
-        elevation: 1,
-    },
-    petText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#1A374D',
+    petName: {
+        fontSize: 16,
+        fontWeight: '600',
     },
     modalContainer: {
         flex: 1,
@@ -192,30 +235,22 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 12,
         width: '80%',
-        alignItems: 'center',
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 10,
-    },
-    modalText: {
-        fontSize: 16,
-        color: '#555',
-        marginBottom: 5,
     },
     button: {
         backgroundColor: '#007BFF',
-        paddingVertical: 12,
+        padding: 12,
         marginTop: 10,
         borderRadius: 8,
-        width: '80%',
         alignItems: 'center',
     },
     buttonText: {
         color: 'white',
         fontSize: 16,
+    },
+    noDataText: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: '#999',
     },
 });
 

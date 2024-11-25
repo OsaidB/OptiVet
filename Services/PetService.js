@@ -17,6 +17,17 @@ const PetService = {
         }
     },
 
+    // Get pets by residency
+    getPetsByResidency: async (residency) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/residency/${residency}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching pets by residency:", error);
+            throw error;
+        }
+    },
+
     // // Upload pet image
     // uploadPetImage: async (imageUri) => {
     //     try {
@@ -68,17 +79,18 @@ const PetService = {
         }
     },
 
-    // Serve pet image by filename
-    serveImage: async (fileName) => {
-        try {
-            const response = await axios.get(`${BASE_URL}/uploads/${fileName}`, {
-                responseType: 'blob',
-            });
-            return URL.createObjectURL(response.data);
-        } catch (error) {
-            console.error("Error serving pet image:", error);
-            throw error;
+// Serve pet image by filename or relative path
+    serveImage: (imagePath) => {
+        if (!imagePath) {
+            console.error("Error: Image path is required to serve the image.");
+            return null;
         }
+        // If the path already starts with '/uploads', use it as-is
+        if (imagePath.startsWith('/uploads')) {
+            return `${BASE_URL}${imagePath}`;
+        }
+        // Otherwise, assume it's a filename and construct the full path
+        return `${BASE_URL}/uploads/${imagePath}`;
     },
 
     // Get a pet by its ID

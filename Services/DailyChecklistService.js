@@ -1,6 +1,7 @@
 import axios from 'axios';
+import baseURL from "./config";
 
-const BASE_URL = 'http://localhost:8080/api/daily-checklists';
+const BASE_URL = `${baseURL.USED_BASE_URL}/api/daily-checklists`;
 
 const DailyChecklistService = {
     // Create a new Daily Checklist
