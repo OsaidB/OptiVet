@@ -1,222 +1,337 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView, Button, button, Input, Alert } from 'react-native';
+import { Link, useLocalSearchParams } from 'expo-router';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import MedicalHistoryService from "../../Services/MedicalHistoryService";
+import PetService from '../../Services/PetService';
+import baseURL from '../../Services/config'; // Adjust the path as necessary
+const BASE_URL= `${baseURL.USED_BASE_URL}/api/medicalHistories`;
 
 export default function MedicalHistory() {
     const [conditionText, setConditionText] = useState('');
     const [allergyText, setAllergyText] = useState('');
     const [vaccinationText, setVaccinationText] = useState('');
-    const [surgeryText, setSurgeryText] = useState('');
-
+    const [surgeoryText, setSurgeoryText] = useState('');
     const [conditions, setConditions] = useState([]);
     const [allergies, setAllergies] = useState([]);
     const [vaccinations, setVaccinations] = useState([]);
-    const [surgeries, setSurgeries] = useState([]);
-
+    const [surgeories, setSurgeories] = useState([]);
     const [dietaryPreferencesText, setDietaryPreferencesText] = useState('');
     const [notesText, setNotesText] = useState('');
-    const petId = 2;
+    const petId = 1;
+    // const { clientId } = useLocalSearchParams();
 
-    // Fetches and sets each piece of medical history data
+
+
+
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAllergies = async () => {
             try {
-                setAllergies(await MedicalHistoryService.getAllergies(petId));
-                setConditions(await MedicalHistoryService.getChronicConditions(petId));
-                setVaccinations(await MedicalHistoryService.getVaccinations(petId));
-                setSurgeries(await MedicalHistoryService.getSurgeories(petId));
-
-                const medicalHistory = await MedicalHistoryService.getMedicalHistory(petId);
-                setDietaryPreferencesText(medicalHistory.dietaryPreferences || '');
-                setNotesText(medicalHistory.notes || '');
+                const fetchedAllergies = await MedicalHistoryService.getAllergies(petId);
+                setAllergies(fetchedAllergies);
             } catch (error) {
-                console.error("Error fetching medical history:", error);
-                Alert.alert('Error', 'Failed to load medical history.');
+                console.error("Error fetching allergies:", error);
+                Alert.alert('Error', 'Failed to load allergies.');
             }
         };
-        fetchData();
+
+
+        const fetchChronicConditions = async () => {
+            try {
+                const fetchedChronicConditions = await MedicalHistoryService.getChronicConditions(petId);
+                setConditions(fetchedChronicConditions);
+            } catch (error) {
+                console.error("Error fetching chronic conditions:", error);
+                Alert.alert('Error', 'Failed to load chronic conditions.');
+            }
+        };
+
+
+        const fetchVaccinations = async () => {
+            try {
+                const fetchedVaccinations = await MedicalHistoryService.getVaccinations(petId);
+                setVaccinations(fetchedVaccinations);
+            } catch (error) {
+                console.error("Error fetching vaccinations:", error);
+                Alert.alert('Error', 'Failed to load vaccinations.');
+            }
+        };
+
+
+        const fetchSurgeories = async () => {
+            try {
+                const fetchedSurgeories = await MedicalHistoryService.getSurgeories(petId);
+                setSurgeories(fetchedSurgeories);
+            } catch (error) {
+                console.error("Error fetching surgeories:", error);
+                Alert.alert('Error', 'Failed to load surgeories.');
+            }
+        };
+
+        const fetchDietaryPreferencesText = async () => {
+            try {
+
+                const fetchedDietaryPreferencesText = await MedicalHistoryService.getMedicalHistory(petId);
+                if (fetchedDietaryPreferencesText.dietaryPreferences === null) {
+                    setDietaryPreferencesText('');
+                }
+                else {
+                    setDietaryPreferencesText(fetchedDietaryPreferencesText.dietaryPreferences);
+                }
+            } catch (error) {
+                console.error("Error fetching dietary preferences:", error);
+                Alert.alert('Error', 'Failed to load dietary preferences.');
+            }
+        };
+
+
+        const fetchNotesText = async () => {
+            try {
+                const fetchedNotesText = await MedicalHistoryService.getMedicalHistory(petId);
+                if (fetchedNotesText.notes === null) {
+                    setNotesText('');
+                }
+                else {
+                    setNotesText(fetchedNotesText.notes);
+                }
+
+            } catch (error) {
+                console.error("Error fetching notes:", error);
+                Alert.alert('Error', 'Failed to load notes.');
+            }
+        };
+
+        fetchNotesText();
+        fetchDietaryPreferencesText();
+        fetchAllergies();
+        fetchChronicConditions();
+        fetchVaccinations();
+        fetchSurgeories();
+
     }, []);
 
-    // Generalized delete handler to remove items from lists
-    const handleDeleteItem = async (id, items, setItems, serviceMethod) => {
-        try {
-            await serviceMethod(id);
-            setItems(items.filter(item => item.id !== id));
-        } catch (error) {
-            console.error("Error deleting item:", error);
-            Alert.alert("Error", "Failed to delete item.");
+    const deleteChronicConditionHandle = (id) => {
+        MedicalHistoryService.deleteChronicConditionById(id);
+        const newChronicConditions = conditions.filter(chronicCondition => chronicCondition.id !== id);
+        setConditions(newChronicConditions);
+    };
+
+    const deleteAllergyHandle = (id) => {
+        const newAllergies = allergies.filter(allergy => allergy.id !== id);
+        setAllergies(newAllergies);
+        MedicalHistoryService.deleteAllergyById(id);
+
+    };
+
+    const deleteVaccinationHandle = (id) => {
+        MedicalHistoryService.deleteVaccinationById(id);
+        const newVaccinations = vaccinations.filter(vaccination => vaccination.id !== id);
+        setVaccinations(newVaccinations);
+    };
+
+    const deleteSurgeoryHandle = (id) => {
+        MedicalHistoryService.deleteSurgeoryById(id);
+        const newSurgeories = surgeories.filter(surgeory => surgeory.id !== id);
+        setSurgeories(newSurgeories);
+    };
+
+    const addChronicConditionHandle = async () => {
+        if (conditionText === '') {
+            Alert.alert('Please enter a chronic condition text before you add it')
+        }
+        else {
+            const newChronicCondition = await MedicalHistoryService.createChronicConditionByPetId({ chronicCondition: conditionText }, petId);
+
+            setConditions([...conditions, newChronicCondition]);
+            setConditionText('');
         }
     };
 
-    const deleteChronicCondition = (id) => handleDeleteItem(id, conditions, setConditions, MedicalHistoryService.deleteChronicConditionById);
-    const deleteAllergy = (id) => handleDeleteItem(id, allergies, setAllergies, MedicalHistoryService.deleteAllergyById);
-    const deleteVaccination = (id) => handleDeleteItem(id, vaccinations, setVaccinations, MedicalHistoryService.deleteVaccinationById);
-    const deleteSurgery = (id) => handleDeleteItem(id, surgeries, setSurgeries, MedicalHistoryService.deleteSurgeoryById);
-
-    // Generalized add handler to add items to lists
-    const handleAddItem = async (text, setText, setItems, serviceMethod, type) => {
-        if (!text.trim()) {
-            Alert.alert(`Please enter a ${type.toLowerCase()} before adding.`);
-            return;
+    const addAllergyHandle = async () => {
+        if (allergyText === '') {
+            Alert.alert('Please enter an allergy text before you add it')
         }
-        try {
-            const newItem = await serviceMethod({[type]: text.trim()}, petId);
-            setItems(prevItems => [...prevItems, newItem]);
-            setText('');
-        } catch (error) {
-            console.error(`Error adding ${type.toLowerCase()}:`, error);
-            Alert.alert("Error", `Failed to add ${type.toLowerCase()}.`);
+        else {
+            const newAllergy = await MedicalHistoryService.createAllergyByPetId({ allergy: allergyText }, petId);
+
+            setAllergies([...allergies, newAllergy]);
+            setAllergyText('');
         }
     };
 
-    const addChronicCondition = () => handleAddItem(conditionText, setConditionText, setConditions, MedicalHistoryService.createChronicConditionByPetId, "chronicCondition");
-    const addAllergy = () => handleAddItem(allergyText, setAllergyText, setAllergies, MedicalHistoryService.createAllergyByPetId, "allergy");
-    const addVaccination = () => handleAddItem(vaccinationText, setVaccinationText, setVaccinations, MedicalHistoryService.createVaccinationByPetId, "vaccination");
-    const addSurgery = () => handleAddItem(surgeryText, setSurgeryText, setSurgeries, MedicalHistoryService.createSurgeoryByPetId, "surgeory");
+    const addVaccinationHandle = async () => {
+        if (vaccinationText === '') {
+            Alert.alert('Please enter a vaccination text before you add it')
+        }
+        else {
+            const newVaccination = await MedicalHistoryService.createVaccinationByPetId({ vaccination: vaccinationText }, petId);
 
-    // Updates dietary preferences and notes
+            setVaccinations([...vaccinations, newVaccination]);
+            setVaccinationText('');
+        }
+    };
+
+    const addSurgeoryHandle = async () => {
+        if (surgeoryText === '') {
+            Alert.alert('Please enter a surgeory text before you add it')
+        }
+        else {
+            const newSurgeory = await MedicalHistoryService.createSurgeoryByPetId({ surgeory: surgeoryText }, petId);
+
+            setSurgeories([...surgeories, newSurgeory]);
+            setSurgeoryText('');
+        }
+    };
+
     const updateMedicalHistory = async () => {
-        try {
-            const updatedHistory = await MedicalHistoryService.updateMedicalHistory({
-                dietaryPreferences: dietaryPreferencesText || null,
-                notes: notesText || null,
-            }, petId);
-            setDietaryPreferencesText(updatedHistory.dietaryPreferences);
-            setNotesText(updatedHistory.notes);
-        } catch (error) {
-            console.error("Error updating medical history:", error);
-            Alert.alert("Error", "Failed to update medical history.");
-        }
-    };
 
+        if (dietaryPreferencesText === '') {
+            const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: null, notes: notesText }, petId);
+            setDietaryPreferencesText('');
+            setNotesText('');
+        }
+        if (notesText === '') {
+            const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: dietaryPreferencesText, notes: null }, petId);
+            setDietaryPreferencesText('');
+            setNotesText('');
+        }
+        const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: dietaryPreferencesText, notes: notesText }, petId);
+        setDietaryPreferencesText(newDietaryPreferences.dietaryPreferences);
+        setNotesText(newDietaryPreferences.notes);
+    };
 
     return (
         <ScrollView>
             <View>
                 <Text style={{ fontSize: 35, marginLeft: 10 }}>Medical History:</Text>
-
-                {/* Chronic Conditions Section */}
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Chronic Conditions:</Text>
-                    <View style={styles.inputRow}>
-                        <TextInput
-                            value={conditionText}
-                            onChangeText={setConditionText}
-                            multiline
-                            numberOfLines={4}
-                            placeholder="Add Chronic Condition Here"
-                            placeholderTextColor="grey"
-                            style={styles.textInput}
-                        />
-                        <TouchableOpacity style={styles.addButton} onPress={addChronicCondition}>
-                            <Text style={styles.buttonText}>Add Condition</Text>
-                        </TouchableOpacity>
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Chronic Conditions:</Text>
+                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
+                        <View style={{ flex: 3, margin: 10 }}>
+                            <TextInput value={conditionText} onChangeText={setConditionText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
+                            <TouchableOpacity>
+                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addChronicConditionHandle()}>Add Condition</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <ScrollView style={styles.scrollView}>
-                        {conditions.map((item) => (
-                            <View key={item.id} style={styles.listItemContainer}>
-                                <Text style={styles.itemText}>{item.chronicCondition}</Text>
-                                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteChronicCondition(item.id)}>
-                                    <Text style={styles.deleteButtonText}>Delete Condition</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                        {conditions.map((item) => {
+                            return (
+                                <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteChronicConditionHandle={deleteChronicConditionHandle}>
+                                    <View>
+                                        <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.chronicCondition}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
+                                            <Text style={{ color: 'black', alignSelf: 'center' }} onPress={() => deleteChronicConditionHandle(item.id)}>Delete Condition</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )
+                        })}
                     </ScrollView>
                 </View>
 
-                {/* Allergies Section */}
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Allergies:</Text>
-                    <View style={styles.inputRow}>
-                        <TextInput
-                            value={allergyText}
-                            onChangeText={setAllergyText}
-                            multiline
-                            numberOfLines={4}
-                            placeholder="Add Allergy Here"
-                            placeholderTextColor="grey"
-                            style={styles.textInput}
-                        />
-                        <TouchableOpacity style={styles.addButton} onPress={addAllergy}>
-                            <Text style={styles.buttonText}>Add Allergy</Text>
-                        </TouchableOpacity>
+
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Allergies:</Text>
+                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
+                        <View style={{ flex: 3, margin: 10 }}>
+                            <TextInput value={allergyText} onChangeText={setAllergyText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
+                            <TouchableOpacity>
+                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addAllergyHandle()}>Add Allergy</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <ScrollView style={styles.scrollView}>
-                        {allergies.map((item) => (
-                            <View key={item.id} style={styles.listItemContainer}>
-                                <Text style={styles.itemText}>{item.allergy}</Text>
-                                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteAllergy(item.id)}>
-                                    <Text style={styles.deleteButtonText}>Delete Allergy</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                        {allergies.map((item) => {
+                            return (
+                                <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteAllergyHandle={deleteAllergyHandle}>
+                                    <View>
+                                        <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.allergy}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
+                                            <Text style={{ color: 'black', alignSelf: 'center' }} onPress={() => deleteAllergyHandle(item.id)}>Delete Allergy</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )
+                        })}
                     </ScrollView>
                 </View>
 
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Vaccinations:</Text>
-
-                    <View style={styles.inputRow}>
-                        <TextInput
-                            value={vaccinationText}
-                            onChangeText={setVaccinationText}
-                            multiline
-                            numberOfLines={4}
-                            placeholder="Add Vaccination Here"
-                            placeholderTextColor="grey"
-                            style={styles.textInput}
-                        />
-
-                        <TouchableOpacity style={styles.addButton} onPress={addVaccination}>
-                            <Text style={styles.buttonText}>Add Vaccination</Text>
-                        </TouchableOpacity>
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Vaccinations:</Text>
+                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
+                        <View style={{ flex: 3, margin: 10 }}>
+                            <TextInput value={vaccinationText} onChangeText={setVaccinationText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
+                            <TouchableOpacity>
+                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addVaccinationHandle()}>Add Vaccination</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-
-                    <ScrollView style={styles.scrollView}>
-                        {vaccinations.map((item) => (
-                            <View key={item.id} style={styles.listItemContainer}>
-                                <Text style={styles.itemText}>{item.vaccination}</Text>
-                                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteVaccination(item.id)}>
-                                    <Text style={styles.deleteButtonText}>Delete Vaccination</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                        {vaccinations.map((item) => {
+                            return (
+                                <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteVaccinationHandle={deleteVaccinationHandle}>
+                                    <View>
+                                        <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.vaccination}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
+                                            <Text style={{ color: 'black', alignSelf: 'center' }} onPress={() => deleteVaccinationHandle(item.id)}>Delete Vaccination</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )
+                        })}
                     </ScrollView>
                 </View>
 
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Surgeries:</Text>
 
-                    <View style={styles.inputRow}>
-                        <TextInput
-                            value={surgeryText}
-                            onChangeText={setSurgeryText}
-                            multiline
-                            numberOfLines={4}
-                            placeholder="Add Surgery Here"
-                            placeholderTextColor="grey"
-                            style={styles.textInput}
-                        />
-
-                        <TouchableOpacity style={styles.addButton} onPress={addSurgery}>
-                            <Text style={styles.buttonText}>Add Surgery</Text>
-                        </TouchableOpacity>
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Surgeories:</Text>
+                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
+                        <View style={{ flex: 3, margin: 10 }}>
+                            <TextInput value={surgeoryText} onChangeText={setSurgeoryText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
+                            <TouchableOpacity>
+                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addSurgeoryHandle()}>Add Surgeory</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                        {surgeories.map((item) => {
+                            return (
+                                <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteSurgeoryHandle={deleteSurgeoryHandle}>
+                                    <View>
+                                        <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.surgeory}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
+                                            <Text style={{ color: 'black', alignSelf: 'center' }} onPress={() => deleteSurgeoryHandle(item.id)}>Delete Surgeory</Text>
+                                        </TouchableOpacity>
 
-                    <ScrollView style={styles.scrollView}>
-                        {surgeries.map((item) => (
-                            <View key={item.id} style={styles.listItemContainer}>
-                                <Text style={styles.itemText}>{item.surgery}</Text>
-                                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteSurgery(item.id)}>
-                                    <Text style={styles.deleteButtonText}>Delete Surgery</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                                    </View>
+                                </View>
+
+                            )
+                        })}
                     </ScrollView>
+
                 </View>
 
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Dietary Preferences:</Text>
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Dietary Preferences:</Text>
                     <TextInput
                         editable
                         multiline
@@ -224,12 +339,13 @@ export default function MedicalHistory() {
                         value={dietaryPreferencesText}
                         onChangeText={setDietaryPreferencesText}
                         onBlur={updateMedicalHistory}
-                        style={styles.textArea}
+                        style={{ color: 'white', borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 10, borderColor: 'white' }}
                     />
                 </View>
 
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Notes About The Pet:</Text>
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Notes About The Pet:</Text>
+
                     <TextInput
                         editable
                         multiline
@@ -237,125 +353,28 @@ export default function MedicalHistory() {
                         value={notesText}
                         onChangeText={setNotesText}
                         onBlur={updateMedicalHistory}
-                        style={styles.textArea}
+                        style={{ color: 'white', borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 10, borderColor: 'white' }}
                     />
                 </View>
-
             </View>
         </ScrollView>
     );
 }
-
-
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F7F3FC', // Very light lavender for a clean background
-        padding: 20,
-    },
-    sectionContainer: {
-        backgroundColor: '#EDE7F6', // Light lavender with a slight tint for subtle contrast
-        borderRadius: 15,
-        padding: 20,
-        marginVertical: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    sectionTitle: {
-        fontSize: 22,
-        color: '#4A3B53', // Soft, deep lavender for primary text
-        marginBottom: 15,
-        fontWeight: '700',
-    },
-    inputRow: {
-        flexDirection: 'row',
+
+    button: {
+        backgroundColor: '#1D3D47',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginTop: 20,
         alignItems: 'center',
-        marginBottom: 15,
-    },
-    textInput: {
-        flex: 3,
-        height: 40,
-        borderColor: '#D1C4E9', // Light purple for input borders
-        borderWidth: 1.5,
-        borderRadius: 10,
-        color: '#4A3B53', // Darker text for readability
-        backgroundColor: '#FAF8FC', // Slightly off-white to soften the input area
-        paddingHorizontal: 12,
-        fontSize: 16,
-        marginRight: 10,
-    },
-    addButton: {
-        flex: 1,
-        backgroundColor: '#D4A5A5', // Soft peach-pink for button backgrounds
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 3,
-        elevation: 3,
+        marginBottom: 10
     },
     buttonText: {
-        color: '#4A3B53', // Darker text color on buttons
-        fontWeight: '600',
-        fontSize: 15,
-    },
-    scrollView: {
-        maxHeight: 150,
-        backgroundColor: '#EFE3F4', // Very light lavender-pink for list background
-        borderRadius: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        marginTop: 10,
-    },
-    listItemContainer: {
-        backgroundColor: '#D9CDE4', // Soft muted purple for items
-        borderRadius: 10,
-        padding: 12,
-        marginBottom: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 2,
-    },
-    itemText: {
-        color: '#4A3B53',
+        color: 'white',
         fontSize: 16,
-        fontWeight: '500',
-    },
-    deleteButton: {
-        backgroundColor: '#E8A2A2', // Soft muted pink for delete button
-        borderRadius: 10,
-        paddingVertical: 5,
-        marginTop: 10,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    deleteButtonText: {
-        color: '#4A3B53',
-        fontWeight: '700',
-    },
-    textArea: {
-        color: '#4A3B53',
-        borderWidth: 1.5,
-        borderColor: '#D1C4E9', // Light purple for border
-        borderRadius: 10,
-        padding: 12,
-        fontSize: 15,
-        height: 90,
-        backgroundColor: '#FAF8FC', // Soft off-white background
-        marginTop: 10,
+        fontWeight: 'bold',
+
     },
 });
-

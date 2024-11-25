@@ -26,6 +26,35 @@ const ManagerStack = () => {
                     <Text style={styles.buttonText}>Handle Walk-in Clients</Text>
                 </TouchableOpacity>
             </Link>
+
+
+{/* 
+            <Link href="ManagerStack/AddProduct" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Add Product!</Text>
+                </TouchableOpacity>
+            </Link> */}
+
+
+            <Link href="ManagerStack/Products" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Products</Text>
+                </TouchableOpacity>
+            </Link>
+
+
+            <Link href="ManagerStack/AddProduct" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>addProduct</Text>
+                </TouchableOpacity>
+            </Link>
+
+
+
+
+
+
+
         </View>
     );
 }
