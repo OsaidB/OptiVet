@@ -39,8 +39,16 @@ const LoginScreen = () => {
       if (newToken?.token) {
         console.log('Login successful, token:', newToken.token);
 
-        // Save the token in AsyncStorage
+        // Manually decode the token to extract the role
+        const base64Payload = newToken.token.split('.')[1]; // Extract the payload
+        const payload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
+        console.log('Decoded payload:', payload);
+
+        // Save the token and role in AsyncStorage
         await AsyncStorage.setItem('authToken', newToken.token);
+        if (payload?.role) {
+          await AsyncStorage.setItem('role', payload.role);
+        }
 
         Toast.show({
           type: 'success',

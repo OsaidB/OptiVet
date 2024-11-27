@@ -7,8 +7,8 @@ import {
     View,
 } from 'react-native';
 import { Link } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import UserService from '../../Services/UserService'; // Import the updated UserService
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -20,10 +20,11 @@ export default function HomeScreen() {
     useEffect(() => {
         const fetchUserRole = async () => {
             try {
-                const storedRole = await AsyncStorage.getItem('role');
-                setRole(storedRole);
+                const decodedRole = await UserService.getRoleFromToken();
+                console.log("decoded Role:",decodedRole);
+                setRole(decodedRole);
             } catch (error) {
-                console.error('Error fetching user role from AsyncStorage:', error);
+                console.error('Error fetching user role:', error);
             }
         };
 

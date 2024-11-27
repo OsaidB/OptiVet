@@ -10,6 +10,26 @@ const UserService = {
         return await AsyncStorage.getItem('authToken');
     },
 
+    // Helper function to decode the token and extract the role
+    getRoleFromToken: async () => {
+        try {
+            const token = await UserService.getToken();
+            if (!token) {
+                return null;
+            }
+
+            // Manually decode the JWT payload
+            const base64Payload = token.split('.')[1]; // Extract the payload
+            const decodedPayload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
+            console.log("Decoded Payload:", decodedPayload);
+
+            return decodedPayload.role || null; // Return the role
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    },
+
     // Fetch all users
     getAllUsers: async () => {
         try {
@@ -114,7 +134,6 @@ const UserService = {
     // Authentication methods
     logout: async () => {
         await AsyncStorage.removeItem('authToken');
-        await AsyncStorage.removeItem('role');
     },
 
     isAuthenticated: async () => {
@@ -123,12 +142,12 @@ const UserService = {
     },
 
     isClient: async () => {
-        const role = await AsyncStorage.getItem('role');
+        const role = await UserService.getRoleFromToken();
         return role === 'ROLE_CLIENT';
     },
 
     isUser: async () => {
-        const role = await AsyncStorage.getItem('role');
+        const role = await UserService.getRoleFromToken();
         return role === 'ROLE_USER';
     },
 
