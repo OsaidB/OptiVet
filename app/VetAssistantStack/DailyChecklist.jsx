@@ -49,7 +49,7 @@ const DailyChecklist = () => {
                 criticalNotes,
             };
 
-            await DailyChecklistService.submitChecklist(checklistData);
+            await DailyChecklistService.createDailyChecklist(checklistData);
             Alert.alert('Success', 'Checklist submitted successfully!');
             router.back();
         } catch (error) {
