@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
 import AuthService from '../Services/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -37,6 +38,9 @@ const LoginScreen = () => {
 
       if (newToken?.token) {
         console.log('Login successful, token:', newToken.token);
+
+        // Save the token in AsyncStorage
+        await AsyncStorage.setItem('authToken', newToken.token);
 
         Toast.show({
           type: 'success',

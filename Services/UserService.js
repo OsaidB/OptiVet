@@ -1,31 +1,23 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from './config'; // Adjust the path as necessary
 
 const USERS_API_BASE_URL = `${baseURL.USED_BASE_URL}/api/users`;
 
 const UserService = {
-
-    fetchVets: async () => {
-        try {
-            const response = await axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`);
-            return response.data; // Return the data for use in the component
-        } catch (error) {
-            console.error('Error fetching vets:', error);
-            throw error; // Rethrow the error for handling in the component
-        }
+    // Helper function to get the token
+    getToken: async () => {
+        return await AsyncStorage.getItem('authToken');
     },
-    // Add other user-related methods as needed
-
-
 
     // Fetch all users
     getAllUsers: async () => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             const response = await axios.get(USERS_API_BASE_URL, {
                 headers: {
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
             return response.data;
         } catch (error) {
@@ -36,12 +28,12 @@ const UserService = {
 
     // Fetch a user by its ID
     getUserById: async (userId) => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             const response = await axios.get(`${USERS_API_BASE_URL}/${userId}`, {
                 headers: {
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
             return response.data;
         } catch (error) {
@@ -52,12 +44,12 @@ const UserService = {
 
     // Fetch a user by email
     getUserByName: async (email) => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             const response = await axios.get(`${USERS_API_BASE_URL}/users/${email}`, {
                 headers: {
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
             return response.data;
         } catch (error) {
@@ -68,13 +60,13 @@ const UserService = {
 
     // Update a user by its ID
     updateUser: async (userId, userData) => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             const response = await axios.put(`${USERS_API_BASE_URL}/${userId}`, userData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
             return response.data;
         } catch (error) {
@@ -85,12 +77,12 @@ const UserService = {
 
     // Delete a user by its ID
     deleteUser: async (userId) => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             await axios.delete(`${USERS_API_BASE_URL}/${userId}`, {
                 headers: {
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
         } catch (error) {
             console.error(`Error deleting user with ID: ${userId}`, error);
@@ -100,12 +92,12 @@ const UserService = {
 
     // Fetch users by role ID
     getUsersByRoleId: async (roleId) => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             const response = await axios.get(`${USERS_API_BASE_URL}/roles/${roleId}`, {
                 headers: {
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
             return response.data;
         } catch (error) {
@@ -116,12 +108,12 @@ const UserService = {
 
     // Fetch manager users
     getManagerUsers: async () => {
-        const token = localStorage.getItem("token");
         try {
+            const token = await UserService.getToken();
             const response = await axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`, {
                 headers: {
-                    'X-Auth-Token': token
-                }
+                    'X-Auth-Token': token,
+                },
             });
             return response.data;
         } catch (error) {
@@ -131,29 +123,47 @@ const UserService = {
     },
 
     // Authentication methods
-    logout: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
+    logout: async () => {
+        await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem('role');
     },
 
-    isAuthenticated: () => {
-        const token = localStorage.getItem('token');
+    isAuthenticated: async () => {
+        const token = await UserService.getToken();
         return !!token;
     },
 
-    isAdmin: () => {
-        const role = localStorage.getItem('role');
+    isAdmin: async () => {
+        const role = await AsyncStorage.getItem('role');
         return role === 'ADMIN';
     },
 
-    isUser: () => {
-        const role = localStorage.getItem('role');
+    isUser: async () => {
+        const role = await AsyncStorage.getItem('role');
         return role === 'USER';
     },
 
-    adminOnly: () => {
-        return UserService.isAuthenticated() && UserService.isAdmin();
-    }
+    adminOnly: async () => {
+        const isAuthenticated = await UserService.isAuthenticated();
+        const isAdmin = await UserService.isAdmin();
+        return isAuthenticated && isAdmin;
+    },
+
+    // Fetch vets (example of additional method)
+    fetchVets: async () => {
+        try {
+            const token = await UserService.getToken();
+            const response = await axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching vets:', error);
+            throw error;
+        }
+    },
 };
 
 export default UserService;

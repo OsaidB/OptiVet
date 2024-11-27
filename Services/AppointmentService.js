@@ -1,21 +1,24 @@
 import axios from 'axios';
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from './config'; // Adjust the path as necessary
-const API_URL= `${baseURL.USED_BASE_URL}/api/appointments`;
+
+const API_URL = `${baseURL.USED_BASE_URL}/api/appointments`;
 
 const AppointmentService = {
+    // Helper function to get the token
+    getToken: async () => {
+        return await AsyncStorage.getItem('authToken');
+    },
+
     // Create a new appointment
-
-    // getAppointmentsByDateAndVet: (vetId, date) => {
-    //     return axios.get(`${API_URL}/vet/${vetId}/date`, {
-    //         params: { date: date.toISOString() }
-    //     });
-    // },
-
     createAppointment: async (appointmentData) => {
         try {
-            const response = await axios.post(`${API_URL}`, appointmentData);
+            const token = await AppointmentService.getToken();
+            const response = await axios.post(`${API_URL}`, appointmentData, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error creating appointment:', error);
@@ -26,7 +29,12 @@ const AppointmentService = {
     // Fetch all appointments
     getAllAppointments: async () => {
         try {
-            const response = await axios.get(`${API_URL}`);
+            const token = await AppointmentService.getToken();
+            const response = await axios.get(`${API_URL}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error fetching appointments:', error);
@@ -37,7 +45,12 @@ const AppointmentService = {
     // Get appointment by ID
     getAppointmentById: async (appointmentId) => {
         try {
-            const response = await axios.get(`${API_URL}/${appointmentId}`);
+            const token = await AppointmentService.getToken();
+            const response = await axios.get(`${API_URL}/${appointmentId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(`Error fetching appointment with ID: ${appointmentId}`, error);
@@ -48,7 +61,12 @@ const AppointmentService = {
     // Update appointment
     updateAppointment: async (appointmentId, appointmentData) => {
         try {
-            const response = await axios.put(`${API_URL}/${appointmentId}`, appointmentData);
+            const token = await AppointmentService.getToken();
+            const response = await axios.put(`${API_URL}/${appointmentId}`, appointmentData, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(`Error updating appointment with ID: ${appointmentId}`, error);
@@ -59,7 +77,12 @@ const AppointmentService = {
     // Delete appointment
     deleteAppointment: async (appointmentId) => {
         try {
-            await axios.delete(`${API_URL}/${appointmentId}`);
+            const token = await AppointmentService.getToken();
+            await axios.delete(`${API_URL}/${appointmentId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
         } catch (error) {
             console.error(`Error deleting appointment with ID: ${appointmentId}`, error);
             throw error;
@@ -69,10 +92,14 @@ const AppointmentService = {
     // Fetch available slots for a selected vet
     getAvailableSlots: async (vetId) => {
         try {
+            const token = await AppointmentService.getToken();
             const response = await axios.get(`${API_URL}/available-slots`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
                 params: {
-                    vetId: vetId
-                }
+                    vetId: vetId,
+                },
             });
             return response.data;
         } catch (error) {
@@ -81,9 +108,15 @@ const AppointmentService = {
         }
     },
 
+    // Fetch appointments by client
     getAppointmentsByClient: async (clientId) => {
         try {
-            const response = await axios.get(`${API_URL}/client/${clientId}`);
+            const token = await AppointmentService.getToken();
+            const response = await axios.get(`${API_URL}/client/${clientId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error fetching appointments:', error);
@@ -91,17 +124,22 @@ const AppointmentService = {
         }
     },
 
+    // Fetch scheduled appointments for a specific vet
     getScheduledAppointments: async (vetId) => {
         try {
-            const response = await axios.get(`${API_URL}/appointments`, { params: { vetId, status: "SCHEDULED" } });
+            const token = await AppointmentService.getToken();
+            const response = await axios.get(`${API_URL}/appointments`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+                params: { vetId, status: 'SCHEDULED' },
+            });
             return response.data;
         } catch (error) {
             console.error(`Error fetching scheduled appointments for vet ID: ${vetId}`, error);
             throw error;
         }
     },
-
-
 };
 
 export default AppointmentService;

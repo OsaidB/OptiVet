@@ -3,6 +3,7 @@
 const BASE_URLS = {
     OsaidPC: "http://192.168.1.51:8080", // Osaid's PC base URL
     OsaidLaptop: "http://192.168.137.1:8080", // Osaid's laptop base URL
+    // local: "http://localhost:8080", // Osaid's laptop base URL
 
     MurrarLaptopHome: "http://192.168.56.1:8080", // Murrar's laptop base URL
     //////////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +20,7 @@ const BASE_URLS = {
 };
 
 // Choose the base URL you want to use
-const USED_BASE_URL = BASE_URLS.MurrarLaptopUni; // Change this to select a different base URL
+const USED_BASE_URL = BASE_URLS.OsaidPC; // Change this to select a different base URL
 
 const baseURL = {
     USED_BASE_URL,
