@@ -4,24 +4,22 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  // Alert,
   TouchableOpacity,
   View,
   ScrollView,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
-import AuthService from '../Services/authService'; // Adjust path if necessary
+import AuthService from '../Services/authService';
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState(''); // Changed to 'email'
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // For loading state
+  const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Expo Router's navigation hook
 
   const handleLogin = async () => {
-    console.log('email:', email);
-    console.log('password:', password);
-
+    // Basic validation
     if (!email.trim() || !password.trim()) {
       Toast.show({
         type: 'error',
@@ -39,20 +37,16 @@ const LoginScreen = () => {
 
       if (newToken?.token) {
         console.log('Login successful, token:', newToken.token);
+
         Toast.show({
           type: 'success',
           text1: 'Login Successful',
           text2: 'Welcome to the app!',
         });
 
-        // Uncomment to store the token locally
-        // await AsyncStorage.setItem('token', newToken.token);
-
         // Navigate to the home screen
-        navigation.navigate('Home'); // Replace 'Home' with your actual main screen name
+        router.push('/(tabs)/home'); // Use Expo Router for navigation
       } else {
-        console.log('Response Message:', newToken.message); // Log message
-        console.log('Response Description:', newToken.description); // Log description
         Toast.show({
           type: 'error',
           text1: 'Login Failed',
@@ -62,14 +56,13 @@ const LoginScreen = () => {
     } catch (error) {
       setLoading(false);
 
+      // Handle API errors gracefully
       const responseData = error.response?.data;
       const errorMessage = responseData?.message || 'An error occurred during login.';
       const errorDescription = responseData?.description || 'Please try again later.';
 
-      console.log('Error Message:', errorMessage);
-      console.log('Error Description:', errorDescription);
+      console.error('Login Error:', errorMessage, errorDescription);
 
-      // Show the error in a toast
       Toast.show({
         type: 'error',
         text1: 'Login Failed',
@@ -111,8 +104,8 @@ const LoginScreen = () => {
           <TextInput
               style={styles.input}
               placeholder="Email"
-              value={email} // Updated to use 'email'
-              onChangeText={setEmail} // Updated to use 'setEmail'
+              value={email}
+              onChangeText={setEmail}
               autoCorrect={false}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -123,8 +116,6 @@ const LoginScreen = () => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              // autoCorrect={false}
-              // autoCapitalize="none"
           />
         </View>
 
@@ -137,16 +128,17 @@ const LoginScreen = () => {
           >
             <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
           </TouchableOpacity>
-          <Link href="/(tabs)/home" asChild>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Home Screen (Skip login)</Text>
-            </TouchableOpacity>
-          </Link>
+          <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push('/(tabs)/home')} // Navigate directly to Home
+          >
+            <Text style={styles.buttonText}>Home Screen (Skip login)</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Footer */}
         <Text style={styles.footerText}>
-          <Text>Don't have an account?  </Text>
+          Don't have an account?{' '}
           <Text style={styles.signup}>Sign Up</Text>
         </Text>
 
@@ -178,13 +170,11 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   iconsContainer: {
-
-    // width: '130%',
     flexDirection: 'row',
-    justifyContent: 'space-between', // Better alignment
-    width: '100%', // Align with input container width
-    paddingHorizontal: 10, // Adds padding to ensure icons don’t overflow
-    marginBottom: -11, // Adjust vertical positioning closer to the input
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10,
+    marginBottom: -11,
   },
   icon: {
     height: 100,
@@ -197,7 +187,6 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: '#fff',
     padding: 15,
-    // marginVertical: 10,
     marginBottom: 10,
     borderRadius: 8,
     borderWidth: 1,
@@ -213,30 +202,28 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 10,
     alignItems: 'center',
-    shadowColor: '#000', // Subtle shadow for a modern look
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5, // For Android shadow
+    elevation: 5,
+  },
+  buttonDisabled: {
+    backgroundColor: '#999',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    // textTransform: 'uppercase', // Optional for a stronger call to action
   },
   footerText: {
     color: 'white',
     textAlign: 'center',
-    // marginTop: 20, // Add spacing from the buttons
-
   },
-
-
   signup: {
     color: '#FFD700',
     fontWeight: 'bold',
-    textDecorationLine: 'underline', // Highlight sign-up link
+    textDecorationLine: 'underline',
   },
 });
 
