@@ -16,11 +16,12 @@ const BASE_URLS = {
     MurrarLapInv: "http://192.168.1.35:8080",
     MurrarphInv: "http://192.168.2.10:8080",
 
-    SwitiLaptop: "http://192.168.137.1:8080", // Switi's laptop base URL
+    SwitiLaptop: "http://localhost:8080", // Switi's laptop base URL
 };
 
 // Choose the base URL you want to use
 const USED_BASE_URL = BASE_URLS.OsaidPC; // Change this to select a different base URL
+
 
 const baseURL = {
     USED_BASE_URL,
