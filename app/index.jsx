@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
 import AuthService from '../Services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import UserService from '../Services/UserService'; // Import UserService for fetching user data
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -39,15 +40,21 @@ const LoginScreen = () => {
       if (newToken?.token) {
         console.log('Login successful, token:', newToken.token);
 
-        // Manually decode the token to extract the role
+        // Manually decode the token to extract the email
         const base64Payload = newToken.token.split('.')[1]; // Extract the payload
         const payload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
         console.log('Decoded payload:', payload);
 
-        // Save the token and role in AsyncStorage
+        // Save the token and email in AsyncStorage
         await AsyncStorage.setItem('authToken', newToken.token);
         if (payload?.role) {
           await AsyncStorage.setItem('role', payload.role);
+        }
+
+        if (payload?.sub) {
+          const email = payload.sub;
+          await AsyncStorage.setItem('email', email); // Store the email
+          console.log('Email saved:', email);
         }
 
         Toast.show({

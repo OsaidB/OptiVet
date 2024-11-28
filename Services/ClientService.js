@@ -45,6 +45,23 @@ const ClientService = {
         }
     },
 
+    // Fetch a client by their email
+    getClientByEmail: async (email) => {
+        try {
+            const token = await ClientService.getToken();
+            console.log("tokennnnnnnnnnn:",token);
+            const response = await axios.get(`${API_URL}/email/${email}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching client with email: ${email}`, error);
+            throw error;
+        }
+    },
+
     // Create a new client
     createClient: async (clientData) => {
         try {

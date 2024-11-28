@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Text, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { Link } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
 
 const ClientStack = () => {
     const [clientInfo, setClientInfo] = useState(null);
-    const clientId = 1; // Temporary static client ID
+    const [email, setEmail] = useState(null);
 
     useEffect(() => {
-        const fetchClientInfo = async () => {
+        const fetchEmail = async () => {
             try {
-                const data = await ClientService.getClientById(clientId);
+                const storedEmail = await AsyncStorage.getItem('email'); // Fetch stored email
+                if (storedEmail) {
+                    setEmail(storedEmail);
+                } else {
+                    console.error("No email found in AsyncStorage");
+                    Alert.alert('Error', 'No email found. Please log in again.');
+                }
+            } catch (error) {
+                console.error("Error fetching email from AsyncStorage:", error);
+                Alert.alert('Error', 'Failed to retrieve email.');
+            }
+        };
+
+        const fetchClientInfo = async () => {
+            if (!email) return;
+            try {
+                const data = await ClientService.getClientByEmail(email); // Fetch client by email
                 setClientInfo(data);
             } catch (error) {
                 console.error("Error fetching client info:", error);
@@ -18,8 +35,9 @@ const ClientStack = () => {
             }
         };
 
+        fetchEmail();
         fetchClientInfo();
-    }, []);
+    }, [email]);
 
     return (
         <View style={styles.container}>
@@ -35,7 +53,13 @@ const ClientStack = () => {
             )}
 
             {/* Button to navigate to Pet Profiles */}
-            <Link href={{ pathname: "/ClientStack/PetProfiles", params: { clientId } }} asChild>
+            <Link
+                href={{
+                    pathname: "/ClientStack/PetProfiles",
+                    params: { clientId: clientInfo?.id },
+                }}
+                asChild
+            >
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>View Your Pet Profiles</Text>
                 </TouchableOpacity>
