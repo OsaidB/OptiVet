@@ -10,6 +10,7 @@ import {
     Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import Toast from 'react-native-toast-message';
 import AuthService from '../../Services/authService';
 
 const AddEmployee = () => {
@@ -26,7 +27,11 @@ const AddEmployee = () => {
 
     const handleAddEmployee = async () => {
         if (!firstName || !lastName || !email || !password || !phoneNumber || !dateOfBirth) {
-            Alert.alert('Error', 'All fields are required.');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'All fields are required.',
+            });
             return;
         }
 
@@ -45,13 +50,26 @@ const AddEmployee = () => {
             await AuthService.registerEmployee(newEmployee);
             setLoading(false);
 
-            Alert.alert('Success', 'Employee account created successfully!', [
-                { text: 'OK', onPress: () => router.push('/ManagerStack') },
-            ]);
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Employee account created successfully!',
+            });
+
+            // Navigate back to ManagerStack after success
+            router.push('/ManagerStack');
         } catch (error) {
             setLoading(false);
+
+            // Log and display error
             console.error('Error creating employee:', error);
-            Alert.alert('Error', 'Failed to create employee account. Please try again.');
+            const errorMessage =
+                error.response?.data?.message || 'Failed to create employee account. Please try again.';
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: errorMessage,
+            });
         }
     };
 
@@ -162,6 +180,9 @@ const AddEmployee = () => {
                     {loading ? 'Creating Account...' : 'Create Account'}
                 </Text>
             </TouchableOpacity>
+
+            {/* Toast Notification */}
+            <Toast />
         </ScrollView>
     );
 };
