@@ -158,7 +158,9 @@ const LoginScreen = () => {
         {/* Footer */}
         <Text style={styles.footerText}>
           Don't have an account?{' '}
-          <Text style={styles.signup}>Sign Up</Text>
+          <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
+            <Text style={styles.signup}>Sign Up</Text>
+          </TouchableOpacity>
         </Text>
 
         {/* Toast Notification */}

@@ -41,29 +41,27 @@ const ManagerStack = () => {
                 </TouchableOpacity>
             </Link>
 
-
             <Link href="ManagerStack/Products" asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Products</Text>
                 </TouchableOpacity>
             </Link>
 
-
             <Link href="ManagerStack/AddProduct" asChild>
                 <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>addProduct</Text>
+                    <Text style={styles.buttonText}>Add Product</Text>
                 </TouchableOpacity>
             </Link>
 
-
-
-
-
-
-
+            {/* Button to navigate to Add Employee screen */}
+            <Link href="ManagerStack/AddEmployee" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Create Employee Account</Text>
+                </TouchableOpacity>
+            </Link>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {

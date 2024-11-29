@@ -23,7 +23,7 @@ class AuthService {
         }
     }
 
-// Function to reset the password with a token
+    // Function to reset the password with a token
     async resetPassword(resetToken, newPassword) {
         const token = localStorage.getItem("token");
         try {
@@ -56,6 +56,22 @@ class AuthService {
             const response = await axios.post(`${BASE_URL}/register`, userData, {
                 headers: {
                     'Content-Type': 'application/json',
+                }
+            });
+            return response.data;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    // Function to register a new employee
+    async registerEmployee(employeeData) {
+        try {
+            const token = localStorage.getItem("token"); // Retrieve the token for authentication
+            const response = await axios.post(`${BASE_URL}/register-employee`, employeeData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Auth-Token': token, // Include token in the request headers
                 }
             });
             return response.data;
