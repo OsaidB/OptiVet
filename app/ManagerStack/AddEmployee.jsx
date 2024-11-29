@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Alert,
     ScrollView,
+    Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AuthService from '../../Services/authService';
@@ -17,12 +18,14 @@ const AddEmployee = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState(new Date());
     const [role, setRole] = useState('VET_ASSISTANT'); // Default role
     const [loading, setLoading] = useState(false);
+    const [isPickerVisible, setIsPickerVisible] = useState(false);
     const router = useRouter();
 
     const handleAddEmployee = async () => {
-        if (!firstName || !lastName || !email || !password || !phoneNumber) {
+        if (!firstName || !lastName || !email || !password || !phoneNumber || !dateOfBirth) {
             Alert.alert('Error', 'All fields are required.');
             return;
         }
@@ -33,6 +36,7 @@ const AddEmployee = () => {
             email,
             password,
             phoneNumber,
+            dateOfBirth: dateOfBirth.toISOString().split('T')[0], // Format for API
             role,
         };
 
@@ -90,12 +94,44 @@ const AddEmployee = () => {
                 keyboardType="phone-pad"
             />
 
+            {/* Date of Birth Picker */}
+            <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setIsPickerVisible(true)}
+            >
+                <Text style={styles.dateButtonText}>
+                    {dateOfBirth ? dateOfBirth.toISOString().split('T')[0] : 'Select Date of Birth'}
+                </Text>
+            </TouchableOpacity>
+
+            {isPickerVisible && (
+                <Modal transparent animationType="slide">
+                    <View style={styles.modalContainer}>
+                        <View style={styles.pickerContainer}>
+                            <Text style={styles.pickerTitle}>Select Date of Birth</Text>
+                            <input
+                                type="date"
+                                value={dateOfBirth.toISOString().split('T')[0]}
+                                onChange={(e) => setDateOfBirth(new Date(e.target.value))}
+                                style={styles.dateInput}
+                            />
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setIsPickerVisible(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+
             {/* Role Selection */}
             <Text style={styles.label}>Select Role</Text>
             <TouchableOpacity
                 style={[
                     styles.roleButton,
-                    role === 'ROLE_VET' && styles.roleButtonSelected,
+                    role === 'VET' && styles.roleButtonSelected,
                 ]}
                 onPress={() => setRole('VET')}>
                 <Text style={styles.roleButtonText}>Veterinarian</Text>
@@ -103,7 +139,7 @@ const AddEmployee = () => {
             <TouchableOpacity
                 style={[
                     styles.roleButton,
-                    role === 'ROLE_VET_ASSISTANT' && styles.roleButtonSelected,
+                    role === 'VET_ASSISTANT' && styles.roleButtonSelected,
                 ]}
                 onPress={() => setRole('VET_ASSISTANT')}>
                 <Text style={styles.roleButtonText}>Vet Assistant</Text>
@@ -111,7 +147,7 @@ const AddEmployee = () => {
             <TouchableOpacity
                 style={[
                     styles.roleButton,
-                    role === 'ROLE_SECRETARY' && styles.roleButtonSelected,
+                    role === 'SECRETARY' && styles.roleButtonSelected,
                 ]}
                 onPress={() => setRole('SECRETARY')}>
                 <Text style={styles.roleButtonText}>Secretary</Text>
@@ -149,6 +185,53 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#ddd',
+    },
+    dateButton: {
+        backgroundColor: '#1D3D47',
+        paddingVertical: 15,
+        borderRadius: 8,
+        marginVertical: 10,
+        alignItems: 'center',
+        width: '100%',
+    },
+    dateButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    pickerContainer: {
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 8,
+        width: '80%',
+    },
+    pickerTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    dateInput: {
+        width: '100%',
+        padding: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        marginBottom: 10,
+    },
+    closeButton: {
+        backgroundColor: '#1D3D47',
+        padding: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
     label: {
         fontSize: 16,
