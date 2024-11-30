@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Alert, Platform } from 'react-native';
+import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import PetService from '../../Services/PetService';
+import UserService from '../../Services/UserService'; // Import the UserService
 import { useRouter } from "expo-router";
 
 const categories = [
@@ -12,6 +14,8 @@ const categories = [
 
 const VetAssistantStack = () => {
     const router = useRouter();
+    const [vetAssistantInfo, setVetAssistantInfo] = useState(null); // Store vet assistant details
+    const [email, setEmail] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [pets, setPets] = useState([]);
     const [filteredPets, setFilteredPets] = useState([]);
@@ -19,12 +23,41 @@ const VetAssistantStack = () => {
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
 
-    // Fetch all pets on initial mount
+    useEffect(() => {
+        const fetchEmail = async () => {
+            try {
+                const storedEmail = await AsyncStorage.getItem('email'); // Fetch stored email
+                if (storedEmail) {
+                    setEmail(storedEmail);
+                } else {
+                    console.error("No email found in AsyncStorage");
+                    Alert.alert('Error', 'No email found. Please log in again.');
+                }
+            } catch (error) {
+                console.error("Error fetching email from AsyncStorage:", error);
+                Alert.alert('Error', 'Failed to retrieve email.');
+            }
+        };
+
+        const fetchVetAssistantInfo = async () => {
+            if (!email) return;
+            try {
+                const data = await UserService.getUserByEmail(email); // Fetch vet assistant by email
+                setVetAssistantInfo(data);
+            } catch (error) {
+                console.error("Error fetching vet assistant info:", error);
+                Alert.alert('Error', 'Failed to load vet assistant information.');
+            }
+        };
+
+        fetchEmail();
+        fetchVetAssistantInfo();
+    }, [email]);
+
     useEffect(() => {
         fetchPets();
     }, []);
 
-    // Fetch all pets
     const fetchPets = async () => {
         try {
             const petData = await PetService.getAllPets();
@@ -36,10 +69,9 @@ const VetAssistantStack = () => {
         }
     };
 
-    // Fetch pets by residency type
     const fetchPetsByResidency = async (category) => {
         if (category === 'ALL') {
-            fetchPets(); // Fetch all pets if "All" is selected
+            fetchPets();
         } else {
             try {
                 const petsByResidency = await PetService.getPetsByResidency(category);
@@ -95,7 +127,17 @@ const VetAssistantStack = () => {
         <View style={styles.container}>
             <Text style={styles.title}>Vet Assistant Dashboard</Text>
 
-            {/* Search Bar */}
+            {vetAssistantInfo ? (
+                <>
+                    <Text>Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!</Text>
+                    <Text>Email: {vetAssistantInfo.email}</Text>
+                    <Text>Phone: {vetAssistantInfo.phoneNumber}</Text>
+                    <Text>ID: {vetAssistantInfo.userId}</Text>
+                </>
+            ) : (
+                <Text>Loading vet assistant information...</Text>
+            )}
+
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search by pet or owner name..."
@@ -103,7 +145,6 @@ const VetAssistantStack = () => {
                 onChangeText={handleSearch}
             />
 
-            {/* Category List */}
             <FlatList
                 data={categories}
                 horizontal
@@ -128,7 +169,6 @@ const VetAssistantStack = () => {
                 contentContainerStyle={styles.categoryListContainer}
             />
 
-            {/* Pets List */}
             <FlatList
                 data={filteredPets}
                 keyExtractor={(item) => item.id.toString()}
@@ -137,7 +177,6 @@ const VetAssistantStack = () => {
                 numColumns={2}
             />
 
-            {/* Modal for Pet Details */}
             <Modal
                 visible={modalVisible}
                 transparent={true}
@@ -164,6 +203,7 @@ const VetAssistantStack = () => {
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
