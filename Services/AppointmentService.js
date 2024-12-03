@@ -10,6 +10,22 @@ const AppointmentService = {
         return await AsyncStorage.getItem('authToken');
     },
 
+    // Fetch appointments by vet ID
+    getAppointmentsByVetId: async (vetId) => {
+        try {
+            const token = await AppointmentService.getToken();
+            const response = await axios.get(`${API_URL}/vet/${vetId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching appointments for vet ID: ${vetId}`, error);
+            throw error;
+        }
+    },
+
     // Create a new appointment
     createAppointment: async (appointmentData) => {
         try {
@@ -140,6 +156,22 @@ const AppointmentService = {
             throw error;
         }
     },
+
+    getScheduledAppointmentsByClient: async (clientId) => {
+        try {
+            const token = await AppointmentService.getToken();
+            const response = await axios.get(`${API_URL}/client/${clientId}/scheduled`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching scheduled appointments for client ID: ${clientId}`, error);
+            throw error;
+        }
+    },
+
 };
 
 export default AppointmentService;

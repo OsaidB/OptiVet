@@ -126,10 +126,42 @@ const UserService = {
         }
     },
 
+    // fetchVets: async () => {
+    //     try {
+    //         const token = await getToken(); // Retrieve the token
+    //         const response = await axios.get(`${API_BASE_URL}/users/roles/MANAGER`, {
+    //             headers: {
+    //                 'X-Auth-Token': token,
+    //             },
+    //         });
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error('Error fetching vets:', error);
+    //         throw error;
+    //     }
+    // },
+
     // Fetch vets or managers
     fetchVets: async () => {
         return await UserService.getUsersByRole('MANAGER');
     },
+    // // Fetch vets or managers
+    // fetchVets: async () => {
+    //     try {
+    //         const token = await UserService.getToken();
+    //         const response = await axios.get(`${USERS_API_BASE_URL}/roles/MANAGER`, {
+    //             headers: {
+    //                 'X-Auth-Token': token,
+    //                 //'Custom-Header': 'YourCustomHeaderValue', // Add your custom header here
+    //             },
+    //         });
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error('Error fetching vets:', error);
+    //         throw error;
+    //     }
+    // },
+
 
     // Authentication methods
     logout: async () => {

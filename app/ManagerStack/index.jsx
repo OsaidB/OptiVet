@@ -54,25 +54,33 @@ const ManagerStack = () => {
             )}
 
             {/* Navigation Buttons */}
-            <Link href="ManagerStack/ManagerScheduleScreen" asChild>
+            <Link
+                href={{
+                    pathname: "/ManagerStack/ManagerScheduleScreen",
+                    params: { userId: managerInfo?.userId } }}
+                asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Manage your meets!</Text>
                 </TouchableOpacity>
             </Link>
 
-            <Link href="ManagerStack/ManagerAppointmentsScreen" asChild>
+            <Link
+                href={{
+                    pathname: "/ManagerStack/ManagerAppointmentsScreen",
+                    params: { userId: managerInfo?.userId } }}
+                asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>View Your Appointments</Text>
                 </TouchableOpacity>
             </Link>
 
-            <Link href="ManagerStack/WalkInClientsScreen" asChild>
+            <Link href={{ pathname: "/ManagerStack/WalkInClientsScreen", params: { userId: managerInfo?.userId } }} asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Handle Walk-in Clients</Text>
                 </TouchableOpacity>
             </Link>
 
-            <Link href="ManagerStack/MsgsScreen" asChild>
+            <Link href={{ pathname: "/ManagerStack/MsgsScreen", params: { userId: managerInfo?.userId } }} asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Important Messages</Text>
                 </TouchableOpacity>

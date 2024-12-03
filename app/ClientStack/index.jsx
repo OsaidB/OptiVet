@@ -45,6 +45,7 @@ const ClientStack = () => {
             {clientInfo ? (
                 <>
                     <Text>Welcome, {clientInfo.firstName} {clientInfo.lastName}!</Text>
+                    <Text>ID: {clientInfo.id}</Text>
                     <Text>Email: {clientInfo.email}</Text>
                     <Text>Phone: {clientInfo.phoneNumber}</Text>
                 </>
@@ -66,7 +67,13 @@ const ClientStack = () => {
             </Link>
 
             {/* Button to navigate to Manage Appointments */}
-            <Link href="/ClientStack/manageAppointments" asChild>
+            <Link
+                href={{
+                    pathname: "/ClientStack/manageAppointments",
+                    params: { clientId: clientInfo?.id }, // Pass clientId here
+                }}
+                asChild
+            >
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Manage Appointments</Text>
                 </TouchableOpacity>

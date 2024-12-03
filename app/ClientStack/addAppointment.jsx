@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ScrollView, Alert, SafeAreaView } from 'react-native';
 import { format, parseISO, addDays } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
 import UserService from '../../Services/UserService';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function AddAppointment() {
     const [selectedPet, setSelectedPet] = useState(null);
@@ -16,12 +17,13 @@ export default function AddAppointment() {
     const [pets, setPets] = useState([]);
     const [showCalendar, setShowCalendar] = useState(false);
     const [closestSlotHint, setClosestSlotHint] = useState(null);
+    const {clientId} = useLocalSearchParams();
 
     // Fetch pets
     useEffect(() => {
         const fetchPets = async () => {
             try {
-                const petData = await PetService.getPetsByOwnerId(1);
+                const petData = await PetService.getPetsByOwnerId(clientId);
                 setPets(petData);
             } catch (error) {
                 console.error('Error fetching pets:', error);
@@ -30,11 +32,12 @@ export default function AddAppointment() {
         fetchPets();
     }, []);
 
+
     // Fetch vets
     useEffect(() => {
         const fetchVets = async () => {
             try {
-                const vetsData = await UserService.fetchVets();
+                const vetsData = await UserService.getUsersByRole("VET");
                 setVets(vetsData);
             } catch (error) {
                 console.error('Error fetching vets:', error);
@@ -42,6 +45,20 @@ export default function AddAppointment() {
         };
         fetchVets();
     }, []);
+
+    // useEffect(() => {
+    //     const fetchVets = async () => {
+    //         try {
+    //             console.log("Fetching vets...");
+    //             const vetsData = await UserService.getUsersByRole("MANAGER");
+    //             console.log("Vets Data:", vetsData);
+    //             setVets(vetsData);
+    //         } catch (error) {
+    //             console.error('Error fetching vets:', error);
+    //         }
+    //     };
+    //     fetchVets();
+    // }, []);
 
     // Fetch available slots based on selected vet and date
     useEffect(() => {
@@ -99,9 +116,10 @@ export default function AddAppointment() {
             await AppointmentService.updateAppointment(selectedSlot.id, {
                 status: 'SCHEDULED',
                 vetId: selectedVet.userId,
-                clientId: 1,
+                clientId: clientId,
                 petId: selectedPet.id,
-                appointmentDate: selectedSlot.appointmentDate
+                appointmentDate: selectedSlot.appointmentDate,
+                duration: selectedSlot.duration
             });
             Alert.alert('Success', 'Appointment successfully scheduled!');
             resetForm();
@@ -121,17 +139,17 @@ export default function AddAppointment() {
         setClosestSlotHint(null);
     };
 
-    const renderPetItem = ({ item }) => (
+    const renderPetItem = ({item}) => (
         <TouchableOpacity
             style={[styles.petCard, selectedPet?.id === item.id && styles.selectedCard]}
             onPress={() => setSelectedPet(item)}
         >
-            <Image source={{ uri: item.petId }} style={styles.petImage} />
+            <Image source={{uri: PetService.serveImage(item.imageUrl)}} style={styles.petImage}/>
             <Text style={styles.petName}>{item.name}</Text>
         </TouchableOpacity>
     );
 
-    const renderVetItem = ({ item }) => (
+    const renderVetItem = ({item}) => (
         <TouchableOpacity
             style={[styles.vetCard, selectedVet?.userId === item.userId && styles.selectedCard]}
             onPress={() => setSelectedVet(item)}
@@ -141,7 +159,7 @@ export default function AddAppointment() {
         </TouchableOpacity>
     );
 
-    const renderSlotItem = ({ item }) => (
+    const renderSlotItem = ({item}) => (
         <TouchableOpacity
             style={[styles.slotCard, selectedSlot?.id === item.id && styles.selectedCard]}
             onPress={() => setSelectedSlot(item)}
@@ -151,80 +169,100 @@ export default function AddAppointment() {
     );
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Add Appointment</Text>
+        <SafeAreaView style={styles.safeArea}>
+            <ScrollView contentContainerStyle={styles.container}>
+                <Text style={styles.title}>Add Appointment</Text>
 
-            {/* Pet Selection */}
-            <Text style={styles.label}>Select Your Pet</Text>
-            <FlatList
-                data={pets}
-                horizontal
-                renderItem={renderPetItem}
-                keyExtractor={(item) => item.id.toString()}
-                showsHorizontalScrollIndicator={false}
-                style={styles.petList}
-            />
+                {/*<Text style={styles.label}>Select Your Pet</Text>*/}
+                {/*<View style={styles.petListContainer}>*/}
+                {/*    <FlatList*/}
+                {/*        data={pets}*/}
+                {/*        horizontal*/}
+                {/*        renderItem={renderPetItem}*/}
+                {/*        keyExtractor={(item) => item.id.toString()}*/}
+                {/*        showsHorizontalScrollIndicator={false}*/}
+                {/*        style={styles.petList}*/}
+                {/*    />*/}
+                {/*</View>*/}
 
-            {/* Vet Selection */}
-            <Text style={styles.label}>Select a Vet</Text>
-            <FlatList
-                data={vets}
-                horizontal
-                renderItem={renderVetItem}
-                keyExtractor={(item) => item.userId.toString()}
-                showsHorizontalScrollIndicator={false}
-                style={styles.vetList}
-            />
-
-            {/* Date Selection Button */}
-            <TouchableOpacity style={styles.button} onPress={() => setShowCalendar(true)}>
-                <Text style={styles.buttonText}>Select a Date</Text>
-            </TouchableOpacity>
-
-            {/* Calendar for Date Selection */}
-            {showCalendar && (
-                <Calendar
-                    onDayPress={(day) => handleDateSelection(day.dateString)}
-                    markedDates={{
-                        [selectedDate]: { selected: true, selectedColor: '#1D3D47' },
-                    }}
-                    theme={{
-                        todayTextColor: '#00adf5',
-                        selectedDayBackgroundColor: '#1D3D47',
-                    }}
+                {/* Pet Selection */}
+                <Text style={styles.label}>Select Your Pet</Text>
+                <FlatList
+                    data={pets}
+                    horizontal
+                    renderItem={renderPetItem}
+                    keyExtractor={(item) => item.id.toString()}
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.petList}
                 />
-            )}
 
-            {/* Time Slot Selection */}
-            {selectedDate && (
-                <>
-                    <Text style={styles.label}>Available Slots on {selectedDate}</Text>
-                    {availableSlots.length > 0 ? (
-                        <FlatList
-                            data={availableSlots}
-                            horizontal
-                            renderItem={renderSlotItem}
-                            keyExtractor={(item) => item.id.toString()}
-                            showsHorizontalScrollIndicator={false}
-                            style={styles.slotList}
-                        />
-                    ) : (
-                        <Text style={styles.hintText}>{closestSlotHint || "No available slots found."}</Text>
-                    )}
-                </>
-            )}
+                {/* Vet Selection */}
+                <Text style={styles.label}>Select a Vet</Text>
+                <FlatList
+                    data={vets}
+                    horizontal
+                    renderItem={renderVetItem}
+                    keyExtractor={(item) => item.userId.toString()}
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.vetList}
+                />
 
-            {/* Submit Button */}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                <Text style={styles.buttonText}>Confirm Appointment</Text>
-            </TouchableOpacity>
-        </ScrollView>
+                {/* Date Selection Button */}
+                <TouchableOpacity style={styles.button} onPress={() => setShowCalendar(true)}>
+                    <Text style={styles.buttonText}>Select a Date</Text>
+                </TouchableOpacity>
+
+                {/* Calendar for Date Selection */}
+                {showCalendar && (
+                    <Calendar
+                        onDayPress={(day) => handleDateSelection(day.dateString)}
+                        markedDates={{
+                            [selectedDate]: {selected: true, selectedColor: '#1D3D47'},
+                        }}
+                        theme={{
+                            todayTextColor: '#00adf5',
+                            selectedDayBackgroundColor: '#1D3D47',
+                        }}
+                    />
+                )}
+
+                {/* Time Slot Selection */}
+                {selectedDate && (
+                    <>
+                        <Text style={styles.label}>Available Slots on {selectedDate}</Text>
+                        {availableSlots.length > 0 ? (
+                            <FlatList
+                                data={availableSlots}
+                                horizontal
+                                renderItem={renderSlotItem}
+                                keyExtractor={(item) => item.id.toString()}
+                                showsHorizontalScrollIndicator={false}
+                                style={styles.slotList}
+                            />
+                        ) : (
+                            <Text style={styles.hintText}>{closestSlotHint || "No available slots found."}</Text>
+                        )}
+                    </>
+                )}
+
+                {/* Submit Button */}
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                    <Text style={styles.buttonText}>Confirm Appointment</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+
     container: {
-        padding: 20
+        padding: 12
     },
 
     title: {
@@ -236,11 +274,21 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 18,
-        marginVertical: 10
+        marginVertical: 10,
+        fontWeight: 'bold',
     },
 
     petList: {
         marginBottom: 20
+    },
+
+    petListContainer: {
+        borderWidth: 2, // Outer border width
+        borderColor: '#1D3D47', // Border color
+        borderRadius: 10, // Rounded corners
+        padding: 10, // Space inside the border
+        // marginVertical: 5, // Space above and below the list
+
     },
 
     vetList: {
@@ -248,7 +296,8 @@ const styles = StyleSheet.create({
     },
 
     petCard: {
-        width: 120,
+        width: 150,
+        height: 150,
         padding: 10,
         marginRight: 10,
         alignItems: 'center',
@@ -261,17 +310,16 @@ const styles = StyleSheet.create({
     },
 
     petImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 100,
+        height: 100,
+        borderRadius: 30,
         marginBottom: 8
     },
 
     petName: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: 'bold'
     },
-
 
     slotCard: {
         padding: 15,
@@ -282,6 +330,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#f5f5f5',
     },
+
     slotList: {
         paddingHorizontal: 15,
     },

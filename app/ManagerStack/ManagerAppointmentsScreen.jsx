@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { useRouter } from "expo-router";
+import {Text, View, FlatList, StyleSheet, TouchableOpacity, Modal, Image, SafeAreaView} from 'react-native';
+import {useLocalSearchParams, useRouter} from "expo-router";
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
+import ClientService from '../../Services/ClientService';
 
 const ManagerAppointmentsScreen = () => {
     const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [pets, setPets] = useState([]);
     const router = useRouter();
+    const { userId } = useLocalSearchParams(); // Retrieve userId from params
 
     useEffect(() => {
         const fetchScheduledAppointments = async () => {
             try {
                 const vetId = 1; // Update this ID as needed
-                const scheduledAppointments = await AppointmentService.getScheduledAppointments(vetId);
+                const scheduledAppointments = await AppointmentService.getScheduledAppointments(userId);
 
                 // Fetch pet and client details for each appointment
                 const detailedAppointments = await Promise.all(
                     scheduledAppointments.map(async (appointment) => {
                         const petData = await PetService.getPetById(appointment.petId);
-                        // const clientData = await ClientService.getClientById(appointment.clientId); // Fetch owner details
+                        const clientData = await ClientService.getClientById(appointment.clientId);
+
+                        console.log(petData);
 
                         return {
                             ...appointment,
                             petName: petData?.name || 'Unknown Pet',
-                            // ownerName: clientData?.firstName || 'Unknown Owner', // Use the owner's first name
+                            petImage: PetService.serveImage(petData?.imageUrl || petData?.imageFileName),
+                            firstName: clientData?.firstName || 'Unknown Owner',
+                            lastName: clientData?.lastName || 'Unknown Owner',
                         };
                     })
                 );
@@ -53,7 +60,7 @@ const ManagerAppointmentsScreen = () => {
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, clientId, appointmentId },
+                params: { petId, clientId, appointmentId, userId },
             });
         }
     };
@@ -61,57 +68,78 @@ const ManagerAppointmentsScreen = () => {
     const renderAppointment = ({ item }) => (
         <TouchableOpacity onPress={() => handleAppointmentPress(item)}>
             <View style={styles.appointmentItem}>
-                <Text style={styles.appointmentText}>Pet: {item.petName}</Text>
-                <Text style={styles.appointmentText}>Date: {new Date(item.appointmentDate).toLocaleDateString()}</Text>
-                <Text style={styles.appointmentText}>Time: {new Date(item.appointmentDate).toLocaleTimeString()}</Text>
-                {/*<Text style={styles.appointmentText}>Owner: {item.ownerName}</Text>*/}
+                <View style={styles.cardContent}>
+                    {/* Pet Image */}
+                    {item.petImage ? (
+                        <Image
+                            source={{ uri: item.petImage }}
+                            style={styles.petImage}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <Text style={styles.noImageText}>No Image Available</Text>
+                    )}
+
+                    {/* Appointment Details */}
+                    <View style={styles.detailsContainer}>
+                        <Text style={styles.appointmentText}>Pet Owner: {item.firstName} {item.lastName}</Text>
+                        <Text style={styles.appointmentText}>Pet: {item.petName}</Text>
+                        <Text style={styles.appointmentText}>Date: {new Date(item.appointmentDate).toLocaleDateString()}</Text>
+                        <Text style={styles.appointmentText}>Time: {new Date(item.appointmentDate).toLocaleTimeString()}</Text>
+                    </View>
+                </View>
             </View>
         </TouchableOpacity>
     );
 
+
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Your Appointments</Text>
-            <FlatList
-                data={appointments}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderAppointment}
-            />
+        <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Your Appointments</Text>
+                <FlatList
+                    data={appointments}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderAppointment}
+                />
 
-            <Modal
-                visible={modalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalContainer}
-                    activeOpacity={1}
-                    onPressOut={() => setModalVisible(false)}
+                <Modal
+                    visible={modalVisible}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setModalVisible(false)}
                 >
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
-                        {selectedAppointment && (
-                            <>
-                                <Text style={styles.modalTitle}>Appointment Details</Text>
-                                <Text style={styles.modalText}>Pet: {selectedAppointment.petName}</Text>
-                                <Text style={styles.modalText}>Date: {new Date(selectedAppointment.appointmentDate).toLocaleDateString()}</Text>
-                                <Text style={styles.modalText}>Time: {new Date(selectedAppointment.appointmentDate).toLocaleTimeString()}</Text>
-                                {/*<Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>*/}
-                                {/*<Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>*/}
+                    <TouchableOpacity
+                        style={styles.modalContainer}
+                        activeOpacity={1}
+                        onPressOut={() => setModalVisible(false)}
+                    >
+                        <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
+                            {selectedAppointment && (
+                                <>
+                                    <Text style={styles.modalTitle}>Appointment Details</Text>
+                                    <Text style={styles.modalText}>Pet: {selectedAppointment.petName}</Text>
+                                    <Text style={styles.modalText}>Date: {new Date(selectedAppointment.appointmentDate).toLocaleDateString()}</Text>
+                                    <Text style={styles.modalText}>Time: {new Date(selectedAppointment.appointmentDate).toLocaleTimeString()}</Text>
+                                    {/*<Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>*/}
+                                    {/*<Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>*/}
 
-                                <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
-                                    <Text style={styles.buttonText}>Start a Medical Session</Text>
-                                </TouchableOpacity>
+                                    <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
+                                        <Text style={styles.buttonText}>Start a Medical Session</Text>
+                                    </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
-                                    <Text style={styles.buttonText}>Close</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
+                                    <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
+                                        <Text style={styles.buttonText}>Close</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </TouchableOpacity>
                     </TouchableOpacity>
-                </TouchableOpacity>
-            </Modal>
-        </View>
+                </Modal>
+            </View>
+        </SafeAreaView>
+
     );
 };
 
@@ -194,6 +222,16 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+
+    imageContainer: {
+        marginRight: 15,
+    },
+    petImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#f0f0f0',
     },
 });
 

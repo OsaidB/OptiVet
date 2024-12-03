@@ -13,6 +13,8 @@ const MedicalSession = () => {
     const router = useRouter();
     const { petId: initialPetId, clientId: initialOwnerId, appointmentId:initialAppointmentId}= useLocalSearchParams(); // Retrieve petId and ownerId from params
 
+    const { userId } = useLocalSearchParams(); // Retrieve userId from params
+
     const [sessionDate, setSessionDate] = useState(new Date());
     const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date());
 
@@ -43,7 +45,7 @@ const MedicalSession = () => {
     const [isNextAppointmentDatePickerVisible, setNextAppointmentDatePickerVisibility] = useState(false);
 
     useEffect(() => {
-        setLoggedInVetId(1); // Temporary static ID
+        setLoggedInVetId(userId); // Temporary static ID
         setVeterinarianId(loggedInVetId);
     }, [loggedInVetId]);
 
@@ -106,6 +108,7 @@ const MedicalSession = () => {
             petId: currentAppointment.petId,
             vetId: currentAppointment.vetId,
             status: 'DONE',
+            duration: currentAppointment.duration,
         };
 
         try {
@@ -129,26 +132,6 @@ const MedicalSession = () => {
             hour12: true,
         }).format(date);
     };
-
-    // const updateAppointmentStatus = async (appointmentId) => {
-    //     if (!appointmentId) {
-    //         console.error("Appointment ID is missing");
-    //         return;
-    //     }
-    //
-    //     try {
-    //         const updatedData = { status: 'DONE' };
-    //         await AppointmentService.updateAppointment(appointmentId, updatedData);
-    //         console.log(`Appointment ${appointmentId} status updated to DONE`);
-    //     } catch (error) {
-    //         console.error(`Error updating appointment status with ID: ${appointmentId}`, error.response?.data || error);
-    //         if (Platform.OS !== 'web') {
-    //             Alert.alert('Error', 'Failed to update appointment status.');
-    //         } else {
-    //             window.alert('Error: Failed to update appointment status.');
-    //         }
-    //     }
-    // };
 
     const handleCreateSession = async () => {
         const formattedSessionDate = sessionDate.toISOString();
@@ -201,10 +184,17 @@ const MedicalSession = () => {
             // Handle success message and navigation based on the platform
             if (Platform.OS === 'web') {
                 window.alert('Medical session created successfully!');
-                router.push("../ManagerStack/ManagerAppointmentsScreen");
+                router.push({
+                    pathname: "../ManagerStack/ManagerAppointmentsScreen",
+                    params: { userId }, // Pass the userId as a parameter
+                });
             } else {
                 Alert.alert('Success', 'Medical session created successfully!', [
-                    { text: 'OK', onPress: () => router.push("../ManagerStack/ManagerAppointmentsScreen") }
+                    { text: 'OK', onPress: () =>
+                            router.push({
+                                pathname: "../ManagerStack/ManagerAppointmentsScreen",
+                                params: { userId }, // Pass the userId as a parameter
+                            }) }
                 ]);
             }
         } catch (error) {

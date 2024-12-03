@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, SafeAreaView, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import DailyChecklistService from '../../Services/DailyChecklistService';
 import PetService from '../../Services/PetService';
 
@@ -19,7 +20,7 @@ const MsgsScreen = () => {
                 const messagesWithPetInfo = await Promise.all(
                     filteredMessages.map(async (message) => {
                         const pet = await PetService.getPetById(message.petId);
-                        return { ...message, pet };
+                        return { ...message, pet, done: false }; // Add "done" state initially as false
                     })
                 );
 
@@ -34,38 +35,74 @@ const MsgsScreen = () => {
         fetchCriticalMessages();
     }, []);
 
+    const toggleDoneStatus = (id) => {
+        // Toggle the "done" state for the selected message
+        setCriticalMessages((prev) =>
+            prev.map((message) =>
+                message.id === id ? { ...message, done: !message.done } : message
+            )
+        );
+    };
+
+    const handleDeleteMessage = (id) => {
+        // Delete the message
+        setCriticalMessages((prev) => prev.filter((message) => message.id !== id));
+    };
+
     const renderMessageItem = ({ item }) => (
         <View style={styles.messageContainer}>
-            <Text style={styles.dateText}>Date: {item.date}</Text>
+            <View style={styles.messageHeader}>
+                <Text style={styles.dateText}>Date: {item.date}</Text>
+                <View style={styles.actionIcons}>
+                    {/* Done Icon */}
+                    <TouchableOpacity onPress={() => toggleDoneStatus(item.id)} style={styles.iconButton}>
+                        <Ionicons
+                            name={item.done ? "checkmark-circle" : "checkmark-circle-outline"}
+                            size={24}
+                            color={item.done ? "#4CAF50" : "#888"}
+                        />
+                    </TouchableOpacity>
+                    {/* Delete Icon */}
+                    <TouchableOpacity onPress={() => handleDeleteMessage(item.id)} style={styles.iconButton}>
+                        <Ionicons name="trash-outline" size={24} color="#F44336" />
+                    </TouchableOpacity>
+                </View>
+            </View>
             <Text style={styles.notesText}>Critical Notes: {item.criticalNotes}</Text>
             {item.pet && (
-                <>
+                <View style={styles.petInfoContainer}>
                     <Text style={styles.petInfoText}>Pet Name: {item.pet.name}</Text>
                     <Text style={styles.petInfoText}>Type: {item.pet.type}</Text>
                     <Text style={styles.petInfoText}>Breed: {item.pet.breed}</Text>
-                </>
+                </View>
             )}
         </View>
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Critical Messages</Text>
-            {loading ? (
-                <ActivityIndicator size="large" color="#1D3D47" />
-            ) : (
-                <FlatList
-                    data={criticalMessages}
-                    renderItem={renderMessageItem}
-                    keyExtractor={(item) => item.id.toString()}
-                    ListEmptyComponent={<Text style={styles.emptyText}>No critical messages found.</Text>}
-                />
-            )}
-        </View>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Assistant's Critical Messages</Text>
+                {loading ? (
+                    <ActivityIndicator size="large" color="#1D3D47" />
+                ) : (
+                    <FlatList
+                        data={criticalMessages}
+                        renderItem={renderMessageItem}
+                        keyExtractor={(item) => item.id.toString()}
+                        ListEmptyComponent={<Text style={styles.emptyText}>No critical messages found.</Text>}
+                    />
+                )}
+            </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
     container: {
         flex: 1,
         padding: 20,
@@ -88,19 +125,36 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 2,
     },
+    messageHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
     dateText: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#333',
     },
+    actionIcons: {
+        flexDirection: 'row',
+    },
+    iconButton: {
+        marginLeft: 10,
+    },
     notesText: {
         fontSize: 16,
         color: '#555',
+        marginVertical: 10,
+    },
+    petInfoContainer: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 5,
     },
     petInfoText: {
         fontSize: 14,
-        color: '#777',
-        marginTop: 5,
+        color: '#555',
     },
     emptyText: {
         textAlign: 'center',

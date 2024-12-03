@@ -88,6 +88,17 @@ const DailyChecklistService = {
             throw error;
         }
     },
+
+    async getCriticalDailyChecklists() {
+        try {
+            const response = await axios.get(`${BASE_URL}/critical`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching critical daily checklists:", error);
+            throw error;
+        }
+    }
+
 };
 
 export default DailyChecklistService;

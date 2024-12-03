@@ -10,7 +10,7 @@ class AuthService {
     // Function to request a password reset
 // Function to request a password reset
     async requestPasswordReset(email) {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("authToken");
         try {
             const response = await axios.post(`${BASE_URL}/password-reset`, { email }, {
                 headers: {
@@ -25,7 +25,7 @@ class AuthService {
 
     // Function to reset the password with a token
     async resetPassword(resetToken, newPassword) {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("authToken");
         try {
             const response = await axios.post(`${BASE_URL}/password-reset/confirm`, { resetToken, newPassword }, {
                 headers: {

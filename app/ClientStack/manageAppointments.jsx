@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Platform} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Platform, SafeAreaView} from 'react-native';
 import { Link } from 'expo-router';
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
+import {Ionicons} from "@expo/vector-icons";
+import { useLocalSearchParams } from 'expo-router';
+
 
 export default function ManageAppointments() {
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState({});
     const [refreshing, setRefreshing] = useState(false);
-    const clientId = 1; // Assuming the client ID is 1
+    //const clientId = 1; // Assuming the client ID is 1
+    const { clientId } = useLocalSearchParams();
+
+    //console.log("useLocalSearchParams output:", { clientId });
+
+    useEffect(() => {
+        if (!clientId) {
+            console.error("Client ID is missing");
+            Alert.alert("Error", "Client ID is required to view appointments.");
+            return;
+        }
+        fetchAppointments();
+    }, [clientId]);
 
     const fetchAppointments = async () => {
         try {
-            const appointmentData = await AppointmentService.getAppointmentsByClient(clientId);
+            const appointmentData = await AppointmentService.getScheduledAppointmentsByClient(clientId);
             setAppointments(appointmentData);
 
             // Fetch pet details using PetService
@@ -53,6 +68,7 @@ export default function ManageAppointments() {
 
         const updatedData = {
             appointmentDate: currentAppointment.appointmentDate,
+            duration: currentAppointment.duration,
             clientId: null,
             petId: null,
             vetId: currentAppointment.vetId,
@@ -82,45 +98,65 @@ export default function ManageAppointments() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Manage Appointments</Text>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Manage Appointments</Text>
 
-            {/* List of Appointments with Pull-to-Refresh */}
-            <FlatList
-                data={appointments}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.appointmentCard}>
-                        <Text style={styles.appointmentText}>
-                            Your {pets[item.petId]?.type}, {pets[item.petId] ? pets[item.petId].name : 'Unknown Pet'} - {formatDate(item.appointmentDate)}
-                        </Text>
+                {/* List of Appointments with Pull-to-Refresh */}
+                <FlatList
+                    data={appointments}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.appointmentCard}>
+                            <Text style={styles.appointmentText}>
+                                Your {pets[item.petId]?.type}, {pets[item.petId] ? pets[item.petId].name : 'Unknown Pet'} - {'\n'}{formatDate(item.appointmentDate)}
+                                {"\n"}
+                                {item.status}
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.deleteButton}
+                                onPress={() => handleDeleteAppointment(item.id)}
+                            >
+                                <Ionicons name="trash-outline" size={20} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                    }
+                />
 
-                        {/* Delete Button */}
-                        <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => handleDeleteAppointment(item.id)}
-                        >
-                            <Text style={styles.deleteButtonText}>Delete</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-                }
-            />
+                <Link
+                    href={{
+                        pathname: "/ClientStack/addAppointment",
+                        params: { clientId }, // Pass clientId here
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.button}>
+                        <Text style={styles.buttonText}>Add New Appointment</Text>
+                    </TouchableOpacity>
+                </Link>
 
 
-            {/* Button to Add a New Appointment */}
-            <Link href="/ClientStack/addAppointment" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Add New Appointment</Text>
-                </TouchableOpacity>
-            </Link>
-        </View>
+                {/* Button to Add a New Appointment */}
+                {/*<Link href="/ClientStack/addAppointment" asChild>*/}
+                {/*    <TouchableOpacity style={styles.button}>*/}
+                {/*        <Text style={styles.buttonText}>Add New Appointment</Text>*/}
+                {/*    </TouchableOpacity>*/}
+                {/*</Link>*/}
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+
+    safeArea:{
+        flex: 1,
+        backgroundColor:'#fff'
+    },
+
     container: {
         flex: 1,
         padding: 20,
@@ -183,7 +219,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 10,
         elevation: 5,
-        marginBottom: Platform.OS === 'android' ? 40 : 0,
+        // marginBottom: Platform.OS === 'android' ? 40 : 0,
     },
     buttonText: {
         color: '#FFFFFF',
