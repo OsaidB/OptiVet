@@ -77,31 +77,17 @@ const PetService = {
     },
 
     // Serve pet image by filename or relative path
-    // serveImage: (imagePath) => {
-    //     if (!imagePath) {
-    //         console.error('Error: Image path is required to serve the image.');
-    //         return null;
-    //     }
-    //     // If the path already starts with '/uploads', use it as-is
-    //     if (imagePath.startsWith('/uploads')) {
-    //         return `${BASE_URL}${imagePath}`;
-    //     }
-    //     // Otherwise, assume it's a filename and construct the full path
-    //     return `${BASE_URL}/uploads/${imagePath}`;
-    // },
-
     serveImage: (imagePath) => {
-        try {
-            if (!imagePath) {
-                console.warn('Image path is not provided.');
-                return `${BASE_URL}/uploads/default.jpg`; // Optional default placeholder
-            }
-            const normalizedPath = imagePath.startsWith('/uploads') ? imagePath : `/uploads/${imagePath}`;
-            return `${baseURL.USED_BASE_URL}${normalizedPath}`;
-        } catch (error) {
-            console.error('Error constructing image URL:', error);
+        if (!imagePath) {
+            console.error('Error: Image path is required to serve the image.');
             return null;
         }
+        // If the path already starts with '/uploads', use it as-is
+        if (imagePath.startsWith('/uploads')) {
+            return `${BASE_URL}${imagePath}`;
+        }
+        // Otherwise, assume it's a filename and construct the full path
+        return `${BASE_URL}/uploads/${imagePath}`;
     },
 
     // Get a pet by its ID
