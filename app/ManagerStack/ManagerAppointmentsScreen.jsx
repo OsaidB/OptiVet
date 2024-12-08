@@ -75,6 +75,8 @@ const ManagerAppointmentsScreen = () => {
                             source={{ uri: item.petImage }}
                             style={styles.petImage}
                             resizeMode="cover"
+                            // tintColor="desired-color"
+                            tintColor={null}
                         />
                     ) : (
                         <Text style={styles.noImageText}>No Image Available</Text>

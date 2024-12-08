@@ -116,7 +116,7 @@ const VetAssistantStack = () => {
     const renderPet = ({ item }) => (
         <TouchableOpacity style={styles.petCard} onPress={() => handlePetPress(item)}>
             <Image
-                source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }}
+                source={{ uri: item.imageUrl }}
                 style={styles.petImage}
             />
             <Text style={styles.petName}>{item.name}</Text>

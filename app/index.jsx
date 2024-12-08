@@ -6,7 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
+  ScrollView, SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
@@ -91,85 +91,92 @@ const LoginScreen = () => {
   };
 
   return (
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Logo Section */}
-        <View style={styles.logoContainer}>
-          <Image
-              source={require('../assets/images/Background.png')}
-              style={styles.logo}
-              resizeMode="contain"
-          />
-        </View>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
+          {/* Logo Section */}
+          <View style={styles.logoContainer}>
+            <Image
+                source={require('../assets/images/Background.png')}
+                style={styles.logo}
+                resizeMode="contain"
+            />
+          </View>
 
-        {/* Title */}
-        <Text style={styles.title}>Login</Text>
+          {/* Title */}
+          <Text style={styles.title}>Login</Text>
 
-        {/* Dog and Cat Icons */}
-        <View style={styles.iconsContainer}>
-          <Image
-              source={require('../assets/images/cat (1).png')}
-              style={styles.icon}
-              resizeMode="contain"
-          />
-          <Image
-              source={require('../assets/images/dog.png')}
-              style={styles.icon}
-              resizeMode="contain"
-          />
-        </View>
+          {/* Dog and Cat Icons */}
+          <View style={styles.iconsContainer}>
+            <Image
+                source={require('../assets/images/cat (1).png')}
+                style={styles.icon}
+                resizeMode="contain"
+            />
+            <Image
+                source={require('../assets/images/dog.png')}
+                style={styles.icon}
+                resizeMode="contain"
+            />
+          </View>
 
-        {/* Input Fields */}
-        <View style={styles.inputContainer}>
-          <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCorrect={false}
-              autoCapitalize="none"
-              keyboardType="email-address"
-          />
-          <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-          />
-        </View>
+          {/* Input Fields */}
+          <View style={styles.inputContainer}>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="email-address"
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+            />
+          </View>
 
-        {/* Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleLogin}
-              disabled={loading}
-          >
-            <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-              style={styles.button}
-              onPress={() => router.push('/(tabs)/home')} // Navigate directly to Home
-          >
-            <Text style={styles.buttonText}>Home Screen (Skip login)</Text>
-          </TouchableOpacity>
-        </View>
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+            >
+              <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push('/(tabs)/home')} // Navigate directly to Home
+            >
+              <Text style={styles.buttonText}>Home Screen (Skip login)</Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Footer */}
-        <Text style={styles.footerText}>
-          Don't have an account?{' '}
-          <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
-            <Text style={styles.signup}>Sign Up</Text>
-          </TouchableOpacity>
-        </Text>
+          {/* Footer */}
+          <Text style={styles.footerText}>
+            Don't have an account?{' '}
+            <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
+              <Text style={styles.signup}>Sign Up</Text>
+            </TouchableOpacity>
+          </Text>
 
-        {/* Toast Notification */}
-        <Toast />
-      </ScrollView>
+          {/* Toast Notification */}
+          <Toast />
+        </ScrollView>
+      </SafeAreaView>
+
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+
   container: {
     flexGrow: 1,
     backgroundColor: '#134B70',
