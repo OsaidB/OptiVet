@@ -197,7 +197,3 @@ export default function Products() {
     );
 
 }
-
-
-
-
