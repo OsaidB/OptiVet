@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Alert } from 'react-native';
+import {
+    Text,
+    View,
+    FlatList,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    Modal,
+    Image,
+    Alert,
+    Platform
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PetService from '../../Services/PetService';
 import UserService from '../../Services/UserService'; // Import the UserService
@@ -116,7 +127,7 @@ const VetAssistantStack = () => {
     const renderPet = ({ item }) => (
         <TouchableOpacity style={styles.petCard} onPress={() => handlePetPress(item)}>
             <Image
-                source={{ uri: item.imageUrl }}
+                source={{ uri: PetService.serveImage(item.imageUrl) }}
                 style={styles.petImage}
             />
             <Text style={styles.petName}>{item.name}</Text>
@@ -129,10 +140,10 @@ const VetAssistantStack = () => {
 
             {vetAssistantInfo ? (
                 <>
-                    <Text>Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!</Text>
-                    <Text>Email: {vetAssistantInfo.email}</Text>
-                    <Text>Phone: {vetAssistantInfo.phoneNumber}</Text>
-                    <Text>ID: {vetAssistantInfo.userId}</Text>
+                    {/*<Text>Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!</Text>*/}
+                    {/*<Text>Email: {vetAssistantInfo.email}</Text>*/}
+                    {/*<Text>Phone: {vetAssistantInfo.phoneNumber}</Text>*/}
+                    {/*<Text>ID: {vetAssistantInfo.userId}</Text>*/}
                 </>
             ) : (
                 <Text>Loading vet assistant information...</Text>
@@ -143,6 +154,7 @@ const VetAssistantStack = () => {
                 placeholder="Search by pet or owner name..."
                 value={searchQuery}
                 onChangeText={handleSearch}
+                placeholderTextColor={'gray'}
             />
 
             <FlatList
@@ -209,50 +221,67 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#F0F4F8', // Light grayish blue for a soothing background
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#333',
+        color: '#2C3E50', // Darker shade for better contrast
     },
     searchInput: {
-        height: 40,
-        borderColor: '#ccc',
+        height: 45,
+        borderColor: '#CED6E0', // Light border color
         borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 10,
+        borderRadius: 12,
+        paddingHorizontal: 15,
         marginBottom: 20,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#FFFFFF',
+        fontSize: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3
     },
     categoryListContainer: {
-        marginBottom: 20,
+        marginBottom: Platform.OS === 'web' ? 10 : -160,
+        flexDirection: 'row',
     },
     categoryItem: {
-        backgroundColor: '#D3E4F0',
-        padding: 10,
-        borderRadius: 20,
-        marginRight: 8,
+        backgroundColor: '#d1e1f6', // Soft blue for unselected categories
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 25,
+        marginRight: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 100, // Fixed width for consistent size
+        height: 40, // Fixed height for consistent size
     },
     selectedCategoryItem: {
-        backgroundColor: '#007BFF',
+        backgroundColor: '#3498DB', // Accent color for selected categories
     },
     categoryText: {
         fontSize: 14,
-        color: '#333',
+        color: '#34495E', // Neutral dark text
     },
     selectedCategoryText: {
-        color: '#fff',
+        color: '#FFFFFF', // White text for selected categories
+        fontWeight: '600',
     },
     petCard: {
-        backgroundColor: '#fff',
-        borderRadius: 10,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
         padding: 10,
         margin: 8,
         alignItems: 'center',
         width: '45%',
-        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 4,
     },
     petImage: {
         width: 100,
@@ -261,37 +290,58 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     petName: {
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#2C3E50',
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent background
     },
     modalContent: {
-        backgroundColor: 'white',
+        backgroundColor: '#FFFFFF',
         padding: 20,
-        borderRadius: 12,
-        width: '80%',
+        borderRadius: 16,
+        width: '85%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#2C3E50',
     },
     button: {
-        backgroundColor: '#007BFF',
-        padding: 12,
-        marginTop: 10,
+        backgroundColor: '#3498DB',
+        paddingVertical: 14,
         borderRadius: 8,
         alignItems: 'center',
+        marginTop: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
     },
     buttonText: {
-        color: 'white',
+        color: '#FFFFFF',
         fontSize: 16,
+        fontWeight: '600',
     },
     noDataText: {
         textAlign: 'center',
         marginTop: 20,
-        color: '#999',
+        color: '#7F8C8D', // Grayish text for no data
+        fontSize: 16,
     },
 });
+
+
 
 export default VetAssistantStack;
