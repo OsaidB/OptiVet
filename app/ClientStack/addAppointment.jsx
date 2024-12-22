@@ -335,13 +335,61 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
 
-    vetCard: { width: 280, padding: 15, paddingVertical: 20, marginBottom: 15, marginHorizontal: 10, borderRadius: 20, borderWidth: 1, alignItems: 'center' },
-    vetName: { fontSize: 16, fontWeight: 'bold' },
-    vetSpecialty: { fontSize: 14, color: '#666' },
-    //slotCard: { padding: 15, marginBottom: 10, borderRadius: 10, borderWidth: 1, alignItems: 'center' },
-    slotText: { fontSize: 20, paddingHorizontal: 5, alignItems: 'center' },
-    //slotList: {paddingHorizontal:10},
-    button: { padding: 15, backgroundColor: '#1D3D47', alignItems: 'center', borderRadius: 10, marginTop: 20 },
-    buttonText: { color: '#fff', fontWeight: 'bold' },
-    hintText: { fontSize: 14, color: '#888', textAlign: 'center', marginVertical: 10 },
+    vetCard: {
+        width: 280,
+        padding: 15,
+        paddingVertical: 20,
+        marginBottom: 15,
+        marginHorizontal: 10,
+        borderRadius: 20,
+        borderWidth: 1,
+        alignItems: 'center'
+    },
+
+    vetName: {
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+
+    vetSpecialty: {
+        fontSize: 14,
+        color: '#666'
+    },
+
+//slotCard: {
+//     padding: 15,
+//     marginBottom: 10,
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     alignItems: 'center'
+//},
+
+    slotText: {
+        fontSize: 20,
+        paddingHorizontal: 5,
+        alignItems: 'center'
+    },
+
+//slotList: { paddingHorizontal: 10 },
+
+    button: {
+        padding: 15,
+        backgroundColor: '#1D3D47',
+        alignItems: 'center',
+        borderRadius: 10,
+        marginTop: 20
+    },
+
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold'
+    },
+
+    hintText: {
+        fontSize: 14,
+        color: '#888',
+        textAlign: 'center',
+        marginVertical: 10
+    }
+
 });
