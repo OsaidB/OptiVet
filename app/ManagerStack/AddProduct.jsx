@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import {
     View, Text, Image, TouchableOpacity,
-    StyleSheet, Alert, ImageBackground, TextInput
+    StyleSheet, Alert, ImageBackground, TextInput,
+    Modal, ScrollView
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from 'react-native';
@@ -11,10 +12,11 @@ import { Ionicons } from '@expo/vector-icons';
 import baseURL from '../../Services/config'; // Adjust the path as necessary
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/products`;
 import ProductService from '../../Services/ProductService';
+import { WINDOWS } from "nativewind/dist/utils/selector";
 
 
 
-export default function AddProducttt() {
+export default function AddProduct() {
     const [countKey, setCountKey] = useState(0);
     const [numOfImages, setNumOfImages] = useState(0);
     const [numCounter, setNumCounter] = useState(0);
@@ -27,10 +29,11 @@ export default function AddProducttt() {
     const [nannam, setNannam] = useState('');
     // Stores the selected image URI
     const [file, setFile] = useState(null);
+    const [categories, setCategories] = useState([{ id: 1, name: 'ddd' }, { id: 2, name: 'ddd' }, { id: 3, name: 'ddd' }, { id: 4, name: 'ddd' }, { id: 5, name: 'ddd' }, { id: 6, name: 'ddd' }, { id: 7, name: 'ddd' }, { id: 8, name: 'ddd' }, { id: 9, name: 'ddd' }, { id: 10, name: 'ddd' }, { id: 11, name: 'ddd' }, { id: 12, name: 'ddd' }, { id: 13, name: 'ddd' }, { id: 14, name: 'ddd' }, { id: 15, name: 'ddd' }, { id: 16, name: 'ddd' }, { id: 17, name: 'ddd' }, { id: 18, name: 'ddd' },])
 
     // Stores any error message
     const [error, setError] = useState(null);
-
+    const [showModal, setShowModal] = useState(false);
     // const windowWidth = Dimensions.get('window').width;
     // const windowHeight = Dimensions.get('window').height;
     // Function to pick an image from 
@@ -129,7 +132,7 @@ export default function AddProducttt() {
                 // Clear any previous errors
                 setError(null);
                 //console.log(imageUris[imageUris.length - 1]);
-               // console.log(numOfImages);
+                // console.log(numOfImages);
                 console.log(result.assets[0].uri);
                 // Alert.alert(result.uri);
                 // console.log(result.assets[0].uri);
@@ -190,16 +193,16 @@ export default function AddProducttt() {
 
 
 
-    const checkingNumberOfImages = () => {
+    // const checkingNumberOfImages = () => {
 
-        if (numOfImages < 1) {
-            return true;
-        }
-        else {
-            return false;
-        }
+    //     if (numOfImages < 1) {
+    //         return true;
+    //     }
+    //     else {
+    //         return false;
+    //     }
 
-    }
+    // }
 
 
 
@@ -305,16 +308,118 @@ export default function AddProducttt() {
 
 
 
+
+
+
+
+
+
+
+
+
+
         <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
 
 
 
-            <View style={{ flex: 1 }}>
+            <Modal animationType="none" transparent={true} visible={showModal} onRequestClose={() => { setShowModal(false) }}>
+
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+
+
+
+                    <View style={{ justifyContent: 'flex-start', backgroundColor: 'white', borderWidth: 4, width: '50%', height: '80%', borderRadius: 15, borderColor: '#201E43' }}>
+
+
+
+
+
+                        <View style={{ flex:0.5,flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', marginVertical: 10 }}>
+
+
+                            <TextInput editable placeholder="Category Name" placeholderTextColor='#787170' value={productName} onChangeText={setProductName} style={{ borderWidth: 2, marginHorizontal: 10, marginVertical: 10, width: '60%', height: '80%', paddingLeft: 20, backgroundColor: 'white', borderRadius: 8 }} />
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <TouchableOpacity style={{ backgroundColor: '#508C9B', borderRadius: 8, borderWidth: 3, height: '80%' }}>
+                                    <Text style={{ color: 'black', alignSelf: 'center', margin: 5, color: 'white', fontWeight: 'bold' }} onPress={() => { }}>Add Category</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+
+
+
+                        <View style={{ flex: 1.2, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }}>
+                            <View style={{ width: '45%', height: '100%', marginRight: 20, marginLeft: 20, backgroundColor: 'white', alignItems: 'center', justifyContent: 'space-around', borderRadius: 15, borderWidth: 3, justifyContent: 'center' }}>
+
+
+                                {/* <Image source={require('../../assets/images/upload (5).png')} resizeMode='cover'></Image> */}
+                                <View style={{ flex: 1, height: '60%', width: '100%' }}>
+                                    <Image source={require('../../assets/images/upload (3).png')} style={{ flex: 1, width: null, height: null }} resizeMode='contain'></Image>
+                                </View>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '85%' }}>
+                                    <TouchableOpacity style={{ backgroundColor: "#133945", borderRadius: 8, padding: 10, marginVertical: 10, width: '100%', justifyContent: 'center', alignItems: 'center' }} onPress={pickImage}>
+                                        <Text style={styles.buttonText} adjustsFontSizeToFit>Upload Image</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+
+                            </View>
+                        </View>
+
+
+
+
+                        <View style={{ flex: 2, marginHorizontal: 10, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'brown', marginVertical: 10, borderWidth: 4, borderTopEndRadius: 12, borderTopStartRadius: 12 }}>
+                            <View style={{ justifyContent: 'center', alignItems: 'center', width: '100%', marginVertical: 5 }}>
+                                <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>Current Categories</Text>
+                            </View>
+                            <ScrollView style={{ backgroundColor: '#508C9B', borderWidth: 5, borderColor: '#201E43', width: '100%' }} showsVerticalScrollIndicator={true}>
+                                {categories.map((item) => {
+                                    return (
+                                        <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }}>
+                                            <View>
+                                                <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.name}</Text>
+                                            </View>
+                                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                                                <TouchableOpacity style={{ backgroundColor: 'red', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
+                                                    <Text style={{ color: 'white', alignSelf: 'center' }} onPress={() => deleteVaccinationHandle(item.id)}>Delete Category</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    )
+                                })}
+                            </ScrollView>
+                        </View>
+
+
+
+
+
+
+
+
+                        <View style={{ flex: 0.5, justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+
+                            <TouchableOpacity>
+                                <Text style={{ color: 'brown', fontWeight: 'bold', fontSize: 25 }} onPress={() => setShowModal(!showModal)}>Close</Text>
+                            </TouchableOpacity>
+
+                        </View>
+
+
+
+                    </View>
+                </View>
+
+            </Modal>
+
+
+            <View style={{}}>
                 <Text style={styles.title}>Add a new product:</Text>
             </View>
 
 
-            <View style={{ flex: 2 }}>
+            <View style={{}}>
                 <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25 }}>Product Name:</Text>
                 <TextInput
                     editable
@@ -332,7 +437,7 @@ export default function AddProducttt() {
 
 
 
-            <View style={{ flex: 2 }}>
+            <View style={{}}>
                 <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25 }}>Product Price:</Text>
                 <TextInput
                     editable
@@ -349,8 +454,18 @@ export default function AddProducttt() {
 
 
 
-            <View style={{ flex: 2 }}>
-                <Text style={{ marginLeft: 10, fontSize: 25 }}>Product Category:</Text>
+            <View style={{}}>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }} >
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ marginLeft: 10, fontSize: 25 }}>Product Category:</Text>
+                    </View>
+                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                        <TouchableOpacity style={{ backgroundColor: "#133945", borderRadius: 25, padding: 5, marginHorizontal: 20 }} onPress={() => { setShowModal(true) }}>
+                            <Text style={{ fontSize: 12, color: 'white', fontWeight: 'bold' }} adjustsFontSizeToFit>Add a new category</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
                 <Picker
                     selectedValue={productCategory}
                     style={styles.picker}
@@ -393,7 +508,7 @@ export default function AddProducttt() {
 
             {/* {checkingNumberOfImages()} */}
 
-            <Text style={{ marginLeft: 10, fontSize: 25 }}>Add product Images<Text style={{ fontSize: 17, color: '#1f1f1f' }}> (5 images Max)   {numOfImages}</Text> :</Text>
+            <Text style={{ marginLeft: 10, fontSize: 25 }}>Add a product Image<Text style={{ fontSize: 17, color: '#1f1f1f' }}></Text> :</Text>
             <View style={{ flex: 4, borderRadius: 8, backgroundColor: '#c7bcbc', flexDirection: 'row', justifyContent: 'center', paddingBottom: 20, paddingTop: 20, alignItems: 'center' }}>
 
 
@@ -545,11 +660,11 @@ export default function AddProducttt() {
 
 
                         {/* <Image source={require('../../assets/images/upload (5).png')} resizeMode='cover'></Image> */}
-                        <View style={{ height: '60%', width: '100%' }}>
+                        <View style={{ flex: 1, height: '60%', width: '100%' }}>
                             <Image source={require('../../assets/images/upload (3).png')} style={{ flex: 1, width: null, height: null }} resizeMode='contain'></Image>
                         </View>
-                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <TouchableOpacity style={{ backgroundColor: "#133945", borderRadius: 8, padding: 10, marginVertical: 10 }} onPress={pickImage}>
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '85%' }}>
+                            <TouchableOpacity style={{ backgroundColor: "#133945", borderRadius: 8, padding: 10, marginVertical: 10, width: '100%', justifyContent: 'center', alignItems: 'center' }} onPress={pickImage}>
                                 <Text style={styles.buttonText} adjustsFontSizeToFit>Upload Image</Text>
                             </TouchableOpacity>
                         </View>
@@ -635,9 +750,9 @@ const styles = StyleSheet.create({
 
 
     picker: {
-        height: 50,
-        margin: 20,
-
+        height: 40,
+        marginTop: 10,
+        marginHorizontal: 10,
 
         borderColor: 'black',
         borderWidth: 2, // Thicker border

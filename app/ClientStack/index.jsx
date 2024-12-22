@@ -79,6 +79,19 @@ const ClientStack = () => {
                 </TouchableOpacity>
             </Link>
 
+
+            <Link href="ManagerStack/Products" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Products</Text>
+                </TouchableOpacity>
+            </Link>
+
+            <Link href="ManagerStack/AddProduct" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Add Product</Text>
+                </TouchableOpacity>
+            </Link>
+
             {/* Button to navigate to Client Settings */}
             <Link href="/ClientStack/settings" asChild>
                 <TouchableOpacity style={styles.button}>

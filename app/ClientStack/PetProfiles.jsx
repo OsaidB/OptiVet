@@ -6,6 +6,7 @@ import PetService from "../../Services/PetService";
 export default function PetProfiles() {
     const { clientId } = useLocalSearchParams(); // Retrieve clientId dynamically
     const [pets, setPets] = useState([]);
+    const [petId, setPetId] = useState(0);
     // const ownerId = 1; // Replace this with the actual owner ID, e.g., from authentication
 
     // // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
@@ -68,8 +69,8 @@ export default function PetProfiles() {
                         <Text>Age: {calculateAge(item.birthDate)}</Text>
                         <Text>Medical History: {item.medicalHistory}</Text>
 
-                        <Link href="../ClientStack/MedicalHistory" asChild>
-                            <TouchableOpacity style={styles.button}>
+                        <Link href={{ pathname: "../ClientStack/MedicalHistory", params: { petId } }} asChild>
+                            <TouchableOpacity style={styles.button} onPress={setPetId(item.id)}>
                                 <Text style={styles.buttonText}>Medical History</Text>
                             </TouchableOpacity>
                         </Link>
