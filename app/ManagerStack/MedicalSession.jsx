@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Alert, TouchableOpacity, Platform,Image } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MedicalSessionService from '../../Services/MedicalSessionService';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -70,7 +70,7 @@ const MedicalSession = () => {
 
     const pickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (permissionResult.granted === false) {
+        if (!permissionResult.granted) {
             Alert.alert('Permission to access media is required!');
             return;
         }
@@ -82,11 +82,14 @@ const MedicalSession = () => {
         });
 
         if (!result.canceled && result.assets && result.assets.length > 0) {
-            // setTestResultsImageUrl(result.assets[0].uri);
             setTestResultsImageUri(result.assets[0].uri);
         } else {
             Alert.alert('No image selected.');
         }
+    };
+
+    const removeImage = () => {
+        setTestResultsImageUri(null);
     };
 
     const updateAppointmentStatus = async (appointmentId) => {
@@ -300,7 +303,7 @@ const MedicalSession = () => {
                         accessibilityLabel="Tests Ordered Input"
                     />
 
-                    <View style={[styles.rowContainer, styles.input]}>
+                    <View>
                         <Text style={styles.sectionTitle}>Test Results:</Text>
 
                         {/* Image Picker Button for Test Results */}
@@ -314,8 +317,19 @@ const MedicalSession = () => {
                                 {testResultsImageUri ? "Change Image" : "Select Test Results Image"}
                             </Text>
                         </TouchableOpacity>
+
+                        {/* Display Selected Image with Delete Button */}
+                        {testResultsImageUri && (
+                            <View style={styles.photoContainer}>
+                                <Image source={{ uri: testResultsImageUri }} style={styles.testResultImage} />
+                                <TouchableOpacity onPress={removeImage} style={styles.removeButton}>
+                                    <Text style={styles.removeButtonText}>X</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </View>
+
 
 
                 {/* Follow-Up Actions */}
@@ -358,6 +372,10 @@ const MedicalSession = () => {
                         mode="outlined"
                         style={styles.input}
                     />
+
+
+
+
                 </View>
 
 
@@ -482,19 +500,7 @@ const styles = StyleSheet.create({
     },
 
 
-    createButton: {
-        marginTop: 20,
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        backgroundColor: '#6200ee',
-        elevation: 3,
-    },
-    createButtonText: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#ffffff',
-    },
+
     photoButton: {
         backgroundColor: '#1D3D47',
         paddingVertical: 10,
@@ -511,6 +517,46 @@ const styles = StyleSheet.create({
     photoButtonText: {
         color: 'white',
         fontWeight: 'bold',
+    },
+    photoContainer: {
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 20,
+        position: 'relative',
+    },
+    testResultImage: {
+        width: 150,
+        height: 150,
+        borderRadius: 10,
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        backgroundColor: 'red',
+        borderRadius: 15,
+        width: 30,
+        height: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    removeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+
+    createButton: {
+        marginTop: 20,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        backgroundColor: '#6200ee',
+        elevation: 3,
+    },
+    createButtonText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#ffffff',
     },
 });
 

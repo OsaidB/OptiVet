@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Platform} from 'react-native';
+import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Platform,Image } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,7 +11,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLoca
 
 export default function CreatePetProfile() {
     const router = useRouter();
-    const { clientId } = useLocalSearchParams(); // Retrieve clientId using useLocalSearchParams
+    const {clientId} = useLocalSearchParams(); // Retrieve clientId using useLocalSearchParams
 
     const [petType, setPetType] = useState('');
     const [petName, setPetName] = useState('');
@@ -127,9 +127,9 @@ export default function CreatePetProfile() {
             quality: 1,
         });
 
-        // Check if the user cancelled the picker
-        if (result.canceled) {
-            return; // No action needed if the user cancels
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            const uri = result.assets[0].uri;
+            setPetPhoto(uri);
         }
 
         // // Check if the result contains a URI and set it
@@ -139,14 +139,17 @@ export default function CreatePetProfile() {
         //     Alert.alert('No image selected.'); // Handle case where no image is returned
         // }
 
-        // Check if the result contains a URI and set it
-        if (result.assets && result.assets.length > 0) {
-            const uri = result.assets[0].uri; // Get the URI of the selected asset
-            setPetPhoto(uri); // Set the photo URI
-        } else {
-            Alert.alert('No image selected.'); // Handle case where no image is returned
-        }
+        // // Check if the result contains a URI and set it
+        // if (result.assets && result.assets.length > 0) {
+        //     const uri = result.assets[0].uri; // Get the URI of the selected asset
+        //     setPetPhoto(uri); // Set the photo URI
+        // } else {
+        //     Alert.alert('No image selected.'); // Handle case where no image is returned
+        // }
+    };
 
+    const removePhoto = () => {
+        setPetPhoto(null);
     };
     const handleSubmit = async () => {
         if (!petName || !petAgeMonths || !petType || !petBreed) {
@@ -186,7 +189,7 @@ export default function CreatePetProfile() {
             birthDate: birthDate,
             medicalHistory: petMedicalHistory,
 
-            imageUrl:imageUrl,
+            imageUrl: imageUrl,
         };
 
         console.log("(petProfileData):", petProfileData);
@@ -203,7 +206,7 @@ export default function CreatePetProfile() {
             // Pass clientId while navigating back to PetProfiles
             router.push({
                 pathname: '/ClientStack/PetProfiles',
-                params: { clientId }, // Include clientId in params
+                params: {clientId}, // Include clientId in params
             });
 
         } catch (error) {
@@ -230,7 +233,7 @@ export default function CreatePetProfile() {
         }
         // Request media library permission for image picking
         (async () => {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
             }
@@ -254,7 +257,6 @@ export default function CreatePetProfile() {
             />
 
             {/* Dropdown for selecting Pet Type */}
-            {/*<Text style={styles.label}>Select Pet Type:</Text>*/}
             <Picker
                 selectedValue={petType}
                 style={styles.picker}
@@ -262,8 +264,7 @@ export default function CreatePetProfile() {
                     setPetType(itemValue);
                     setPetBreed(''); // Reset breed when pet type changes
                 }}
-                prompt="Select a Pet Type" // Add a prompt for better user experience
-                // accessibilityLabel="Select Pet Type" // Accessibility label
+                prompt="Select a Pet Type"
             >
                 <Picker.Item label="Select a pet type" value=""/>
                 <Picker.Item label="Dog" value="Dog"/>
@@ -272,25 +273,25 @@ export default function CreatePetProfile() {
             </Picker>
 
             {/* Dropdown for selecting Pet Breed based on Pet Type */}
-            {/*<Text style={styles.label}>Select Pet Breed:</Text>*/}
             <Picker
                 selectedValue={petBreed}
                 style={styles.picker}
                 onValueChange={(itemValue) => setPetBreed(itemValue)}
                 enabled={!!petType}
-
-                prompt="Select a breed" // Add a prompt for better user experience
-                // accessibilityLabel="Select Pet Type" // Accessibility label
+                prompt="Select a breed"
             >
-
                 <Picker.Item label="Select a breed" value=""/>
                 {petData[petType]?.map((breed, index) => (
-                    <Picker.Item key={index} label={breed.label} value={breed.value || ''} />
+                    <Picker.Item key={index} label={breed.label} value={breed.value || ''}/>
                 ))}
             </Picker>
 
             {/* Slider for selecting Pet Age in Months */}
-            <Text style={styles.label}>Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} ({ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''})</Text>
+            <Text style={styles.label}>
+                Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} (
+                {ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month
+                {remainingMonths !== 1 ? 's' : ''})
+            </Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
@@ -303,6 +304,7 @@ export default function CreatePetProfile() {
                 thumbTintColor={Platform.OS === 'android' ? '#FFD700' : '#1D3D47'} // Gold for Android
             />
 
+            {/* Medical History Input */}
             <TextInput
                 style={styles.input}
                 placeholder="Medical History"
@@ -312,17 +314,26 @@ export default function CreatePetProfile() {
 
             {/* Photo Picker Button */}
             <TouchableOpacity onPress={pickImage} style={styles.photoButton}>
-                <Text style={styles.photoButtonText}>{petPhoto ? "Change Photo" : "Select Photo"}</Text>
+                <Text style={styles.photoButtonText}>{petPhoto ? 'Change Photo' : 'Select Photo'}</Text>
             </TouchableOpacity>
 
-            {/* Display Selected Photo */}
-            {/*{petPhoto && (*/}
-            {/*    <Image source={{ uri: petPhoto }} style={styles.image} />*/}
-            {/*)}*/}
+            {/* Display Selected Photo with Delete Button */}
+            {petPhoto && (
+                <View style={styles.photoContainer}>
+                    <Image source={{uri: petPhoto}} style={styles.petImage}/>
+                    <TouchableOpacity onPress={removePhoto} style={styles.removeButton}>
+                        <Text style={styles.removeButtonText}>X</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
 
             {/* Submission Buttons */}
             <View style={styles.buttonContainer}>
-                <Button title="Create Profile" onPress={handleSubmit} color={Platform.OS === 'android' ? '#1D3D47' : undefined} />
+                <Button
+                    title="Create Profile"
+                    onPress={handleSubmit}
+                    color={Platform.OS === 'android' ? '#1D3D47' : undefined}
+                />
                 <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
                     <Text style={styles.resetButtonText}>Reset</Text>
                 </TouchableOpacity>
@@ -335,16 +346,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        justifyContent: 'center',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-    },
-    label: {
-        fontSize: 16,
-        marginBottom: 8,
     },
     input: {
         height: 40,
@@ -353,53 +359,65 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         paddingLeft: 8,
         borderRadius: 5,
-        backgroundColor: Platform.OS === 'android' ? '#f0f8ff' : 'white', // Light color for Android
     },
     picker: {
         height: 50,
-        width: '100%',
         marginBottom: 12,
-        backgroundColor: '#f0f8ff', // Light background for visibility
-        borderColor: '#1D3D47', // Dark border color
-        borderWidth: 2, // Thicker border
-        borderRadius: 5, // Rounded corners
-        padding: 10, // Padding for a more spacious feel
-        color: '#1D3D47', // Text color for visibility
     },
     slider: {
         width: '100%',
         height: 40,
         marginBottom: 20,
     },
+    label: {
+        fontSize: 16,
+        marginBottom: 8,
+    },
     photoButton: {
         backgroundColor: '#1D3D47',
         paddingVertical: 10,
-        paddingHorizontal: 20,
         borderRadius: 8,
         alignItems: 'center',
-        marginVertical: 10,
+        marginBottom: 10,
     },
     photoButtonText: {
         color: 'white',
         fontWeight: 'bold',
     },
+    photoContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
     petImage: {
-        width: 100,
-        height: 100,
+        width: 150,
+        height: 150,
         borderRadius: 10,
-        marginTop: 10,
-        alignSelf: 'center',
+        marginBottom: 10,
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        backgroundColor: 'red',
+        borderRadius: 15,
+        width: 30,
+        height: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    removeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
     buttonContainer: {
         marginTop: 20,
-        alignItems: 'flex-start',
     },
     resetButton: {
         marginTop: 10,
         backgroundColor: '#f0ad4e',
         paddingVertical: 10,
-        paddingHorizontal: 20,
         borderRadius: 5,
+        alignItems: 'center',
     },
     resetButtonText: {
         color: 'white',
