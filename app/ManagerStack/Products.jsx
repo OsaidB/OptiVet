@@ -24,9 +24,9 @@ export default function Products() {
     const [searchedProducts, setSearchedProducts] = useState([...products]);
     const [widthRatio, setWidthRatio] = useState('17%');
     const [searchText, setSearchText] = useState('');
-    const [categories, setCategories] = useState([{ id: 1, name: 'toys' }, { id: 2, name: 'COLLARS' }, { id: 3, name: 'TREATS' }, { id: 4, name: 'DDD' }]);
+    const [categories, setCategories] = useState([{ id: 0, name: 'ALL' },{ id: 1, name: 'TOYS' }, { id: 2, name: 'COLLARS' }, { id: 3, name: 'TREATS' }]);
     //toystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoys
-
+    const [selectedCategory, setSelectedCategory] = useState(0);
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -42,6 +42,21 @@ export default function Products() {
         fetchProducts();
 
     }, []);
+
+
+
+
+
+
+    const catagorizaHandle = (category) => {
+
+
+        setSelectedCategory(category);
+
+
+
+    };
+
 
 
 
@@ -231,7 +246,7 @@ export default function Products() {
 
 
 <View style={{flexDirection:'row', justifyContent:'center', width:'60%'}}>
-<View style={{flexDirection:'row', justifyContent:'center', width:'100%', backgroundColor:'brown', borderRadius:15}}>
+<View style={{flexDirection:'row', justifyContent:'center', width:'100%', backgroundColor:'#8d95d6', borderRadius:15}}>
     
         <ScrollView horizontal={true} contentContainerStyle={{flexGrow:1, justifyContent:'center',alignItems:'center', marginVertical:10}} style={{width:'100%'}}>
         {
@@ -240,8 +255,8 @@ export default function Products() {
                         return (
 
                             <View key={item.id} style={{ marginHorizontal: 30}}>
-                                <TouchableOpacity style={{backgroundColor:'white', borderRadius:8,padding:5}}>
-                                    <Text>{item.name}</Text>
+                                <TouchableOpacity style={selectedCategory === item.id ? { backgroundColor: '#c5e0fa', borderRadius: 8 ,padding:5} : { backgroundColor: '#133945', borderRadius: 8, padding:5 }} onPress={() => catagorizaHandle(item.id)}>
+                                    <Text style = {{color:'white'}}>{item.name}</Text>
                                 </TouchableOpacity>
                             </View>
 

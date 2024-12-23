@@ -1,15 +1,28 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from './config'; // Adjust the path as necessary
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/products`;
 
 
 const ProductService = {
+
+
+    getToken: async () => {
+        return await AsyncStorage.getItem('authToken');
+    },
+
+
     // Create a new product
     createProduct: async (product) => {
         try {
-            const response = await axios.post(`${BASE_URL}`, product);
+            const token = await ProductService.getToken();
+            const response = await axios.post(`${BASE_URL}`, product, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+
+            });
             return response.data;
         } catch (error) {
             console.error("Error creating product:", error);
@@ -25,6 +38,7 @@ const ProductService = {
 
     uploadProductImages: async (imageUris) => {
         try {
+            const token = await ProductService.getToken();
             const fdd = new FormData();
 
             if (Platform.OS === 'web') {
@@ -52,6 +66,8 @@ const ProductService = {
                 headers: {
 
                     'Content-Type': 'multipart/form-data',
+                    'X-Auth-Token': token,
+
                 }
             });
 
@@ -68,7 +84,13 @@ const ProductService = {
 
     getProducts: async () => {
         try {
-            const response = await axios.get(BASE_URL);
+            const token = await ProductService.getToken();
+            const response = await axios.get(BASE_URL,{
+                headers: {
+                    'X-Auth-Token': token,
+                },
+
+            });
             return response.data;
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -77,30 +99,41 @@ const ProductService = {
     },
 
 
-    serveProductImage: async (name) => {
+    // serveProductImage: async (name) => {
 
 
-        try {
-          
-            const response = await axios.get(`${BASE_URL}/uploads/${name}`,
-                {
-                    responseType: 'blob',
-                }
-            );
-            
+    //     try {
 
-            return URL.createObjectURL(response.data);
+    //         const response = await axios.get(`${BASE_URL}/uploads/${name}`,
+    //             {
+    //                 responseType: 'blob',
+    //             },
+    //         );
 
-        } catch (uploadingError) {
-            console.log('Error serving product image', uploadingError);
-            throw uploadingError;
 
+    //         return URL.createObjectURL(response.data);
+
+    //     } catch (uploadingError) {
+    //         console.log('Error serving product image', uploadingError);
+    //         throw uploadingError;
+
+    //     }
+    // }
+
+
+
+    serveImage: (imagePath) => {
+        if (!imagePath) {
+            console.error('Error: Image path is required to serve the image.');
+            return null;
         }
-    }
-
-
-
-
+        // If the path already starts with '/uploads', use it as-is
+        if (imagePath.startsWith('/uploads')) {
+            return `${BASE_URL}${imagePath}`;
+        }
+        // Otherwise, assume it's a filename and construct the full path
+        return `${BASE_URL}/uploads/${imagePath}`;
+    },
 
 
 
