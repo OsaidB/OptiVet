@@ -60,7 +60,7 @@ const ManagerAppointmentsScreen = () => {
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, clientId, appointmentId, userId },
+                params: { petId, clientId, appointmentId, userId, returnTo: "ManagerAppointmentsScreen"  },
             });
         }
     };
