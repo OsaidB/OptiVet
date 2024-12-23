@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 import UserService from '../../Services/UserService'; // Import the updated UserService
 import { HelloWave } from '@/components/HelloWave';
@@ -18,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ClientService from "../../Services/ClientService";
 
 export default function HomeScreen() {
+    const router = useRouter();
     const [role, setRole] = useState(null);
     const [loggedInEmployeeInfo, setLoggedInEmployeeInfo] = useState(null);
     const [email, setEmail] = useState(null);
@@ -35,6 +37,14 @@ export default function HomeScreen() {
 
         fetchUserRole();
     }, []);
+
+    useEffect(() => {
+        if (role === 'ROLE_CLIENT') {
+            router.replace('/ClientStack');
+        } else if (role === 'ROLE_USER') {
+
+        }
+    }, [role]);
 
     useEffect(() => {
         const fetchEmail = async () => {
@@ -68,54 +78,76 @@ export default function HomeScreen() {
         fetchClientInfo();
     }, [email]);
 
+    useEffect(() => {
+        if (!role || !employeeRole) return;
 
-    const renderRoleButtons = () => {
         if (role === 'ROLE_CLIENT') {
-            return (
-                <Link href="/ClientStack" asChild>
-                    <TouchableOpacity style={styles.button}>
-                        <Text style={styles.buttonText}>Go to Client Dashboard</Text>
-                    </TouchableOpacity>
-                </Link>
-            );
-        }
-
-        if (role === 'ROLE_USER') {
+            router.replace('/ClientStack');
+        } else if (role === 'ROLE_USER') {
             switch (employeeRole) {
                 case 'VET_ASSISTANT':
-                    return (
-                        <Link href="/VetAssistantStack" asChild>
-                            <TouchableOpacity style={styles.button}>
-                                <Text style={styles.buttonText}>Go to Vet Assistant Dashboard</Text>
-                            </TouchableOpacity>
-                        </Link>
-                    );
+                    router.replace('/VetAssistantStack');
+                    break;
                 case 'SECRETARY':
-                    return (
-                        <Link href="/SecretaryStack" asChild>
-                            <TouchableOpacity style={styles.button}>
-                                <Text style={styles.buttonText}>Go to Secretary Dashboard</Text>
-                            </TouchableOpacity>
-                        </Link>
-                    );
+                    router.replace('/SecretaryStack');
+                    break;
                 case 'MANAGER':
                 case 'VET':
-                    return (
-                        <Link href="/ManagerStack" asChild>
-                            <TouchableOpacity style={styles.button}>
-                                <Text style={styles.buttonText}>Go to Manager (Veterinarian) Dashboard</Text>
-                            </TouchableOpacity>
-                        </Link>
-                    );
+                    router.replace('/ManagerStack');
+                    break;
                 default:
-                    return (
-                        <View>
-                            <Text style={styles.noAccessText}>No role assigned or authenticated.</Text>
-                        </View>
-                    );
+                    Alert.alert('Error', 'No role assigned or authenticated.');
             }
         }
-    };
+    }, [role, employeeRole]);
+
+    // const renderRoleButtons = () => {
+    //     if (role === 'ROLE_CLIENT') {
+    //         return (
+    //             <Link href="/ClientStack" asChild>
+    //                 <TouchableOpacity style={styles.button}>
+    //                     <Text style={styles.buttonText}>Go to Client Dashboard</Text>
+    //                 </TouchableOpacity>
+    //             </Link>
+    //         );
+    //     }
+    //
+    //     if (role === 'ROLE_USER') {
+    //         switch (employeeRole) {
+    //             case 'VET_ASSISTANT':
+    //                 return (
+    //                     <Link href="/VetAssistantStack" asChild>
+    //                         <TouchableOpacity style={styles.button}>
+    //                             <Text style={styles.buttonText}>Go to Vet Assistant Dashboard</Text>
+    //                         </TouchableOpacity>
+    //                     </Link>
+    //                 );
+    //             case 'SECRETARY':
+    //                 return (
+    //                     <Link href="/SecretaryStack" asChild>
+    //                         <TouchableOpacity style={styles.button}>
+    //                             <Text style={styles.buttonText}>Go to Secretary Dashboard</Text>
+    //                         </TouchableOpacity>
+    //                     </Link>
+    //                 );
+    //             case 'MANAGER':
+    //             case 'VET':
+    //                 return (
+    //                     <Link href="/ManagerStack" asChild>
+    //                         <TouchableOpacity style={styles.button}>
+    //                             <Text style={styles.buttonText}>Go to Manager (Veterinarian) Dashboard</Text>
+    //                         </TouchableOpacity>
+    //                     </Link>
+    //                 );
+    //             default:
+    //                 return (
+    //                     <View>
+    //                         <Text style={styles.noAccessText}>No role assigned or authenticated.</Text>
+    //                     </View>
+    //                 );
+    //         }
+    //     }
+    // };
 
 
     return (
@@ -133,9 +165,7 @@ export default function HomeScreen() {
             </ThemedView>
 
             <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Access Role-Based Dashboards</ThemedText>
-
-                {renderRoleButtons()}
+                <ThemedText type="subtitle">Loading Dashboard...</ThemedText>
             </ThemedView>
         </ParallaxScrollView>
     );
@@ -150,25 +180,6 @@ const styles = StyleSheet.create({
     stepContainer: {
         gap: 8,
         marginBottom: 8,
-    },
-    button: {
-        backgroundColor: '#1D3D47',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginVertical: 5, // Add spacing between buttons
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    noAccessText: {
-        color: '#FF6347',
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 10,
     },
     reactLogo: {
         height: 178,
