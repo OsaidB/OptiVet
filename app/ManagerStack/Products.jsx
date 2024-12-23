@@ -24,8 +24,8 @@ export default function Products() {
     const [searchedProducts, setSearchedProducts] = useState([...products]);
     const [widthRatio, setWidthRatio] = useState('17%');
     const [searchText, setSearchText] = useState('');
-
-
+    const [categories, setCategories] = useState([{ id: 1, name: 'toys' }, { id: 2, name: 'COLLARS' }, { id: 3, name: 'TREATS' }, { id: 4, name: 'DDD' }]);
+    //toystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoys
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -100,14 +100,16 @@ export default function Products() {
 
 
 
-        <View style={{ flex: 1 }}>
+        
+        <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center' }}>
             <View style={{ alignSelf: 'center' }}><Text style={{ fontSize: 40 }}>Products</Text></View>
 
 
-            <View style={{ marginVertical: 10, marginHorizontal: 15, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', borderWidth: 1, borderRadius: 8, borderColor: 'black' }}>
+            <View style={{ marginVertical: 10, marginHorizontal: 15, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', borderWidth: 1, borderRadius: 8, borderColor: 'black', width: '90%', padding: 10 }}>
 
-                <View style={{ width: '90%' }}>
-                    <TextInput placeholder="Search Product" numberOfLines={3} style={{ flex: 1, height: '100%', outlineStyle: 'none', padding: 10 }} value={searchText} onChangeText={SearchProduct} />
+                <View style={{ width: '90%', padding: 10 }}>
+                    <TextInput placeholder="Search Product" style={{ outlineStyle: 'none' }} value={searchText} onChangeText={SearchProduct} />
+
                 </View>
 
 
@@ -118,6 +120,149 @@ export default function Products() {
                 </View> */}
 
             </View>
+
+
+
+
+            {/* <ScrollView contentContainerStyle={{ flexDirection: 'row', justifyContent:'flex-start',alignItems: 'center' , backgroundColor:'brown',paddingHorizontal:10,borderRadius:8, height:'20%'}} horizontal={true}>
+                        {categories.map((item) => {
+                            return (
+
+                                <View key={item.id} style={{ backgroundColor: 'white', borderRadius: 5, marginHorizontal:20 }}>
+
+                                    <TouchableOpacity style = {{padding:10}}>
+                                        <Text>{item.name}</Text>
+
+                                    </TouchableOpacity>
+                                </View>
+
+                            )
+                        })}
+                    </ScrollView> */}
+
+            {/* <View style={{ height: '20%', backgroundColor: 'brown', justifyContent: 'center', alignItems: 'center' }} >
+                
+                    <ScrollView horizontal={true}>
+                        {
+                            categories.map((item) => {
+
+                                return (
+
+                                    <View key={item.id} style={{ backgroundColor: 'white', padding: 5, marginHorizontal: 30, borderRadius: 8 }}>
+                                        <TouchableOpacity>
+                                            <Text>{item.name}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                )
+                            })
+                        }
+
+                    </ScrollView>
+
+                
+            </View> */}
+
+
+
+            {/* <ScrollView horizontal={true} contentContainerStyle={{ backgroundColor: 'brown', height: '10%', width:'60%', justifyContent:'center', alignItems:'center' }}>
+
+
+                {
+                    categories.map((item) => {
+
+                        return (
+
+                            <View key={item.id} style={{ backgroundColor: 'white', padding: 5, marginHorizontal: 30, borderRadius: 8 }}>
+                                <TouchableOpacity>
+                                    <Text>{item.name}</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                        )
+                    })
+                }
+
+
+            </ScrollView> */}
+
+
+
+            {/* <View style={{ height: '15%',width:'60%', backgroundColor: 'brown', borderRadius: 15 }}>
+
+                <ScrollView horizontal={true} contentContainerStyle={{}}>
+                    {
+                        categories.map((item) => {
+
+                            return (
+
+                                <View key={item.id} style={{ backgroundColor: 'white', padding: 5, marginHorizontal: 30, borderRadius: 8 }}>
+                                    <TouchableOpacity>
+                                        <Text>{item.name}</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                            )
+                        })
+                    }
+
+                </ScrollView>
+            
+            </View> */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<View style={{flexDirection:'row', justifyContent:'center', width:'60%'}}>
+<View style={{flexDirection:'row', justifyContent:'center', width:'100%', backgroundColor:'brown', borderRadius:15}}>
+    
+        <ScrollView horizontal={true} contentContainerStyle={{flexGrow:1, justifyContent:'center',alignItems:'center', marginVertical:10}} style={{width:'100%'}}>
+        {
+                    categories.map((item) => {
+
+                        return (
+
+                            <View key={item.id} style={{ marginHorizontal: 30}}>
+                                <TouchableOpacity style={{backgroundColor:'white', borderRadius:8,padding:5}}>
+                                    <Text>{item.name}</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                        )
+                    })
+                }
+
+        </ScrollView>
+        
+        </View>
+        </View>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -153,29 +298,29 @@ export default function Products() {
 
 
 
-                        <View key={item.id} style={{  width: widthRatio, backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center' }} SearchProduct={SearchProduct} setSearchText={setSearchText}>
+                        <View key={item.id} style={{ width: widthRatio, backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center' }} SearchProduct={SearchProduct} setSearchText={setSearchText}>
 
                             <View style={{ width: '60%', height: '60%', marginVertical: 10 }}>
-                                <Image source={`${BASE_URL}${item.productImageUrl}`} style={{ width: '100%', height: '100%'}} resizeMode="contain"></Image>
+                                <Image source={`${BASE_URL}${item.productImageUrl}`} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
                             </View>
 
 
-                                <Text style={{ fontSize: 20, color: 'white' }}>{item.name}</Text>
-                      
+                            <Text style={{ fontSize: 20, color: 'white' }}>{item.name}</Text>
 
 
 
 
 
-                                <Text style={{ fontSize: 20, color: 'white' }}>{item.price+'₪'}</Text>
 
-                            
-
+                            <Text style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
 
 
 
 
-                                <Text style={{ fontSize: 20, color: '#dddd',fontFamily:'bold' }}>{item.productCategory}</Text>
+
+
+
+                            <Text style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold' }}>{item.productCategory}</Text>
 
                         </View>
 
@@ -191,13 +336,9 @@ export default function Products() {
 
         </View>
 
-
+        
 
 
     );
 
 }
-
-
-
-

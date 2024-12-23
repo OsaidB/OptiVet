@@ -6,7 +6,12 @@ import { Picker } from '@react-native-picker/picker';
 import MedicalHistoryService from "../../Services/MedicalHistoryService";
 import PetService from '../../Services/PetService';
 import baseURL from '../../Services/config'; // Adjust the path as necessary
-const BASE_URL= `${baseURL.USED_BASE_URL}/api/medicalHistories`;
+const BASE_URL = `${baseURL.USED_BASE_URL}/api/medicalHistories`;
+//import { useRouter } from 'expo-router';
+//import { useRoute } from '@react-navigation/native';
+import MedicalSessionService from '../../Services/MedicalSessionService';
+//import { newDate } from 'react-datepicker/dist/date_utils';
+
 
 export default function MedicalHistory() {
     const [conditionText, setConditionText] = useState('');
@@ -17,15 +22,51 @@ export default function MedicalHistory() {
     const [allergies, setAllergies] = useState([]);
     const [vaccinations, setVaccinations] = useState([]);
     const [surgeories, setSurgeories] = useState([]);
+
+    const { petId } = useLocalSearchParams(); // Retrieve clientId dynamically
+
+
+    //const route = useRoute();
+
+    const getDate = () => {
+        const date = new Date();
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+    };
+
+
+
+
+    
+    //const [medicalSessions, setMedicalSessions] = useState([{ id: 1, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }, { id: 2, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }, { id: 3, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }]);
+    const [medicalSessions, setMedicalSessions] = useState([]);
     const [dietaryPreferencesText, setDietaryPreferencesText] = useState('');
     const [notesText, setNotesText] = useState('');
-    const petId = 1;
-    // const { clientId } = useLocalSearchParams();
+
+    //const { clientId } = useLocalSearchParams();
 
 
 
 
     useEffect(() => {
+
+
+
+
+        const fetchMedicalSessions = async () => {
+            try {
+                const fetchedMedicalSessions = await MedicalSessionService.getSessionsByPetId(petId);
+                setMedicalSessions(fetchedMedicalSessions);
+            } catch (error) {
+                console.error("Error fetching medical sessions:", error);
+                Alert.alert('Error', 'Failed to load medical sessions.');
+            }
+        };
+
+
+
         const fetchAllergies = async () => {
             try {
                 const fetchedAllergies = await MedicalHistoryService.getAllergies(petId);
@@ -108,6 +149,8 @@ export default function MedicalHistory() {
         fetchChronicConditions();
         fetchVaccinations();
         fetchSurgeories();
+        fetchMedicalSessions();
+
 
     }, []);
 
@@ -329,6 +372,97 @@ export default function MedicalHistory() {
                     </ScrollView>
 
                 </View>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
+                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Medical Sessions: </Text>
+
+                    <ScrollView style={{ height: 400, backgroundColor: '#508C9B' }}>
+                        {medicalSessions.map((item) => {
+                            return (
+
+
+                                <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8, paddingHorizontal: 10 }}>
+                                    {/* <View>
+                                        <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.chronicCondition}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
+                                            <Text style={{ color: 'black', alignSelf: 'center' }} onPress={() => deleteChronicConditionHandle(item.id)}>Delete Condition</Text>
+                                        </TouchableOpacity>
+                                    </View> */}
+                                    <TouchableOpacity>
+                                        <View style={{ justifyContent: 'flex-start', alignItems: 'center', marginVertical: 3 }}>
+                                            <Text style={{ fontWeight: 'bold', color: 'white' }}>By: {item.veterinarian}</Text>
+                                            <Text style={{ fontWeight: 'bold', color: 'white' }}> {item.sessiondate}</Text>
+
+                                        </View>
+
+
+                                        <View style={{ padding: 3, marginBottom: 3, backgroundColor: 'white', borderRadius: 5 }}>
+                                            <Text><Text style={{ fontWeight: 'bold' }}>Diagnosis:</Text><Text> {item.symptoms}</Text></Text>
+                                        </View>
+
+
+                                        <View style={{ padding: 3, marginBottom: 3, backgroundColor: 'white', borderRadius: 5 }}>
+                                            <Text><Text style={{ fontWeight: 'bold' }}>Treatment:</Text><Text> {item.symptoms}</Text></Text>
+                                        </View>
+
+
+                                        <View style={{ padding: 3, marginBottom: 3, backgroundColor: 'white', borderRadius: 5 }}>
+                                            <Text><Text style={{ fontWeight: 'bold' }}>Symptoms:</Text><Text> {item.symptoms}</Text></Text>
+                                        </View>
+
+
+                                        <View style={{ padding: 3, marginBottom: 10, backgroundColor: 'white', borderRadius: 5 }}>
+                                            <Text><Text style={{ fontWeight: 'bold' }}>Treatment Plan:</Text><Text> {item.symptoms}</Text></Text>
+                                        </View>
+
+
+
+                                    </TouchableOpacity>
+                                </View>
+
+                            )
+                        })}
+                    </ScrollView>
+                </View>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
                     <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Dietary Preferences:</Text>

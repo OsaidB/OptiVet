@@ -21,7 +21,7 @@ const BASE_URLS = {
 };
 
 // Choose the base URL you want to use
-const USED_BASE_URL = BASE_URLS.MurrarPhoneHome; // Change this to select a different base URL
+const USED_BASE_URL = BASE_URLS.SwitiLaptop; // Change this to select a different base URL
 
 const baseURL = {
     USED_BASE_URL,
