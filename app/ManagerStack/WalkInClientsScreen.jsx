@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import ClientService from '../../Services/ClientService';
-import { Link, useRouter } from "expo-router"; // Import useRouter
+import { Link, useRouter, useLocalSearchParams  } from "expo-router"; // Import useRouter
 
 const WalkInClientsScreen = () => {
     const router = useRouter();
+    const { vetId } = useLocalSearchParams(); // Retrieve vetId from the navigation params
     const [searchQuery, setSearchQuery] = useState('');
     const [clients, setClients] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
@@ -45,7 +46,7 @@ const WalkInClientsScreen = () => {
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, clientId },
+                params: { petId, clientId, vetId, returnTo: "WalkInClientsScreen" },
             });
         }
     };

@@ -74,11 +74,18 @@ const ManagerStack = () => {
                 </TouchableOpacity>
             </Link>
 
-            <Link href={{ pathname: "/ManagerStack/WalkInClientsScreen", params: { userId: managerInfo?.userId } }} asChild>
+            <Link
+                href={{
+                    pathname: "/ManagerStack/WalkInClientsScreen",
+                    params: { vetId: managerInfo?.userId }, // Pass vetId (userId of the manager)
+                }}
+                asChild
+            >
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Handle Walk-in Clients</Text>
                 </TouchableOpacity>
             </Link>
+
 
             <Link href={{ pathname: "/ManagerStack/MsgsScreen", params: { userId: managerInfo?.userId } }} asChild>
                 <TouchableOpacity style={styles.button}>
