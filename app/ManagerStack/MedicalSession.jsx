@@ -11,7 +11,7 @@ import AppointmentService from '../../Services/AppointmentService';
 
 const MedicalSession = () => {
     const router = useRouter();
-    const { petId: initialPetId, clientId: initialOwnerId, appointmentId:initialAppointmentId}= useLocalSearchParams(); // Retrieve petId and ownerId from params
+    const { petId: initialPetId, clientId: initialOwnerId, appointmentId:initialAppointmentId,vetId:initialVetId,returnTo}= useLocalSearchParams(); // Retrieve petId and ownerId from params
 
     const { userId } = useLocalSearchParams(); // Retrieve userId from params
 
@@ -22,7 +22,7 @@ const MedicalSession = () => {
     const [ownerId, setOwnerId] = useState(initialOwnerId || ''); // Initialize with ownerId from params
     const [appointmentId, setAppointmentId] = useState(initialAppointmentId || ''); // Initialize with ownerId from params
 
-    const [veterinarianId, setVeterinarianId] = useState('');
+    const [vetId, setVetId] = useState(initialVetId || '');
     const [loggedInVetId, setLoggedInVetId] = useState('');
 
     const [diagnosis, setDiagnosis] = useState('');
@@ -37,17 +37,17 @@ const MedicalSession = () => {
     const [testsOrdered, setTestsOrdered] = useState('');
 
     // const [testResultsImageUrl, setTestResultsImageUrl] = useState(null);
-    const [testResultsImageUri, setTestResultsImageUri] = useState(null);
+    const [testResultsImages, setTestResultsImages] = useState([]); // Array to store multiple images
     // const [nextAppointmentDate, setNextAppointmentDate] = useState('');
     const [postTreatmentInstructions, setPostTreatmentInstructions] = useState('');
 
     const [isSessionDatePickerVisible, setSessionDatePickerVisibility] = useState(false);
     const [isNextAppointmentDatePickerVisible, setNextAppointmentDatePickerVisibility] = useState(false);
 
-    useEffect(() => {
-        setLoggedInVetId(userId); // Temporary static ID
-        setVeterinarianId(loggedInVetId);
-    }, [loggedInVetId]);
+    // useEffect(() => {
+    //     setLoggedInVetId(userId); // Temporary static ID
+    //     setVeterinarianId(loggedInVetId);
+    // }, [loggedInVetId]);
 
     const showNextAppointmentDatePicker = () => setNextAppointmentDatePickerVisibility(true);
     const hideNextAppointmentDatePicker = () => setNextAppointmentDatePickerVisibility(false);
@@ -68,7 +68,7 @@ const MedicalSession = () => {
         setter(new Date(event.target.value));
     };
 
-    const pickImage = async () => {
+    const pickImages = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permissionResult.granted) {
             Alert.alert('Permission to access media is required!');
@@ -76,20 +76,20 @@ const MedicalSession = () => {
         }
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
+            allowsMultipleSelection: true,
             aspect: [4, 3],
             quality: 1,
         });
 
         if (!result.canceled && result.assets && result.assets.length > 0) {
-            setTestResultsImageUri(result.assets[0].uri);
+            setTestResultsImages((prevImages) => [...prevImages, ...result.assets.map((asset) => asset.uri)]);
         } else {
-            Alert.alert('No image selected.');
+            Alert.alert('No images selected.');
         }
     };
 
-    const removeImage = () => {
-        setTestResultsImageUri(null);
+    const removeImage = (uri) => {
+        setTestResultsImages((prevImages) => prevImages.filter((image) => image !== uri));
     };
 
     const updateAppointmentStatus = async (appointmentId) => {
@@ -140,19 +140,17 @@ const MedicalSession = () => {
         const formattedSessionDate = sessionDate.toISOString();
         const formattedNextAppointmentDate = nextAppointmentDate.toISOString();
 
-        let testResultsImageUrl = null;
-
-        if (testResultsImageUri) {
+        const uploadedImageUrls = [];
+        for (const imageUri of testResultsImages) {
             try {
-                console.log("Uploading test results image...");
-                testResultsImageUrl = await PetService.uploadImage(testResultsImageUri);
-                console.log("Image uploaded, URL:", testResultsImageUrl);
+                const imageUrl = await PetService.uploadImage(imageUri);
+                uploadedImageUrls.push(imageUrl);
             } catch (error) {
-                console.error('Error uploading test results image:', error);
+                console.error('Error uploading image:', error);
                 if (Platform.OS !== 'web') {
-                    Alert.alert('Error', 'Failed to upload test results image.');
+                    Alert.alert('Error', 'Failed to upload one or more images.');
                 } else {
-                    window.alert('Error: Failed to upload test results image.');
+                    window.alert('Error: Failed to upload one or more images.');
                 }
                 return;
             }
@@ -160,10 +158,10 @@ const MedicalSession = () => {
 
         const newMedicalSession = {
             sessionDate: formattedSessionDate,
-            // petId: Number(petId),
-            // ownerId: Number(ownerId),
-            petId: 2,
-            ownerId: 1,
+            petId: Number(petId),
+            ownerId: Number(ownerId),
+            // petId: 2,
+            // ownerId: 1,
             diagnosis,
             treatment,
             symptoms,
@@ -174,38 +172,60 @@ const MedicalSession = () => {
             heartRate: parseInt(heartRate),
             veterinarianNotes,
             testsOrdered,
-            testResultsImageUrl,
+            testResultsImageUrls: uploadedImageUrls, // Save all uploaded image URLs
             nextAppointmentDate: formattedNextAppointmentDate,
             postTreatmentInstructions,
         };
 
         try {
-            await MedicalSessionService.createSession(newMedicalSession, veterinarianId);
+            await MedicalSessionService.createSession(newMedicalSession, vetId);
 
             await updateAppointmentStatus(appointmentId);
 
-            // Handle success message and navigation based on the platform
-            if (Platform.OS === 'web') {
-                window.alert('Medical session created successfully!');
-                router.push({
-                    pathname: "../ManagerStack/ManagerAppointmentsScreen",
-                    params: { userId }, // Pass the userId as a parameter
-                });
+// Handle success message and navigation based on the platform
+            if (Platform.OS === "web") {
+                window.alert("Medical session created successfully!");
+                if (returnTo === "WalkInClientsScreen") {
+                    router.push("/ManagerStack/WalkInClientsScreen");
+                } else if (returnTo === "ManagerAppointmentsScreen") {
+                    router.push({
+                        pathname: "/ManagerStack/ManagerAppointmentsScreen",
+                        params: { userId },
+                    });
+                } else {
+                    router.push({
+                        pathname: "/ManagerStack",
+                        params: { userId },
+                    });
+                }
             } else {
-                Alert.alert('Success', 'Medical session created successfully!', [
-                    { text: 'OK', onPress: () =>
-                            router.push({
-                                pathname: "../ManagerStack/ManagerAppointmentsScreen",
-                                params: { userId }, // Pass the userId as a parameter
-                            }) }
+                Alert.alert("Success", "Medical session created successfully!", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            if (returnTo === "WalkInClientsScreen") {
+                                router.push("/ManagerStack/WalkInClientsScreen");
+                            } else if (returnTo === "ManagerAppointmentsScreen") {
+                                router.push({
+                                    pathname: "/ManagerStack/ManagerAppointmentsScreen",
+                                    params: { userId },
+                                });
+                            } else {
+                                router.push({
+                                    pathname: "/ManagerStack",
+                                    params: { userId },
+                                });
+                            }
+                        },
+                    },
                 ]);
             }
         } catch (error) {
-            console.error('Error creating medical session:', error);
-            if (Platform.OS === 'web') {
-                window.alert('Error: Failed to create medical session.');
+            console.error("Error creating medical session:", error);
+            if (Platform.OS === "web") {
+                window.alert("Error: Failed to create medical session.");
             } else {
-                Alert.alert('Error', 'Failed to create medical session.');
+                Alert.alert("Error", "Failed to create medical session.");
             }
         }
     };
@@ -308,25 +328,25 @@ const MedicalSession = () => {
 
                         {/* Image Picker Button for Test Results */}
                         <TouchableOpacity
-                            onPress={pickImage}
+                            onPress={pickImages}
                             style={styles.photoButton}
                             accessibilityRole="button"
                             accessibilityLabel="Test Results Image Picker"
                         >
-                            <Text style={styles.photoButtonText}>
-                                {testResultsImageUri ? "Change Image" : "Select Test Results Image"}
-                            </Text>
+                            <Text style={styles.photoButtonText}>Select Test Results Images</Text>
                         </TouchableOpacity>
 
-                        {/* Display Selected Image with Delete Button */}
-                        {testResultsImageUri && (
-                            <View style={styles.photoContainer}>
-                                <Image source={{ uri: testResultsImageUri }} style={styles.testResultImage} />
-                                <TouchableOpacity onPress={removeImage} style={styles.removeButton}>
-                                    <Text style={styles.removeButtonText}>X</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
+                        {/* Display Selected Images with Delete Buttons */}
+                        <ScrollView horizontal>
+                            {testResultsImages.map((uri, index) => (
+                                <View key={index} style={styles.photoContainer}>
+                                    <Image source={{ uri }} style={styles.testResultImage} />
+                                    <TouchableOpacity onPress={() => removeImage(uri)} style={styles.removeButton}>
+                                        <Text style={styles.removeButtonText}>X</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+                        </ScrollView>
                     </View>
                 </View>
 
@@ -525,14 +545,14 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     testResultImage: {
-        width: 150,
-        height: 150,
-        borderRadius: 10,
+        width: 100,
+        height: 100,
+        borderRadius: 8,
     },
     removeButton: {
         position: 'absolute',
-        top: 5,
-        right: 5,
+        top: -10,
+        right: -10,
         backgroundColor: 'red',
         borderRadius: 15,
         width: 30,
