@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+    Alert,
     Image,
     StyleSheet,
     Text,
@@ -13,10 +14,14 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ClientService from "../../Services/ClientService";
 
 export default function HomeScreen() {
     const [role, setRole] = useState(null);
-
+    const [loggedInEmployeeInfo, setLoggedInEmployeeInfo] = useState(null);
+    const [email, setEmail] = useState(null);
+    const [employeeRole, setEmployeeRole] = useState(null);
     useEffect(() => {
         const fetchUserRole = async () => {
             try {
@@ -31,6 +36,39 @@ export default function HomeScreen() {
         fetchUserRole();
     }, []);
 
+    useEffect(() => {
+        const fetchEmail = async () => {
+            try {
+                const storedEmail = await AsyncStorage.getItem('email'); // Fetch stored email
+                if (storedEmail) {
+                    setEmail(storedEmail);
+                } else {
+                    console.error("No email found in AsyncStorage");
+                    Alert.alert('Error', 'No email found. Please log in again.');
+                }
+            } catch (error) {
+                console.error("Error fetching email from AsyncStorage:", error);
+                Alert.alert('Error', 'Failed to retrieve email.');
+            }
+        };
+
+        const fetchClientInfo = async () => {
+            if (!email) return;
+            try {
+                const data = await UserService.getUserByEmail(email); // Fetch client by email
+                setLoggedInEmployeeInfo(data);
+                setEmployeeRole(data.role);
+            } catch (error) {
+                console.error("Error fetching client info:", error);
+                Alert.alert('Error', 'Failed to load client information.');
+            }
+        };
+
+        fetchEmail();
+        fetchClientInfo();
+    }, [email]);
+
+
     const renderRoleButtons = () => {
         if (role === 'ROLE_CLIENT') {
             return (
@@ -43,33 +81,42 @@ export default function HomeScreen() {
         }
 
         if (role === 'ROLE_USER') {
-            return (
-                <>
-                    <Link href="/ManagerStack" asChild>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>Go to Manager (Veterinarian) Dashboard</Text>
-                        </TouchableOpacity>
-                    </Link>
-                    <Link href="/VetAssistantStack" asChild>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>Go to Vet Assistant Dashboard</Text>
-                        </TouchableOpacity>
-                    </Link>
-                    <Link href="/SecretaryStack" asChild>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>Go to Secretary Dashboard</Text>
-                        </TouchableOpacity>
-                    </Link>
-                </>
-            );
+            switch (employeeRole) {
+                case 'VET_ASSISTANT':
+                    return (
+                        <Link href="/VetAssistantStack" asChild>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={styles.buttonText}>Go to Vet Assistant Dashboard</Text>
+                            </TouchableOpacity>
+                        </Link>
+                    );
+                case 'SECRETARY':
+                    return (
+                        <Link href="/SecretaryStack" asChild>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={styles.buttonText}>Go to Secretary Dashboard</Text>
+                            </TouchableOpacity>
+                        </Link>
+                    );
+                case 'MANAGER':
+                case 'VET':
+                    return (
+                        <Link href="/ManagerStack" asChild>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={styles.buttonText}>Go to Manager (Veterinarian) Dashboard</Text>
+                            </TouchableOpacity>
+                        </Link>
+                    );
+                default:
+                    return (
+                        <View>
+                            <Text style={styles.noAccessText}>No role assigned or authenticated.</Text>
+                        </View>
+                    );
+            }
         }
-
-        return (
-            <View>
-                <Text style={styles.noAccessText}>No role assigned or authenticated.</Text>
-            </View>
-        );
     };
+
 
     return (
         <ParallaxScrollView
