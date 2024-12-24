@@ -388,55 +388,10 @@ console.log(searchText);
 
 
 
-                            <Text style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold' }}>{item.productCategory}</Text>
-
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '30%', height: '30%' }}>
-
-
-                                {/* <View style={{ backgroundColor: 'white', borderRadius: '100%', width:40, height:40 }}>
+                            <Text style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold', marginBottom:10 }}>{item.productCategory}</Text>
 
 
 
-                                        <Image source={require('../../assets/images/pencil (2).png')} style={{ width: 30, height: 30, borderRadius: 8 }} resizeMode='stretch'></Image>
-
-
-                                    </View> */}
-
-                                {/* <View style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 10, marginHorizontal: 10 }}> */}
-                                <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId} }} onPress={() => { setProductId(item.id) }} asChild>
-                                    <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }}>
-
-                                        <Image source={require('../../assets/images/pencil (2).png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
-
-                                    </TouchableOpacity>
-                                </Link>
-
-
-
-
-                                <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId } }} onPress={() => { setProductId(item.id) }} asChild>
-                                    <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }}>
-
-                                        <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
-
-                                    </TouchableOpacity>
-                                </Link>
-
-
-
-                                {/* <Link href= {{pathname:'../ManagerStack/UpdateProduct', params:{productId}}} asChild>
-                                    <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }} onPress={setProductId(item.id)}>
-
-                                        <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
-
-                                    </TouchableOpacity>
-                                </Link> */}
-
-
-
-
-                            </View>
                         </View>
 
 
@@ -455,11 +410,7 @@ console.log(searchText);
 
 
 
-            <Link href={{ pathname: "/ManagerStack/AddProduct" }}  asChild>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, width: '50%' , marginVertical:10}}>
-                    <Text style={{fontSize:20, color:'white', fontWeight:'bold'}}>Add New Product</Text>
-                </TouchableOpacity>
-            </Link>
+
 
         </View>
 
