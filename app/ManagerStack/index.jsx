@@ -99,11 +99,11 @@ const ManagerStack = () => {
                 </TouchableOpacity>
             </Link>
 
-            <Link href="ManagerStack/AddProduct" asChild>
+            {/* <Link href="ManagerStack/AddProduct" asChild>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Add Product</Text>
                 </TouchableOpacity>
-            </Link>
+            </Link> */}
 
             <Link href="ManagerStack/AddEmployee" asChild>
                 <TouchableOpacity style={styles.button}>
