@@ -1,3 +1,4 @@
+//login screen
 import React, { useState } from 'react';
 import {
   Image,
@@ -136,6 +137,8 @@ const LoginScreen = () => {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                onSubmitEditing={handleLogin} // Trigger login on "Enter" key press
+                returnKeyType="done" // Changes the keyboard "Enter" button to "Done"
             />
           </View>
 
@@ -148,12 +151,12 @@ const LoginScreen = () => {
             >
               <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push('/(tabs)/home')} // Navigate directly to Home
-            >
-              <Text style={styles.buttonText}>Home Screen (Skip login)</Text>
-            </TouchableOpacity>
+            {/*<TouchableOpacity*/}
+            {/*    style={styles.button}*/}
+            {/*    onPress={() => router.push('/(tabs)/home')} // Navigate directly to Home*/}
+            {/*>*/}
+            {/*  <Text style={styles.buttonText}>Home Screen (Skip login)</Text>*/}
+            {/*</TouchableOpacity>*/}
           </View>
 
           {/* Footer */}
@@ -166,6 +169,16 @@ const LoginScreen = () => {
 
           {/* Toast Notification */}
           <Toast />
+
+          {/* Temporary Login Emails */}
+          <View style={styles.tempEmailsContainer}>
+            <Text style={styles.tempEmailsTitle}>Temporary Login Emails</Text>
+            <Text style={styles.tempEmail}>Vet Assistant: <Text style={styles.email}>vetAS@ex</Text></Text>
+            <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet@vet</Text></Text>
+            <Text style={styles.tempEmail}>Secretary: <Text style={styles.email}>sec@ex</Text></Text>
+            <Text style={styles.tempEmail}>Client: <Text style={styles.email}>test@test</Text></Text>
+          </View>
+
         </ScrollView>
       </SafeAreaView>
 
@@ -253,6 +266,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textDecorationLine: 'underline',
   },
+
+
+  tempEmailsContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#1E3559',
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  tempEmailsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFD700',
+    marginBottom: 10,
+  },
+  tempEmail: {
+    fontSize: 16,
+    color: 'white',
+    marginBottom: 5,
+  },
+  email: {
+    fontWeight: 'bold',
+    color: '#FFD700',
+  },
+
+
 });
 
 export default LoginScreen;
