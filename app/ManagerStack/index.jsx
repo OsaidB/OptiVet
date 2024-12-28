@@ -3,10 +3,12 @@ import { Text, TouchableOpacity, View, Alert, Image, StyleSheet, ScrollView } fr
 import { Link } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
+import ManagerStackLayout from './_layout'; // Adjust path as needed
 
 const ManagerStack = () => {
     const [managerInfo, setManagerInfo] = useState(null);
     const [email, setEmail] = useState(null);
+    // console.log(ManagerStackLayout);
 
     useEffect(() => {
         const fetchEmail = async () => {
