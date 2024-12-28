@@ -65,7 +65,7 @@ const LoginScreen = () => {
         });
 
         // Navigate to the home screen
-        router.push('/(tabs)/home'); // Use Expo Router for navigation
+        router.push('/home'); // Use Expo Router for navigation
       } else {
         Toast.show({
           type: 'error',

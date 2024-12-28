@@ -47,7 +47,7 @@ const SignUpScreen = () => {
                 text1: 'Success',
                 text2: 'Your account has been created!',
             });
-            router.push('/(tabs)/home'); // Navigate to login screen
+            router.push('/home'); // Navigate to login screen
         } catch (error) {
             console.error('Error during sign up:', error);
             Toast.show({

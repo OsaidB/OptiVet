@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Text, TouchableOpacity, View, StyleSheet, Alert } from "react-native";
+import { Text, TouchableOpacity, View, StyleSheet, Alert, Image } from "react-native";
 import { Link } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import UserService from '../../Services/UserService'; // Import the updated UserService
+import UserService from '../../Services/UserService';
 
 const ManagerStack = () => {
     const [managerInfo, setManagerInfo] = useState(null);
@@ -11,7 +11,7 @@ const ManagerStack = () => {
     useEffect(() => {
         const fetchEmail = async () => {
             try {
-                const storedEmail = await AsyncStorage.getItem('email'); // Fetch stored email
+                const storedEmail = await AsyncStorage.getItem('email');
                 if (storedEmail) {
                     setEmail(storedEmail);
                 } else {
@@ -27,7 +27,7 @@ const ManagerStack = () => {
         const fetchManagerInfo = async () => {
             if (!email) return;
             try {
-                const data = await UserService.getUserByEmail(email); // Fetch manager by email
+                const data = await UserService.getUserByEmail(email);
                 setManagerInfo(data);
             } catch (error) {
                 console.error("Error fetching manager info:", error);
@@ -41,75 +41,76 @@ const ManagerStack = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Manager / Vet Dashboard</Text>
-            {managerInfo ? (
-                <>
-                    <Text>Welcome, {managerInfo.firstName} {managerInfo.lastName}!</Text>
-                    <Text>Email: {managerInfo.email}</Text>
-                    <Text>Phone: {managerInfo.phoneNumber}</Text>
-                    <Text>id: {managerInfo.userId}</Text>
-                </>
-            ) : (
-                <Text>Loading manager information...</Text>
-            )}
+            {/* Profile Header */}
+            <View style={styles.profileCard}>
+                <Image
+                    source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for a profile picture
+                    style={styles.profileImage}
+                />
+                {managerInfo ? (
+                    <>
+                        <Text style={styles.profileName}>
+                            {managerInfo.firstName} {managerInfo.lastName}
+                        </Text>
+                        <Text style={styles.profileEmail}>{managerInfo.email}</Text>
+                    </>
+                ) : (
+                    <Text style={styles.loadingText}>Loading manager information...</Text>
+                )}
+            </View>
 
             {/* Navigation Buttons */}
-            <Link
-                href={{
-                    pathname: "/ManagerStack/ManagerScheduleScreen",
-                    params: { userId: managerInfo?.userId } }}
-                asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Manage your meets!</Text>
-                </TouchableOpacity>
-            </Link>
+            <View style={styles.navSection}>
+                <Text style={styles.sectionTitle}>Appointments</Text>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/ManagerScheduleScreen",
+                        params: { userId: managerInfo?.userId }
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>Manage Your Schedule</Text>
+                    </TouchableOpacity>
+                </Link>
 
-            <Link
-                href={{
-                    pathname: "/ManagerStack/ManagerAppointmentsScreen",
-                    params: { userId: managerInfo?.userId } }}
-                asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>View Your Appointments</Text>
-                </TouchableOpacity>
-            </Link>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/ManagerAppointmentsScreen",
+                        params: { userId: managerInfo?.userId }
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>View Appointments</Text>
+                    </TouchableOpacity>
+                </Link>
 
-            <Link
-                href={{
-                    pathname: "/ManagerStack/WalkInClientsScreen",
-                    params: { vetId: managerInfo?.userId }, // Pass vetId (userId of the manager)
-                }}
-                asChild
-            >
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Handle Walk-in Clients</Text>
-                </TouchableOpacity>
-            </Link>
+                <Text style={styles.sectionTitle}>Clients</Text>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/WalkInClientsScreen",
+                        params: { vetId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>Handle Walk-in Clients</Text>
+                    </TouchableOpacity>
+                </Link>
 
-
-            <Link href={{ pathname: "/ManagerStack/MsgsScreen", params: { userId: managerInfo?.userId } }} asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Important Messages</Text>
-                </TouchableOpacity>
-            </Link>
-
-            <Link href="ManagerStack/Products" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Products</Text>
-                </TouchableOpacity>
-            </Link>
-
-            {/* <Link href="ManagerStack/AddProduct" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Add Product</Text>
-                </TouchableOpacity>
-            </Link> */}
-
-            <Link href="ManagerStack/AddEmployee" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Create Employee Account</Text>
-                </TouchableOpacity>
-            </Link>
+                <Text style={styles.sectionTitle}>Other</Text>
+                <Link href={{ pathname: "/ManagerStack/MsgsScreen", params: { userId: managerInfo?.userId } }} asChild>
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>Important Messages</Text>
+                    </TouchableOpacity>
+                </Link>
+                <Link href="ManagerStack/AddEmployee" asChild>
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>Create Employee Account</Text>
+                    </TouchableOpacity>
+                </Link>
+            </View>
         </View>
     );
 };
@@ -117,27 +118,59 @@ const ManagerStack = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#F3F7FA',
         padding: 20,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    button: {
-        backgroundColor: '#1D3D47',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        marginTop: 20,
+    profileCard: {
         alignItems: 'center',
-        width: '80%',
+        backgroundColor: '#1D3D47',
+        padding: 20,
+        borderRadius: 12,
+        marginBottom: 30,
     },
-    buttonText: {
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 10,
+    },
+    profileName: {
+        fontSize: 20,
         color: 'white',
+        fontWeight: 'bold',
+    },
+    profileEmail: {
         fontSize: 16,
+        color: '#D1E8E2',
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#666',
+    },
+    navSection: {
+        flex: 1,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1D3D47',
+        marginBottom: 10,
+    },
+    navButton: {
+        backgroundColor: '#F0F4F8',
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 5,
+        elevation: 3,
+        alignItems: 'center',
+    },
+    navButtonText: {
+        fontSize: 16,
+        color: '#1D3D47',
         fontWeight: 'bold',
     },
 });
