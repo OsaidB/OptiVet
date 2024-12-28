@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Toast from 'react-native-toast-message'; // Import Toast
 import CustomToast from './Toast.config'; // Import custom Toast config
@@ -42,25 +42,28 @@ export default function RootLayout() {
             {/* Dynamic Status Bar based on theme */}
             <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
+            {/* Header */}
+            <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
+                <Text style={styles.headerText}>OptiVet</Text>
+            </View>
+
             {/* Main Stack Navigation */}
             <Stack
                 screenOptions={{
-                    headerStyle: {
-                        backgroundColor: colorScheme === 'dark' ? '#1E1E1E' : '#FFFFFF',
-                    },
-                    headerTintColor: colorScheme === 'dark' ? '#FFFFFF' : '#1D3D47',
-                    headerTitleStyle: {
-                        fontFamily: 'PoppinsBold',
-                        fontSize: 20,
-                    },
+                    headerShown: false,
                     contentStyle: {
                         backgroundColor: colorScheme === 'dark' ? '#121212' : '#F9F9F9',
                     },
                 }}
             >
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="+not-found" options={{ title: 'Page Not Found' }} />
             </Stack>
+
+            {/* Footer */}
+            <View style={[styles.footer, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#FFFFFF' }]}>
+                <Text style={styles.footerText}>© 2024 OptiVet. All Rights Reserved.</Text>
+            </View>
 
             {/* Global Toast Notifications */}
             <Toast config={CustomToast} />
@@ -74,5 +77,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F9F9F9',
+    },
+    header: {
+        padding: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerText: {
+        fontSize: 24,
+        fontFamily: 'PoppinsBold',
+        color: '#FFFFFF',
+    },
+    footer: {
+        padding: 10,
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#E0E0E0',
+    },
+    footerText: {
+        fontSize: 14,
+        fontFamily: 'NunitoRegular',
+        color: '#555',
     },
 });
