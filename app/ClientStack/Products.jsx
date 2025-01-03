@@ -34,7 +34,7 @@ export default function Products() {
 
     const [widthRatio, setWidthRatio] = useState('17%');
     const [searchText, setSearchText] = useState('');
-    const [categories, setCategories] = useState([{ id: 0, name: 'ALL' }, { id: 1, name: 'TOYS' }, { id: 2, name: 'COLLARS' }, { id: 3, name: 'TREATS' }]);
+    const [categories, setCategories] = useState([{ id: 0, name: 'ALL' }, { id: 1, name: 'TOYS' }, { id: 2, name: 'FOOD' }, { id: 3, name: 'TREATS' }]);
     //toystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoys
     //const { productId } = useLocalSearchParams(); // Retrieve clientId dynamically
     const [productId, setProductId] = useState();

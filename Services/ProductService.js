@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from './config'; // Adjust the path as necessary
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/products`;
+const BASE_URL_IMG = `${baseURL.USED_BASE_URL}/api/pets`;
+
 
 
 const ProductService = {
@@ -43,7 +45,7 @@ const ProductService = {
             });
             return response.data;
         } catch (error) {
-            console.error('Error creating product:', error);
+            console.error('Error creating producTTTTTTTTTt:', error);
             throw error;
         }
     },
@@ -143,6 +145,7 @@ const ProductService = {
 
             if (Platform.OS === 'web') {
                 const response = await fetch(imageUri);
+                console.log(response);
                 const blob = await response.blob();
                 formData.append('image', blob, 'productImage.jpg');
             } else {
@@ -159,7 +162,7 @@ const ProductService = {
                     'X-Auth-Token': token,
                 },
             });
-
+console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Error uploading product image:', error);
@@ -242,6 +245,20 @@ const ProductService = {
 
 
 
+    deleteProduct: async (productId) => {
+        try {
+            const token = await ProductService.getToken();
+            const response = await axios.delete(`${BASE_URL}/${productId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error deleting product with ID: ${productId}`, error);
+            throw error;
+        }
+    },
 
 
 
@@ -249,6 +266,140 @@ const ProductService = {
 
 
 
+
+
+    handleUpload: async (imageUri) => {
+
+        try {
+
+            const token = await ProductService.getToken();
+            const formData = new FormData();
+
+            if (Platform.OS === 'web') {
+                const response = await fetch(BASE_URL_IMG + imageUri, {
+                    method: "GET",
+                    headers: {
+                        'X-Auth-Token': token,
+                    },
+                });
+                //console.log(response);
+                const blob = await response.blob();
+                formData.append('image', blob, 'productImage.jpg');
+                //console.log(formData);
+            } else {
+                formData.append('image', {
+                    uri: imageUri,
+                    name: 'productImage.jpg',
+                    type: 'image/jpeg',
+                });
+            }
+
+            const response = await axios.post(`${BASE_URL}/uploadImage`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-Auth-Token': token,
+                },
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error uploading product image:', error);
+            throw error;
+        }
+
+
+
+
+
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+
+        //         const token = await ProductService.getToken();
+        //         console.log(imageUri);
+        //         const imageData = new FormData();
+
+
+
+        //         fetch(BASE_URL_IMG + imageUri, {
+        //             method: "GET",
+        //         }).then(response => response.blob()).then(response => {
+        //             console.log("Getting success", response);
+        //             imageData.append('productImage', response, 'productImage.jpg');
+
+        //             alert("Getting Success")
+        //         }).catch(error => { console.log("Getting error", error); alert("Getting failed !") });
+
+        // console.log(imageData);
+
+
+
+        //         //imageData.append("productImage", imagee);
+        //        // console.log(imageData.get().type() + 'heyyyy');
+
+
+        //         //imageData.append('productImage', imagee, 'productImage.jpg');
+
+        //         // imageData.append("productImage", {
+        //         //     name: 'productImage.jpg',
+        //         //     type:'image/jpeg' });
+
+
+
+        //         // Object.keys(imageData).forEach(key => {
+
+        //         //   image
+
+        //         // });
+
+
+        //         // fetch(`${BASE_URL}/uploadImage`, {
+        //         //     method: "POST", body: imageData, headers: {
+        //         //         'Content-Type': 'multipart/form-data',
+        //         //         'X-Auth-Token': token,
+        //         //     },
+        //         // }).then(response => response.blob()).then(response => {
+        //         //     console.log("Upload success", response);
+        //         //     alert("Upload Success")
+        //         // }).catch(error => { console.log("Upload error", error); alert("Upload failed !") });
+
+
+
+
+
+
+
+
+
+        //         const response = await axios.post(`${BASE_URL}/uploadImage`, imageData, {
+        //             headers: {
+        //                 'Content-Type': 'multipart/form-data',
+        //                 'X-Auth-Token': token,
+        //             },
+        //         });
+
+        //         return response.data;
+
+
+
+
+
+
+
+        //////////////////////////////////////////
+
+
+        // const response = await axios.post(`${BASE_URL}/uploadImage`, imageData, {
+        //     headers: {
+        //         'Content-Type': 'multipart/form-data',
+        //         'X-Auth-Token': token,
+        //     },
+        // });
+
+        // return response.data;
+
+    },
 
 
 
@@ -289,10 +440,10 @@ const ProductService = {
 
 
 
-    updateProductById: async (productId,productData) => {
+    updateProductById: async (productId, productData) => {
         try {
-            const token = await CategoryService.getToken();
-            const response = await axios.put(`${BASE_URL}/${productId}`,productData,{
+            const token = await ProductService.getToken();
+            const response = await axios.put(`${BASE_URL}/${productId}`, productData, {
                 headers: {
                     'X-Auth-Token': token,
                 },

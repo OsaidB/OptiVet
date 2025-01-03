@@ -15,6 +15,7 @@ const BASE_URL_IMAGES = `${baseURL.USED_BASE_URL}/api/pets`;
 import ProductService from '../../Services/ProductService';
 import { WINDOWS } from "nativewind/dist/utils/selector";
 import { useRouter, Link, useLocalSearchParams, usePathname } from 'expo-router';
+import CategoryService from '../../Services/CategoryService';
 
 
 
@@ -22,7 +23,7 @@ export default function AddProduct() {
     const [countKey, setCountKey] = useState(0);
     const [product, setProduct] = useState(null);
     const [numOfImages, setNumOfImages] = useState(0);
-    const [numCounter, setNumCounter] = useState(0);
+    const [productImage, setProductImage] = useState(null);
     const [productName, setProductName] = useState('');
     const [productPrice, setProductPrice] = useState('');
     const [productCategory, setProductCategory] = useState('');
@@ -33,7 +34,7 @@ export default function AddProduct() {
     // Stores the selected image URI
     const [file, setFile] = useState(null);
     const [categories, setCategories] = useState([{ id: 1, name: 'ddd' }, { id: 2, name: 'ddd' }, { id: 3, name: 'ddd' }, { id: 4, name: 'ddd' }, { id: 5, name: 'ddd' }, { id: 6, name: 'ddd' }, { id: 7, name: 'ddd' }, { id: 8, name: 'ddd' }, { id: 9, name: 'ddd' }, { id: 10, name: 'ddd' }, { id: 11, name: 'ddd' }, { id: 12, name: 'ddd' }, { id: 13, name: 'ddd' }, { id: 14, name: 'ddd' }, { id: 15, name: 'ddd' }, { id: 16, name: 'ddd' }, { id: 17, name: 'ddd' }, { id: 18, name: 'ddd' },])
-
+    
     // Stores any error message
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -62,7 +63,20 @@ export default function AddProduct() {
 
 
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const fetchCategories = await CategoryService.getCategories();
+                setCategories(fetchCategories);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                Alert.alert('Error', 'Failed to load categories.');
+            }
+        };
 
+        fetchCategories();
+
+    }, []);
 
 
 
@@ -73,12 +87,19 @@ export default function AddProduct() {
         const fetchProduct = async () => {
             try {
                 const fetchProduct = await ProductService.getProductById(productId);
+
                 setProduct(fetchProduct);
                 setProductName(fetchProduct.name);
                 setProductPrice(fetchProduct.price);
-                setProductCategory(fetchProduct.productCategory);
-                setProductImageUrl(BASE_URL_IMAGES+fetchProduct.productImageUrl);
-                
+                setProductCategory('T');
+
+                //setProductCategory(fetchProduct.productCategory);
+
+
+                //console.log(BASE_URL_IMAGES+fetchProduct.productImageUrl);
+                //console.log('heyyy');
+                setProductImageUrl(BASE_URL_IMAGES + fetchProduct.productImageUrl);
+                //console.log(productImageUrl+'heyyy');
             } catch (error) {
                 console.error("Error fetching products:", error);
                 Alert.alert('Error', 'Failed to load products.');
@@ -88,57 +109,6 @@ export default function AddProduct() {
         fetchProduct();
 
     }, []);
-
-
-
-
-
-
-
-
-
-
-
-    // const pickImage = async () => {
-    //     const { status } = await ImagePicker.
-    //         requestMediaLibraryPermissionsAsync();
-
-    //     if (status !== "granted") {
-
-    //         // If permission is denied, show an alert
-    //         Alert.alert(
-    //             "Permission Denied",
-    //             `Sorry, we need camera 
-    //              roll permission to upload images.`
-    //         );
-    //     } else {
-
-    //         // Launch the image library and get
-    //         // the selected image
-    //         const result =
-    //             await ImagePicker.launchImageLibraryAsync();
-
-    //         if (!result.canceled) {
-
-    //             // If an image is selected (not cancelled), 
-    //             // update the file state variable
-    //             setImageUris([{ ImageUri: result.assets[0].uri, id: countKey }]);
-    //             setNumOfImages(a => a + 1);
-    //             setCountKey(b => b + 1);
-    //             // Clear any previous errors
-    //             setError(null);
-    //             //console.log(imageUris[imageUris.length - 1]);
-    //             console.log(numOfImages);
-    //             console.log(imageUris);
-    //             // Alert.alert(result.uri);
-    //             // console.log(result.assets[0].uri);
-
-
-
-    //         }
-    //     }
-    // };
-
 
 
 
@@ -190,24 +160,6 @@ export default function AddProduct() {
 
 
 
-
-
-
-    // const deleteImage = (id) => {
-
-    //     const newImages = imageUris.filter(image => image.id !== id);
-    //     setImageUris(newImages);
-    //     // setNumOfImages(numOfImages-10);
-    //     setNumOfImages(a => a - 1);
-    //     //console.log(numOfImages);
-
-
-
-    // };
-
-
-
-
     const deleteImage = () => {
         setProductImageUrl(null);
 
@@ -222,63 +174,7 @@ export default function AddProduct() {
 
 
 
-    // const checkingNumberOfImages = () => {
-
-    //     if (numOfImages < 5) {
-    //         return true;
-    //     }
-    //     else {
-    //         return false;
-    //     }
-
-    // }
-
-
-
-
-    // const checkingNumberOfImages = () => {
-
-    //     if (numOfImages < 1) {
-    //         return true;
-    //     }
-    //     else {
-    //         return false;
-    //     }
-
-    // }
-
-
-
-
-    const checkValueIsNumberOrNot = () => {
-        //Handler called on button click
-        if (isNaN(productPrice)) {
-            //if input is not a number then here
-            return false;
-        } else {
-            //if input is number then here
-
-            setPriceValue(parseFloat(productPrice));
-            return true;
-        }
-    };
-
-
-
-
-
     const updateProductHandle = async () => {
-
-        // if (isNaN(priceValue)) {
-        //     //if input is not a number then here
-        //    // const newProduct = await ProductService.createProduct({})
-        //   } else {
-        //     //if input is number then here
-        //     alert('It is a Number'.parse);
-        //   }
-
-
-        // console.log(imageUris);
 
         if (!productName) {
             Alert.alert('entering the name of the product in mandatory');
@@ -296,43 +192,49 @@ export default function AddProduct() {
         }
 
 
-        else if (!productImageUrl) {
-            Alert.alert('entering product image in mandatory');
-            console.log('entering product image in mandatory');
-        }
+        // else if (!productImageUrl) {
+        //     Alert.alert('entering product image in mandatory');
+        //     console.log('entering product image in mandatory');
+        // }
         else {
-            
-                try {
+
+            try {
+
+            if(productImage){
+                const imageUrl = await ProductService.uploadProductImages(productImage);
+                const product = await ProductService.updateProductById(productId, {
+
+                    name: productName,
+                    productImageUrl: imageUrl,
+                    price: productPrice,
+                    productCategory: productCategory
+                });
+
+            }
+
+            else{
+                const product = await ProductService.updateProductById(productId, {
+
+                    name: productName,
+                    productImageUrl: productImageUrl,
+                    price: productPrice,
+                    productCategory: productCategory
+                });
+            }
+                // setConditions([...conditions, newChronicCondition]);
+                // setConditionText('');
+                router.back({
+                    pathname: '/ManagerStack/Products',
+
+                });
+
+            } catch (error) {
+                Alert.alert('error creating a new product', error);
+            }
 
 
-                    const imageUrl = await ProductService.uploadProductImages(productImageUrl);
-                    const product = await ProductService.updateProductById(productId,{
-
-                        name: productName,
-                        productImageUrl: productImageUrl,
-                        price: productPrice,
-                        productCategory: productCategory
-                    });
-                    // setConditions([...conditions, newChronicCondition]);
-                    // setConditionText('');
-
-                } catch (error) {
-                    Alert.alert('error creating a new product', error);
-                }
-            
-
-            // else{
-
-            //     try{
 
 
-            //     }catch{
-
-
-            //     }
-
-
-            // }
 
         }
 
@@ -340,28 +242,10 @@ export default function AddProduct() {
     };
 
 
-    // const handleSubmit = () => {
-    //   //Handler called on button click
-    //   if (isNaN(priceValue)) {
-    //     //if input is not a number then here
-    //     ProductService.
-    //   } else {
-    //     //if input is number then here
-    //     alert('It is a Number'.parse);
-    //   }
-    // };
+
 
 
     return (
-
-
-
-
-
-
-
-
-
 
 
 
@@ -371,11 +255,8 @@ export default function AddProduct() {
 
 
 
+            <Text style={styles.title}>Update product :</Text>
 
-
-            <View style={{}}>
-                <Text style={styles.title}>Update product :</Text>
-            </View>
 
 
             <View style={{}}>
@@ -431,159 +312,29 @@ export default function AddProduct() {
 
                 >
                     <Picker.Item label="Select product category" value="" />
-                    <Picker.Item label="FOOD" value="FOOD" />
+                    {/* <Picker.Item label="FOOD" value="FOOD" />
                     <Picker.Item label="TREATS" value="TREATS" />
                     <Picker.Item label="TOYS" value="TOYS" />
-                    <Picker.Item label="COLLARS" value="COLLARS" />
+                    <Picker.Item label="COLLARS" value="COLLARS" /> */}
+
+
+                    {categories.map((item) => {
+
+
+                        return (
+
+                            <Picker.Item key={item.id} label={item.name} value={item.id} />
+
+                        )
+                    })}
                 </Picker>
             </View>
 
 
-            {/* <Image source={require('../../assets/images/upload (1).png')}></Image> */}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            {/* {console.log('sd'+windowHeight)} */}
-
-
-            {/* {checkingNumberOfImages()} */}
 
             <Text style={{ marginLeft: 10, fontSize: 25 }}>Add a product Image<Text style={{ fontSize: 17, color: '#1f1f1f' }}></Text> :</Text>
             <View style={{ flex: 4, borderRadius: 8, backgroundColor: '#c7bcbc', flexDirection: 'row', justifyContent: 'center', paddingBottom: 20, paddingTop: 20, alignItems: 'center' }}>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                {/* <View style={{ borderRadius: 8, width: 150, height: 270, marginRight: 20, marginLeft: 20, backgroundColor: '#dddddd' }} deleteImage={deleteImage}>
-
-
-                    <Image source={require('../../assets/images/IMG_6559.jpg')} style={{ flex: 1, width: null, height: null, borderRadius: 8 }} resizeMode='contain'></Image>
-
-
-
-                    <TouchableOpacity style={{ borderRadius: '100%', backgroundColor: 'brown', width: 30, height: 30, justifyContent: 'center', position: 'absolute', left: -10, top: -10 }} onPress={() => {
-                        setNumOfImages(2);
-                        console.log(numOfImages)
-                    }}>
-                        <Text style={{ alignSelf: 'center', fontSize: '100%' }}>X</Text>
-
-                    </TouchableOpacity>
-
-                </View> */}
-
-
-
-
-
-
-
-
-
-
-
-                {/* {imageUris.map((item) => {
-                    return (
-                        <View key={item.id} style={{ borderRadius: 8, width: '12%', height: '100%', marginRight: 20, marginLeft: 20, backgroundColor: '#dddddd' }} deleteImage={deleteImage}>
-
-
-                            <Image source={{ uri: item.ImageUri }} style={{ flex: 1, width: null, height: null, borderRadius: 8 }} resizeMode='contain'></Image>
-
-
-                            
-                            <TouchableOpacity style={{ borderRadius: '100%', backgroundColor: 'brown', width: 30, height: 30, justifyContent: 'center', position: 'absolute', left: -10, top: -10 }} onPress={() => { deleteImage(item.id) }}>
-                                <Text style={{ alignSelf: 'center', fontSize: '100%' }}>X</Text>
-
-                            </TouchableOpacity>
-
-                        </View>
-                    )
-                })} */}
-
-
-                {/* <View key={imgUri.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteChronicConditionHandle={deleteChronicConditionHandle}>
-                                    <View>
-                                        <Text style={{ borderTopEndRadius: 8, borderTopStartRadius: 8, margin: 5, color: 'white' }}>{item.chronicCondition}</Text>
-                                    </View>
-                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
-                                        <TouchableOpacity style={{ backgroundColor: 'yellow', borderBottomEndRadius: 8, borderBottomStartRadius: 8, flex: 1 }}>
-                                            <Text style={{ color: 'black', alignSelf: 'center' }} onPress={() => deleteChronicConditionHandle(item.id)}>Delete Condition</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View> */}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -592,7 +343,7 @@ export default function AddProduct() {
                     <View style={{ borderRadius: 8, width: '12%', height: '100%', marginRight: 20, marginLeft: 20, backgroundColor: '#dddddd' }} deleteImage={deleteImage}>
 
 
-                        <Image source={`${BASE_URL_IMAGES}${productImageUrl}`} style={{ flex: 1, width: null, height: null, borderRadius: 8 }} resizeMode='contain'></Image>
+                        <Image source={`${productImageUrl}`} style={{ flex: 1, width: null, height: null, borderRadius: 8 }} resizeMode='contain'></Image>
 
 
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, Platform} from 'react-native';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, Platform } from 'react-native';
+import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import PetService from "../../Services/PetService";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function PetProfiles() {
     const { clientId } = useLocalSearchParams(); // Retrieve clientId dynamically
@@ -11,6 +12,10 @@ export default function PetProfiles() {
 
     // // const BASE_URL = 'http://192.168.1.51:8080/api/pets'; //Osaid
     // const BASE_URL = 'http://192.168.56.1:8080/api/pets'; //murrar
+
+
+
+
 
 
     useEffect(() => {
@@ -33,6 +38,10 @@ export default function PetProfiles() {
 
         fetchPets();
     }, [clientId]);
+
+
+
+
 
     const calculateAge = (birthDate) => {
         const today = new Date();
@@ -69,8 +78,8 @@ export default function PetProfiles() {
                         <Text>Age: {calculateAge(item.birthDate)}</Text>
                         <Text>Medical History: {item.medicalHistory}</Text>
 
-                        <Link href={{ pathname: "../ClientStack/MedicalHistory", params: { petId } }} asChild>
-                            <TouchableOpacity style={styles.button} onPress={setPetId(item.id)}>
+                        <Link onPress={() => { setPetId(item.id) }} href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: petId }, }} asChild>
+                            <TouchableOpacity style={styles.button}>
                                 <Text style={styles.buttonText}>Medical History</Text>
                             </TouchableOpacity>
                         </Link>

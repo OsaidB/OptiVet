@@ -1,8 +1,13 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from './config';
+import { Platform } from 'react-native';
 
 const API_URL = `${baseURL.USED_BASE_URL}/api/medicalHistories`;
+const BASE_URL_IMG = `${baseURL.USED_BASE_URL}/api/pets`;
+const BASE_URL = `${baseURL.USED_BASE_URL}/api/products`;
+
+
 
 const MedicalHistoryService = {
     // Helper function to get the token
@@ -233,6 +238,44 @@ const MedicalHistoryService = {
             throw error;
         }
     },
+
+
+
+
+    uploadMedicalHistoryImages: async (imageUri) => {
+        try {
+            const token = await MedicalHistoryService.getToken();
+            const formData = new FormData();
+    
+            if (Platform.OS === 'web') {
+                const response = await fetch(imageUri);
+               
+                const blob = await response.blob();
+                formData.append('image', blob, 'MedicalHistoryImage.jpg');
+            } else {
+                formData.append('image', {
+                    uri: imageUri,
+                    name: 'MedicalHistoryImage.jpg',
+                    type: 'image/jpeg',
+                });
+            }
+            //console.log(response);
+            const response = await axios.post(`${BASE_URL}/uploadImage`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-Auth-Token': token,
+                },
+            });
+    console.log(response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error uploading medical history image:', error);
+            throw error;
+        }
+    },
+
+
+
 };
 
 export default MedicalHistoryService;

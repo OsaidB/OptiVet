@@ -119,6 +119,16 @@ const ManagerStack = () => {
                         <Text style={styles.navButtonText}>Create Employee Account</Text>
                     </TouchableOpacity>
                 </Link>
+
+
+
+                <Link href="ManagerStack/Products" asChild>
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>Products</Text>
+                    </TouchableOpacity>
+                </Link>
+
+
             </View>
         </ScrollView>
     );

@@ -34,7 +34,7 @@ export default function Products() {
 
     const [widthRatio, setWidthRatio] = useState('17%');
     const [searchText, setSearchText] = useState('');
-    const [categories, setCategories] = useState([{ id: 0, name: 'ALL' }, { id: 1, name: 'TOYS' }, { id: 2, name: 'COLLARS' }, { id: 3, name: 'TREATS' }]);
+    const [categories, setCategories] = useState([{ id: 0, name: 'ALL' }, { id: 1, name: 'TOYS' }, { id: 2, name: 'FOOD' }, { id: 3, name: 'TREATS' }]);
     //toystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoystoys
     //const { productId } = useLocalSearchParams(); // Retrieve clientId dynamically
     const [productId, setProductId] = useState();
@@ -77,7 +77,14 @@ export default function Products() {
 
 
 
-    
+    const deleteProductHandle = (id) => {
+        ProductService.deleteProduct(id);
+        const newProducts = products.filter(product => product.id !== id);
+        setProducts(newProducts);
+    };
+
+
+
 
     const SearchProduct = (searchString) => {
 
@@ -415,13 +422,13 @@ console.log(searchText);
 
 
 
-                                <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId } }} onPress={() => { setProductId(item.id) }} asChild>
-                                    <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }}>
+                                
+                                    <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }} onPress={() => deleteProductHandle(item.id)}>
 
                                         <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
 
                                     </TouchableOpacity>
-                                </Link>
+                                
 
 
 

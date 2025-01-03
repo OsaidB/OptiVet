@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView, Button, button, Input, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView, Button, button, Input, Alert } from 'react-native';
 import { Link, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from '@react-navigation/native';
 import MedicalHistoryService from "../../Services/MedicalHistoryService";
 import PetService from '../../Services/PetService';
 import baseURL from '../../Services/config'; // Adjust the path as necessary
+import * as ImagePicker from "expo-image-picker";
+import { Picker } from '@react-native-picker/picker';
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/medicalHistories`;
+const BASE_URL_IMAGES = `${baseURL.USED_BASE_URL}/api/pets`;
 //import { useRouter } from 'expo-router';
 //import { useRoute } from '@react-navigation/native';
 import MedicalSessionService from '../../Services/MedicalSessionService';
+import { id } from 'date-fns/locale';
+import { WINDOWS } from 'nativewind/dist/utils/selector';
 //import { newDate } from 'react-datepicker/dist/date_utils';
 
 
@@ -22,9 +27,16 @@ export default function MedicalHistory() {
     const [allergies, setAllergies] = useState([]);
     const [vaccinations, setVaccinations] = useState([]);
     const [surgeories, setSurgeories] = useState([]);
+    //const [imageUrls, setImageUrls] = useState([{ id: 1, name: '1735573696079-petImage.jpg' }, { id: 2, name: '1735573696079-petImage.jpg' }, { id: 3, name: '1735573696079-petImage.jpg' }, { id: 4, name: '1735573696079-petImage.jpg' }, { id: 5, name: '1735573696079-petImage.jpg' }, { id: 6, name: '1735573696079-petImage.jpg' }, { id: 7, name: '1735573696079-petImage.jpg' }, { id: 8, name: '1735573696079-petImage.jpg' }, { id: 9, name: '1735573696079-petImage.jpg' }, { id: 10, name: '1735573696079-petImage.jpg' }, { id: 11, name: '1735573696079-petImage.jpg' }, { id: 12, name: '1735573696079-petImage.jpg' }, { id: 13, name: '1735573696079-petImage.jpg' }, { id: 14, name: '1735573696079-petImage.jpg' }, { id: 15, name: '1735573696079-petImage.jpg' }, { id: 16, name: '1735573696079-petImage.jpg' }, { id: 17, name: '1735573696079-petImage.jpg' }, { id: 18, name: '1735573696079-petImage.jpg' }, { id: 19, name: '1735573696079-petImage.jpg' }]);
+    const { petId } = useLocalSearchParams();
+    // Stores any error message
+    const [counter, setCounter] = useState(0);
+    const [error, setError] = useState(null);
+    const [imageUrls, setImageUrls] = useState([]);
+    const [images, setImages] = useState([]);
 
-    const { petId } = useLocalSearchParams(); // Retrieve clientId dynamically
-
+    //const [addedImages, setAddedImages] = useState([]);
+    const [pickedImage, setPickedImage] = useState(null);
 
     //const route = useRoute();
 
@@ -39,7 +51,7 @@ export default function MedicalHistory() {
 
 
 
-    
+
     //const [medicalSessions, setMedicalSessions] = useState([{ id: 1, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }, { id: 2, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }, { id: 3, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }]);
     const [medicalSessions, setMedicalSessions] = useState([]);
     const [dietaryPreferencesText, setDietaryPreferencesText] = useState('');
@@ -49,10 +61,45 @@ export default function MedicalHistory() {
 
 
 
-
     useEffect(() => {
 
+        const fetchImages = async () => {
 
+            try {
+                const fetchedMedicalHistory = await MedicalHistoryService.getMedicalHistory(petId);
+
+
+                //setImageUrls(fetchedMedicalHistory.medicalHistoryImageUrls);
+
+
+                const fetchedImages = fetchedMedicalHistory.medicalHistoryImageUrls;
+                setImages(fetchedImages);
+                //console.log(images.length);
+                //console.log(fetchedImages);
+                for (let i = 0; i < fetchedImages.length; i++) {
+
+                    setImageUrls([...imageUrls, { id: i, url: fetchedImages[i] }]);
+                }
+                const counterValue = imageUrls.length + 1;
+                setCounter(counterValue);
+
+                //setCounter(imageUrls);
+                //setCounter(counter);
+                //console.log(counter);
+                //const fetchedMedicalHistoryy = await MedicalHistoryService.updateMedicalHistory({medicalHistoryImageUrls:[],notes:'heyyy'}, petId);
+                // console.log(fetchedMedicalHistoryy);
+                //console.log(fetchedMedicalHistoryy.medicalHistoryImageUrls);
+
+            } catch (error) {
+                console.error('Error fetching medical history', error);
+                Alert.alert('Error', 'Failed to load medical history');
+
+            }
+
+
+
+
+        };
 
 
         const fetchMedicalSessions = async () => {
@@ -142,7 +189,7 @@ export default function MedicalHistory() {
                 Alert.alert('Error', 'Failed to load notes.');
             }
         };
-
+        fetchImages();
         fetchNotesText();
         fetchDietaryPreferencesText();
         fetchAllergies();
@@ -153,6 +200,59 @@ export default function MedicalHistory() {
 
 
     }, []);
+
+
+    const pickImage = async () => {
+        const { status } = await ImagePicker.
+            requestMediaLibraryPermissionsAsync();
+
+        if (status !== "granted") {
+
+            // If permission is denied, show an alert
+            Alert.alert(
+                "Permission Denied",
+                `Sorry, we need camera 
+                 roll permission to upload images.`
+            );
+        } else {
+
+            // Launch the image library and get
+            // the selected image
+            const result =
+                await ImagePicker.launchImageLibraryAsync();
+
+            if (!result.canceled) {
+
+
+                try {
+                    () => { counter = counter + 1; };
+                    const medicalHistoryImage = await MedicalHistoryService.uploadMedicalHistoryImages(result.assets[0].uri);
+                    setImageUrls([...imageUrls, { id: counter, url: medicalHistoryImage }]);
+                    setImages([...images, medicalHistoryImage]);
+                    const fetchedMedicalHistoryy = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...images, medicalHistoryImage] }, petId);
+
+                    //setAddedImage({ id: counter, url: result.assets[0].uri });
+                    //setImageUrls(...imageUrls, {id:10,medicalHistoryImage});
+                    //setImageUrls(...imageUrls, {id:counter,url:medicalHistoryImage});
+
+                    //setPickedImage();
+
+                } catch (error) {
+                    console.error('Error uploading medical history image', error);
+                    Alert.alert('Error', 'Failed to load medical history image');
+
+                }
+
+
+                setError(null);
+
+
+
+
+            }
+        }
+    };
+
 
     const deleteChronicConditionHandle = (id) => {
         MedicalHistoryService.deleteChronicConditionById(id);
@@ -230,37 +330,93 @@ export default function MedicalHistory() {
     const updateMedicalHistory = async () => {
 
         if (dietaryPreferencesText === '') {
-            const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: null, notes: notesText }, petId);
-            setDietaryPreferencesText('');
-            setNotesText('');
+            //const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: null, notes: notesText }, petId);
+            const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...images], dietaryPreferences: dietaryPreferencesText, notes: notesText }, petId);
+
+            // setDietaryPreferencesText('');
+            // setNotesText('');
         }
         if (notesText === '') {
-            const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: dietaryPreferencesText, notes: null }, petId);
-            setDietaryPreferencesText('');
-            setNotesText('');
+            const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...images], dietaryPreferences: dietaryPreferencesText, notes: notesText }, petId);
+            // setDietaryPreferencesText('');
+            // setNotesText('');
         }
-        const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ dietaryPreferences: dietaryPreferencesText, notes: notesText }, petId);
+        const newDietaryPreferences = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...images], dietaryPreferences: dietaryPreferencesText, notes: notesText }, petId);
         setDietaryPreferencesText(newDietaryPreferences.dietaryPreferences);
         setNotesText(newDietaryPreferences.notes);
     };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // const deleteAddedImage = (id) => {
+    //     MedicalHistoryService.deleteSurgeoryById(id);
+    //     const newSurgeories = surgeories.filter(surgeory => surgeory.id !== id);
+    //     setSurgeories(newSurgeories);
+    // };
+
+    // const addAddedImage = async () => {
+    //     if (conditionText === '') {
+    //         Alert.alert('Please enter a chronic condition text before you add it')
+    //     }
+    //     else {
+    //         const newChronicCondition = await MedicalHistoryService.createChronicConditionByPetId({ chronicCondition: conditionText }, petId);
+
+    //         setConditions([...conditions, newChronicCondition]);
+    //         setConditionText('');
+    //     }
+    // };
+
+
+
+
+
+
+
+
+
+
+
+
     return (
         <ScrollView>
+
             <View>
-                <Text style={{ fontSize: 35, marginLeft: 10 }}>Medical History:</Text>
+                <Text style={{ fontSize: 35, marginLeft: 10, alignSelf: 'center', marginTop: 20 }}>Medical History</Text>
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Chronic Conditions:</Text>
-                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
-                        <View style={{ flex: 3, margin: 10 }}>
-                            <TextInput value={conditionText} onChangeText={setConditionText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
-                        </View>
-                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
-                            <TouchableOpacity>
-                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addChronicConditionHandle()}>Add Condition</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Chronic Conditions</Text>
+                    <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                        <TextInput value={conditionText} onChangeText={setConditionText} placeholder='Add chronic condition here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
+
+
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addChronicConditionHandle()}>Add Condition</Text>
+                        </TouchableOpacity>
+
                     </View>
-                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}>
                         {conditions.map((item) => {
                             return (
                                 <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteChronicConditionHandle={deleteChronicConditionHandle}>
@@ -280,18 +436,18 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Allergies:</Text>
-                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
-                        <View style={{ flex: 3, margin: 10 }}>
-                            <TextInput value={allergyText} onChangeText={setAllergyText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
-                        </View>
-                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
-                            <TouchableOpacity>
-                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addAllergyHandle()}>Add Allergy</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Allergies</Text>
+                    <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                        <TextInput value={allergyText} onChangeText={setAllergyText} numberOfLines={4} placeholder='Add allergy here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
+
+
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addAllergyHandle()}>Add Allergy</Text>
+                        </TouchableOpacity>
+
                     </View>
-                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}>
                         {allergies.map((item) => {
                             return (
                                 <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteAllergyHandle={deleteAllergyHandle}>
@@ -310,18 +466,18 @@ export default function MedicalHistory() {
                 </View>
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Vaccinations:</Text>
-                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
-                        <View style={{ flex: 3, margin: 10 }}>
-                            <TextInput value={vaccinationText} onChangeText={setVaccinationText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
-                        </View>
-                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
-                            <TouchableOpacity>
-                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addVaccinationHandle()}>Add Vaccination</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Vaccinations</Text>
+                    <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                        <TextInput value={vaccinationText} onChangeText={setVaccinationText} numberOfLines={4} placeholder='Add vaccination here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
+
+
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addVaccinationHandle()}>Add Vaccination</Text>
+                        </TouchableOpacity>
+
                     </View>
-                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}>
                         {vaccinations.map((item) => {
                             return (
                                 <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteVaccinationHandle={deleteVaccinationHandle}>
@@ -341,18 +497,19 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Surgeories:</Text>
-                    <View style={{ margin: 10, flex: 1, flexDirection: 'row' }}>
-                        <View style={{ flex: 3, margin: 10 }}>
-                            <TextInput value={surgeoryText} onChangeText={setSurgeoryText} multiline numberOfLines={4} placeholder='add Chronic Condition Here' placeholderTextColor={'grey'} style={{ borderWidth: 2, borderRadius: 8, color: 'white', borderColor: 'white' }} ></TextInput>
-                        </View>
-                        <View style={{ flex: 1, backgroundColor: 'orange', alignSelf: 'center', borderWidth: 2, borderRadius: 8, borderColor: 'black' }}>
-                            <TouchableOpacity>
-                                <Text style={{ flex: 1, alignSelf: 'center' }} onPress={() => addSurgeoryHandle()}>Add Surgeory</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Surgeories</Text>
+
+                    <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                        <TextInput value={surgeoryText} onChangeText={setSurgeoryText} numberOfLines={4} placeholder='Add surgeory here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
+
+
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addSurgeoryHandle()}>Add Surgeory</Text>
+                        </TouchableOpacity>
+
                     </View>
-                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B' }}>
+                    <ScrollView style={{ height: 150, backgroundColor: '#508C9B', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}>
                         {surgeories.map((item) => {
                             return (
                                 <View key={item.id} style={{ margin: 10, backgroundColor: '#201E43', borderRadius: 8 }} deleteSurgeoryHandle={deleteSurgeoryHandle}>
@@ -394,9 +551,9 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Medical Sessions: </Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Medical Sessions</Text>
 
-                    <ScrollView style={{ height: 400, backgroundColor: '#508C9B' }}>
+                    <ScrollView style={{ height: 400, backgroundColor: '#508C9B', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}>
                         {medicalSessions.map((item) => {
                             return (
 
@@ -453,7 +610,61 @@ export default function MedicalHistory() {
 
 
 
+                <View style={{ justifyContent: 'flex-start', alignItems: 'center', marginTop: 40, marginBottom: 10, marginHorizontal: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
 
+                    <Text style={{ marginLeft: 10, marginVertical: 20, fontSize: 30, color: 'white' }}>Medical History Images </Text>
+
+
+                    <TouchableOpacity style={{ backgroundColor: 'white', borderRadius: 5, paddingVertical: 10, paddingHorizontal: 20, marginBottom: 20 }}>
+                        <Text style={{ color: 'black', alignSelf: 'center', fontSize: 20 }} onPress={pickImage}>Add new image</Text>
+                    </TouchableOpacity>
+
+
+                    {(imageUrls.length != 0) ? (<ScrollView contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', height: 400 }} style={{ alignSelf: 'center', width: '100%', backgroundColor: '#508C9B', paddingBottom: 10, borderBottomStartRadius: 20, borderBottomEndRadius: 20 }} showsVerticalScrollIndicator={false}>
+
+
+
+                        {imageUrls.map((item) => {
+                            return (
+
+                                <View key={item.id} style={{ width: '13%', backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center', borderRadius: 15 }}>
+
+
+                                    <Image source={{ uri: `${BASE_URL_IMAGES}${item.url}` }} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
+
+                                </View>
+
+                            )
+
+
+                        })}
+
+
+                        {/* {addedImages.map((item) => {
+                            return (
+
+                                <View key={item.id} style={{ width: '13%', backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center', borderRadius: 15 }}>
+
+
+                                    <Image source={item.url} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
+
+                                </View>
+
+
+                            )
+                        })} */}
+
+
+                    </ScrollView>) : (<View style={{ alignItems: 'center', backgroundColor: '#508C9B', width: '100%', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}><Text style={{ color: '#e9eff5', fontSize: 20, fontFamily: 'bold', marginVertical: 20 }}>No images picked for this medical history</Text></View>)}
+
+
+
+
+
+
+
+
+                </View>
 
 
 
@@ -465,7 +676,7 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Dietary Preferences:</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginBottom: 10, fontSize: 30, color: 'white' }}>Dietary preferences</Text>
                     <TextInput
                         editable
                         multiline
@@ -473,12 +684,12 @@ export default function MedicalHistory() {
                         value={dietaryPreferencesText}
                         onChangeText={setDietaryPreferencesText}
                         onBlur={updateMedicalHistory}
-                        style={{ color: 'white', borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 10, borderColor: 'white' }}
+                        style={{ paddingLeft: 15, paddingTop: 15, color: 'white', borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 10, borderColor: 'white', borderRadius: 12 }}
                     />
                 </View>
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25, color: 'white' }}>Notes About The Pet:</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginBottom: 10, fontSize: 30, color: 'white' }}>Notes about the pet</Text>
 
                     <TextInput
                         editable
@@ -487,9 +698,19 @@ export default function MedicalHistory() {
                         value={notesText}
                         onChangeText={setNotesText}
                         onBlur={updateMedicalHistory}
-                        style={{ color: 'white', borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 10, borderColor: 'white' }}
+                        style={{ paddingLeft: 15, paddingTop: 15, color: 'white', borderWidth: 2, marginHorizontal: 10, marginBottom: 10, borderColor: 'white', borderRadius: 12 }}
                     />
                 </View>
+
+
+                <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, borderRadius: 20 }}>
+                    <Link href={{ pathname: "/ManagerStack/AddProduct" }} asChild>
+                        <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, marginVertical: 10 }}>
+                            <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Download medical history (PDF)</Text>
+                        </TouchableOpacity>
+                    </Link>
+                </View>
+
             </View>
         </ScrollView>
     );
