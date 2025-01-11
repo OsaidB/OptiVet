@@ -114,6 +114,18 @@ const ManagerStack = () => {
                     </TouchableOpacity>
                 </Link>
 
+                <Link
+                    href={{
+                        pathname: "ManagerStack/Products",
+                        params: { userId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.navButton}>
+                        <Text style={styles.navButtonText}>Products</Text>
+                    </TouchableOpacity>
+                </Link>
+
                 <Link href="ManagerStack/AddEmployee" asChild>
                     <TouchableOpacity style={styles.navButton}>
                         <Text style={styles.navButtonText}>Create Employee Account</Text>
