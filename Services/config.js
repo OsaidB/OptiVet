@@ -6,8 +6,9 @@ const BASE_URLS = {
     OsaidLaptopHome: "http://192.168.0.105:8080", // Osaid's laptop base URL
     OsaidLaptopJawaker: "http://192.168.2.15:8080", // Osaid's laptop base URL
     local: "http://localhost:8080", // Osaid's laptop base URL
-    server: "https://optivet-backend.onrender.com", // Osaid's laptop base URL
-    server5: "http://18.159.216.100:8080", // Osaid's laptop base URL
+    // server: "https://optivet-backend.onrender.com", // Osaid's laptop base URL
+    server: "https://optivet-backend-asdk.onrender.com", // Osaid's laptop base URL
+    server5: "http://18.159.216.100", // Osaid's laptop base URL
 
     MurrarLaptopHome: "http://192.168.56.1:8080", // Murrar's laptop base URL
     //////////////////////////////////////////////////////////////////////////////////////
