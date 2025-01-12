@@ -8,7 +8,7 @@ const BASE_URLS = {
     local: "http://localhost:8080", // Osaid's laptop base URL
     oldServer: "https://optivet-backend-asdk.onrender.com", // Osaid's laptop base URL
     server: "https://optivet-backend.onrender.com", // Osaid's laptop base URL
-    lastAWSServer: "http://18.159.216.100:8080", // Osaid's laptop base URL
+    lastAWSServer: "http://18.159.216.100", // Osaid's laptop base URL
 
     MurrarLaptopHome: "http://192.168.56.1:8080", // Murrar's laptop base URL
     //////////////////////////////////////////////////////////////////////////////////////
