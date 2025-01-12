@@ -7,7 +7,9 @@ import {
     View,
     ScrollView,
     Modal,
+    Platform,
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
 import AuthService from '../Services/authService';
@@ -58,55 +60,10 @@ const SignUpScreen = () => {
         }
     };
 
-    return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Sign Up</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="First Name"
-                value={firstName}
-                onChangeText={setFirstName}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Last Name"
-                value={lastName}
-                onChangeText={setLastName}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Phone Number"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
-            />
-            <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setIsPickerVisible(true)}
-            >
-                <Text style={styles.dateButtonText}>
-                    {dateOfBirth ? dateOfBirth.toISOString().split('T')[0] : 'Select Date of Birth'}
-                </Text>
-            </TouchableOpacity>
-
-            {/* Modal for Date Picker */}
-            {isPickerVisible && (
-                <Modal transparent animationType="slide">
+    const renderDatePicker = () => {
+        if (Platform.OS === 'web') {
+            return (
+                <Modal transparent animationType="slide" visible={isPickerVisible}>
                     <View style={styles.modalContainer}>
                         <View style={styles.pickerContainer}>
                             <Text style={styles.pickerTitle}>Select Date of Birth</Text>
@@ -125,7 +82,75 @@ const SignUpScreen = () => {
                         </View>
                     </View>
                 </Modal>
-            )}
+            );
+        }
+
+        return (
+            <DateTimePickerModal
+                isVisible={isPickerVisible}
+                mode="date"
+                date={dateOfBirth}
+                onConfirm={(selectedDate) => {
+                    setIsPickerVisible(false);
+                    setDateOfBirth(selectedDate);
+                }}
+                onCancel={() => setIsPickerVisible(false)}
+            />
+        );
+    };
+
+    return (
+        <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.title}>Sign Up</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                placeholderTextColor={'gray'}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholderTextColor={'gray'}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="First Name"
+                value={firstName}
+                onChangeText={setFirstName}
+                placeholderTextColor={'gray'}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Last Name"
+                value={lastName}
+                onChangeText={setLastName}
+                placeholderTextColor={'gray'}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                placeholderTextColor={'gray'}
+            />
+            <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setIsPickerVisible(true)}
+            >
+                <Text style={styles.dateButtonText}>
+                    {dateOfBirth ? dateOfBirth.toISOString().split('T')[0] : 'Select Date of Birth'}
+                </Text>
+            </TouchableOpacity>
+
+            {renderDatePicker()}
 
             <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                 <Text style={styles.buttonText}>Sign Up</Text>
@@ -215,7 +240,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     dateInput: {
-        width: '100%',
+        width: '96%',
         padding: 10,
         borderRadius: 5,
         borderWidth: 1,

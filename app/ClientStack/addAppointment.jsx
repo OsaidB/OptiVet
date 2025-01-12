@@ -34,17 +34,36 @@ export default function AddAppointment() {
 
 
     // Fetch vets
+    // useEffect(() => {
+    //     const fetchVets = async () => {
+    //         try {
+    //             const vetsData = await UserService.getUsersByRole("MANAGER");
+    //             setVets(vetsData);
+    //         } catch (error) {
+    //             console.error('Error fetching vets:', error);
+    //         }
+    //     };
+    //     fetchVets();
+    // }, [clientId]);
+
     useEffect(() => {
         const fetchVets = async () => {
             try {
-                const vetsData = await UserService.getUsersByRole("VET");
-                setVets(vetsData);
+                // Fetch users for both MANAGER and VET roles
+                const managers = await UserService.getUsersByRole("MANAGER");
+                const vets = await UserService.getUsersByRole("VET");
+
+                // Combine results and remove duplicates if needed
+                const combinedVets = [...new Map([...managers, ...vets].map(user => [user.id, user])).values()];
+
+                setVets(combinedVets);
             } catch (error) {
                 console.error('Error fetching vets:', error);
             }
         };
         fetchVets();
-    }, []);
+    }, [clientId]);
+
 
     // useEffect(() => {
     //     const fetchVets = async () => {
