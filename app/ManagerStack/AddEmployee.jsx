@@ -129,8 +129,24 @@ const AddEmployee = () => {
                             <Text style={styles.pickerTitle}>Select Date of Birth</Text>
                             <input
                                 type="date"
-                                value={dateOfBirth.toISOString().split('T')[0]}
-                                onChange={(e) => setDateOfBirth(new Date(e.target.value))}
+                                value={
+                                    dateOfBirth
+                                        ? dateOfBirth.toISOString().split('T')[0]
+                                        : "" // Fallback if dateOfBirth is not valid
+                                }
+                                onChange={(e) => {
+                                    const selectedDate = new Date(e.target.value);
+                                    if (selectedDate.toString() !== "Invalid Date") {
+                                        setDateOfBirth(selectedDate); // Update state with valid date
+                                    } else {
+                                        Alert.alert(
+                                            "Invalid Date",
+                                            "Please select a valid date.",
+                                            [{ text: "OK" }]
+                                        );
+                                    }
+                                }}
+                                max={new Date().toISOString().split('T')[0]} // Restrict to today or earlier
                                 style={styles.dateInput}
                             />
                             <TouchableOpacity
@@ -143,6 +159,9 @@ const AddEmployee = () => {
                     </View>
                 </Modal>
             )}
+
+
+
 
             {/* Role Selection */}
             <Text style={styles.label}>Select Role</Text>

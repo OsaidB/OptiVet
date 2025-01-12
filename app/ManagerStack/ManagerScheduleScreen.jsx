@@ -128,6 +128,7 @@ const ManagerScheduleScreen = () => {
 
         try {
             const newSlot = await AppointmentService.createAppointment(appointmentData);
+            console.log(newSlot);
             Alert.alert('Success', 'Appointment slot saved successfully!');
             setAvailableSlots([...availableSlots, newSlot]);
 

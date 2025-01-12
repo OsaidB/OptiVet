@@ -6,9 +6,9 @@ const BASE_URLS = {
     OsaidLaptopHome: "http://192.168.0.105:8080", // Osaid's laptop base URL
     OsaidLaptopJawaker: "http://192.168.2.15:8080", // Osaid's laptop base URL
     local: "http://localhost:8080", // Osaid's laptop base URL
-    // server: "https://optivet-backend.onrender.com", // Osaid's laptop base URL
-    server: "https://optivet-backend-asdk.onrender.com", // Osaid's laptop base URL
-    server5: "http://18.159.216.100", // Osaid's laptop base URL
+    oldServer: "https://optivet-backend-asdk.onrender.com", // Osaid's laptop base URL
+    server: "https://optivet-backend.onrender.com", // Osaid's laptop base URL
+    lastAWSServer: "http://18.159.216.100:8080", // Osaid's laptop base URL
 
     MurrarLaptopHome: "http://192.168.56.1:8080", // Murrar's laptop base URL
     //////////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ const BASE_URLS = {
 };
 
 // Choose the base URL you want to use
-const USED_BASE_URL = BASE_URLS.server5; // Change this to select a different base URL
+const USED_BASE_URL = BASE_URLS.lastAWSServer; // Change this to select a different base URL
 // const USED_BASE_URL = BASE_URLS.SwitiLaptop; // Change this to select a different base URL
 
 const baseURL = {
