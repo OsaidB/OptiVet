@@ -18,7 +18,15 @@ const MenuScreen = () => {
             >
                 <Text style={styles.menuButtonText}>Settings</Text>
             </TouchableOpacity>
-
+            <TouchableOpacity
+                style={styles.menuButton}
+                onPress={() => {
+                    console.log("Navigating to create an employee");
+                    router.push("/ManagerStack/AddEmployee"); // Replace with your settings screen route
+                }}
+            >
+                <Text style={styles.menuButtonText}>Add Employee</Text>
+            </TouchableOpacity>
             <TouchableOpacity
                 style={styles.menuButton}
                 onPress={() => {

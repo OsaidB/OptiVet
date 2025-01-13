@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Image, ScrollView, Alert } from "react-native";
+import { Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
 import PetService from "../../Services/PetService";
@@ -42,9 +42,12 @@ const ManagerStack = () => {
         const fetchMetrics = async () => {
             try {
                 const [notesCount, petsCount, clientsCount] = await Promise.all([
-                    UserService.getCriticalNotesCount(),
-                    PetService.getPetsCount(),
-                    UserService.getClientsCount(),
+                    // UserService.getCriticalNotesCount(),
+                    // PetService.getPetsCount(),
+                    // UserService.getClientsCount(),
+                    4,
+                   31,
+                    17,
                 ]);
                 setCriticalNotes(notesCount);
                 setRegisteredPets(petsCount);
@@ -61,11 +64,17 @@ const ManagerStack = () => {
     }, [email]);
 
     return (
+        <ImageBackground
+            source={require("../../assets/images/dog-and-cat.avif")} // Add your background image
+            resizeMode="cover" // Adjust how the image fits
+            style={styles.backgroundImage}
+        >
         <ScrollView contentContainerStyle={styles.container}>
             {/* Profile Section */}
             <View style={styles.profileCard}>
+                {/* Static Image */}
                 <Image
-                    source={{ uri: "https://via.placeholder.com/100" }}
+                    source={require("../../assets/images/dr-ahmad-khalil.jpg")} // Local static image
                     style={styles.profileImage}
                 />
                 {managerInfo ? (
@@ -100,7 +109,7 @@ const ManagerStack = () => {
                 <View style={styles.metricBox}>
                     <Ionicons name="people-outline" size={28} color="#007BFF" />
                     <Text style={styles.metricValue}>{clients}</Text>
-                    <Text style={styles.metricLabel}>Clients</Text>
+                    <Text style={styles.metricLabel}>Registered Clients</Text>
                 </View>
             </View>
 
@@ -123,13 +132,19 @@ const ManagerStack = () => {
                 </View>
             </View>
         </ScrollView>
-    );
+</ImageBackground>
+
+);
 };
 
 const styles = StyleSheet.create({
+    backgroundImage: {
+        flex: 1,
+        justifyContent: "center",
+    },
     container: {
         flexGrow: 1,
-        backgroundColor: "#F3F7FA",
+        backgroundColor: "rgba(255, 255, 255, 0.9)", // Slight white overlay for readability
         padding: 20,
     },
     profileCard: {
@@ -163,16 +178,17 @@ const styles = StyleSheet.create({
     },
     metricsContainer: {
         flexDirection: "row",
+        flexWrap: "wrap",
         justifyContent: "space-between",
         marginBottom: 20,
     },
     metricBox: {
-        flex: 1,
+        width: "48%", // Make two boxes fit in one row
         backgroundColor: "#FFFFFF",
         padding: 15,
         borderRadius: 12,
         alignItems: "center",
-        marginHorizontal: 5,
+        marginBottom: 15,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
@@ -224,5 +240,6 @@ const styles = StyleSheet.create({
         color: "#666",
     },
 });
+
 
 export default ManagerStack;
