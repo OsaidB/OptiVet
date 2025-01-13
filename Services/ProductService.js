@@ -45,7 +45,7 @@ const ProductService = {
             });
             return response.data;
         } catch (error) {
-            console.error('Error creating producTTTTTTTTTt:', error);
+            console.error('Error creating product:', error);
             throw error;
         }
     },
@@ -423,7 +423,7 @@ console.log(response.data);
             });
             return response.data;
         } catch (error) {
-            console.error(`Error fetching product with ID: ${categoryId}`, error);
+            console.error(`Error fetching product with ID: ${productId}`, error);
             throw error;
         }
     },

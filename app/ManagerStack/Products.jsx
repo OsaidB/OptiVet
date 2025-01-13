@@ -63,18 +63,22 @@ export default function Products() {
     useEffect(() => {
 
         SearchProduct();
-    }, [selectedCategory]);
+    }, [selectedCategory,products]);
 
 
 
 
     // useEffect(() => {
 
-        
+
     // }, [searchText]);
 
 
-
+    // const deleteVaccinationHandle = (id) => {
+    //     MedicalHistoryService.deleteVaccinationById(id);
+    //     const newVaccinations = vaccinations.filter(vaccination => vaccination.id !== id);
+    //     setVaccinations(newVaccinations);
+    // };
 
 
     const deleteProductHandle = (id) => {
@@ -90,7 +94,7 @@ export default function Products() {
 
         console.log(selectedCategory);
 
-console.log(searchText);
+        console.log(searchText);
         // if(searchString === undefined){
         // searchString = '1';
         // }
@@ -114,7 +118,7 @@ console.log(searchText);
             else {
                 console.log('heyy');
                 setCategorizedProducts([]);
-            setSearchedProducts([]);
+                setSearchedProducts([]);
 
             }
         }
@@ -411,7 +415,7 @@ console.log(searchText);
                                     </View> */}
 
                                 {/* <View style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 10, marginHorizontal: 10 }}> */}
-                                <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId} }} onPress={() => { setProductId(item.id) }} asChild>
+                                <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId } }} onPress={() => { setProductId(item.id) }} asChild>
                                     <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }}>
 
                                         <Image source={require('../../assets/images/pencil (2).png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
@@ -422,13 +426,13 @@ console.log(searchText);
 
 
 
-                                
-                                    <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }} onPress={() => deleteProductHandle(item.id)}>
 
-                                        <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
+                                <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }} onPress={() => deleteProductHandle(item.id)}>
 
-                                    </TouchableOpacity>
-                                
+                                    <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
+
+                                </TouchableOpacity>
+
 
 
 
@@ -462,9 +466,9 @@ console.log(searchText);
 
 
 
-            <Link href={{ pathname: "/ManagerStack/AddProduct" }}  asChild>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, width: '50%' , marginVertical:10}}>
-                    <Text style={{fontSize:20, color:'white', fontWeight:'bold'}}>Add New Product</Text>
+            <Link href={{ pathname: "/ManagerStack/AddProduct" }} asChild>
+                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, width: '50%', marginVertical: 10 }}>
+                    <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Add New Product</Text>
                 </TouchableOpacity>
             </Link>
 
