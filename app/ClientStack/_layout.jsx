@@ -63,7 +63,7 @@ export default function ClientStackLayout() {
                 <TouchableOpacity onPress={() => console.log('Back pressed')} style={styles.iconButton}>
                     <Ionicons name="arrow-back" size={24} color="#FFF" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Client Dashboard</Text>
+                <Text style={styles.headerTitle}>🐾OptiVet</Text>
                 <TouchableOpacity onPress={() => console.log('Profile pressed')} style={styles.iconButton}>
                     <Ionicons name="person-circle" size={24} color="#FFF" />
                 </TouchableOpacity>

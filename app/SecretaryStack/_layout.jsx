@@ -16,7 +16,7 @@ export default function SecretaryStackLayout() {
                 <TouchableOpacity onPress={() => console.log('Menu pressed')} style={styles.iconButton}>
                     <Ionicons name="menu" size={24} color="#FFF" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Secretary Dashboard</Text>
+                <Text style={styles.headerTitle}>🐾OptiVet</Text>
                 <TouchableOpacity onPress={() => console.log('Profile pressed')} style={styles.iconButton}>
                     <Ionicons name="person-circle" size={24} color="#FFF" />
                 </TouchableOpacity>

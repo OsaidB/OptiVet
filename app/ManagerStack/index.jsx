@@ -65,10 +65,14 @@ const ManagerStack = () => {
 
     return (
         <ImageBackground
-            source={require("../../assets/images/dog-and-cat.avif")} // Add your background image
-            resizeMode="cover" // Adjust how the image fits
+            source={require("../../assets/images/dog-and-cat.jpeg")} // Add your background image
+            resizeMode="center" // Adjust how the image fits
             style={styles.backgroundImage}
         >
+            {/*<Image*/}
+            {/*    source={require("../../assets/images/dr-ahmad-khalil.jpg")} // Local static image*/}
+            {/*    style={styles.profileImage}*/}
+            {/*/>*/}
         <ScrollView contentContainerStyle={styles.container}>
             {/* Profile Section */}
             <View style={styles.profileCard}>

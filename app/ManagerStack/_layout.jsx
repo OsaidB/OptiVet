@@ -30,6 +30,7 @@ export default function ManagerStackLayout() {
                 if (storedEmail) {
                     setEmail(storedEmail);
                 } else {
+                    console.error("No email found in AsyncStorage");
                     Alert.alert("Error", "No email found. Please log in again.");
                 }
             } catch (error) {
@@ -63,7 +64,7 @@ export default function ManagerStackLayout() {
             <View
                 style={[
                     styles.header,
-                    { backgroundColor: colorScheme === "dark" ? "#1D3D47" : "#A1CEDC" },
+                    { backgroundColor : "#A1CEDC" },
                 ]}
             >
                 <TouchableOpacity style={styles.iconButton}>
@@ -118,7 +119,7 @@ export default function ManagerStackLayout() {
             <Stack
                 screenOptions={{
                     headerShown: false,
-                    contentStyle: { backgroundColor: colorScheme === "dark" ? "#121212" : "#F9F9F9" },
+                    contentStyle: { backgroundColor: "#F9F9F9" },
                 }}
             >
                 <Stack.Screen name="index" />
@@ -126,14 +127,52 @@ export default function ManagerStackLayout() {
             </Stack>
 
             {/* Footer */}
-            <View style={[styles.footer, { backgroundColor: colorScheme === "dark" ? "#1D3D47" : "#FFFFFF" }]}>
+            <View style={[styles.footer, { backgroundColor:  "#1D3D47"  }]}>
                 <Link href="/ManagerStack" asChild>
                     <TouchableOpacity style={styles.footerButton}>
                         <Ionicons name="home-outline" size={24} color="#FFF" />
                         <Text style={styles.footerButtonText}>Home</Text>
                     </TouchableOpacity>
                 </Link>
-                {/* Other footer links */}
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/ManagerScheduleScreen",
+                        params: { userId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.footerButton}>
+                        <Ionicons name="calendar-outline" size={24} color={ '#FFF' } />
+                        <Text style={styles.footerButtonText}>Appointments</Text>
+                    </TouchableOpacity>
+                </Link>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/WalkInClientsScreen",
+                        params: { vetId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.footerButton}>
+                        <Ionicons name="people-outline" size={24} color={'#FFF' } />
+                        <Text style={styles.footerButtonText}>Clients</Text>
+                    </TouchableOpacity>
+                </Link>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/MsgsScreen",
+                        params: { userId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() => console.log('Messages')}
+                    >
+                        <Ionicons name="chatbox-outline" size={24} color={'#FFF' } />
+                        <Text style={styles.footerButtonText}>Messages</Text>
+                    </TouchableOpacity>
+                </Link>
             </View>
         </ThemeProvider>
     );
