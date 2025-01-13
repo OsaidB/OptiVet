@@ -68,19 +68,19 @@ const ManagerAppointmentsScreen = () => {
     const renderAppointment = ({ item }) => (
         <TouchableOpacity onPress={() => handleAppointmentPress(item)}>
             <View style={styles.appointmentItem}>
-                <View style={styles.cardContent}>
+                <View style={styles.rowContainer}>
                     {/* Pet Image */}
-                    {item.petImage ? (
-                        <Image
-                            source={{ uri: item.petImage }}
-                            style={styles.petImage}
-                            resizeMode="cover"
-                            // tintColor="desired-color"
-                            tintColor={null}
-                        />
-                    ) : (
-                        <Text style={styles.noImageText}>No Image Available</Text>
-                    )}
+                    <View style={styles.imageContainer}>
+                        {item.petImage ? (
+                            <Image
+                                source={{ uri: item.petImage }}
+                                style={styles.petImage}
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <Text style={styles.noImageText}>No Image Available</Text>
+                        )}
+                    </View>
 
                     {/* Appointment Details */}
                     <View style={styles.detailsContainer}>
@@ -139,6 +139,9 @@ const ManagerAppointmentsScreen = () => {
                         </TouchableOpacity>
                     </TouchableOpacity>
                 </Modal>
+                <TouchableOpacity style={styles.scheduleButton} onPress={() => router.push({ pathname: '/ManagerStack/ManagerScheduleScreen', params: { userId } })}>
+                    <Text style={styles.scheduleButtonText}>Publish Available Slots</Text>
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
 
@@ -226,18 +229,43 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 
+    rowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
     imageContainer: {
         marginRight: 15,
     },
     petImage: {
-        width: 60,
-        height: 60,
+        width: 90,
+        height: 90,
         borderRadius: 30,
         backgroundColor: '#f0f0f0',
     },
+    detailsContainer: {
+        flex: 1, // Ensures the details container takes up remaining space
+    },
+
+    scheduleButton: {
+        marginTop: 10,
+        backgroundColor: '#007BFF',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+    scheduleButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
 });
-
-
-
 
 export default ManagerAppointmentsScreen;

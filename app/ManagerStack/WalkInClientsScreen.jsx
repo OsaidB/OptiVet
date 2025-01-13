@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import {Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, SafeAreaView} from 'react-native';
 import ClientService from '../../Services/ClientService';
 import { Link, useRouter, useLocalSearchParams  } from "expo-router"; // Import useRouter
 
@@ -71,62 +71,70 @@ const WalkInClientsScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Walk-in Check-in</Text>
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Search by client or pet name..."
-                value={searchQuery}
-                onChangeText={handleSearch}
-            />
-            <FlatList
-                data={filteredClients}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderClient}
-            />
-            <Modal
-                visible={modalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalContainer}
-                    activeOpacity={1}
-                    onPressOut={() => setModalVisible(false)}
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Walk-in Check-in</Text>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search by client or pet name..."
+                    value={searchQuery}
+                    onChangeText={handleSearch}
+                />
+                <FlatList
+                    data={filteredClients}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderClient}
+                />
+                <Modal
+                    visible={modalVisible}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setModalVisible(false)}
                 >
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
-                        {selectedPet && (
-                            <>
-                                <Text style={styles.modalTitle}>Pet Details</Text>
-                                <Text style={styles.modalText}>Name: {selectedPet.name}</Text>
-                                <Text style={styles.modalText}>Type: {selectedPet.type}</Text>
-                                <Text style={styles.modalText}>Breed: {selectedPet.breed}</Text>
-                                <Text style={styles.modalText}>Birth Date: {selectedPet.birthDate}</Text>
-                                <Text style={styles.modalText}>Medical History: {selectedPet.medicalHistory}</Text>
+                    <TouchableOpacity
+                        style={styles.modalContainer}
+                        activeOpacity={1}
+                        onPressOut={() => setModalVisible(false)}
+                    >
+                        <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
+                            {selectedPet && (
+                                <>
+                                    <Text style={styles.modalTitle}>Pet Details</Text>
+                                    <Text style={styles.modalText}>Name: {selectedPet.name}</Text>
+                                    <Text style={styles.modalText}>Type: {selectedPet.type}</Text>
+                                    <Text style={styles.modalText}>Breed: {selectedPet.breed}</Text>
+                                    <Text style={styles.modalText}>Birth Date: {selectedPet.birthDate}</Text>
+                                    <Text style={styles.modalText}>Medical History: {selectedPet.medicalHistory}</Text>
 
-                                <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
-                                    <Text style={styles.buttonText}>Start a Medical Session</Text>
-                                </TouchableOpacity>
+                                    <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
+                                        <Text style={styles.buttonText}>Start a Medical Session</Text>
+                                    </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
-                                    <Text style={styles.buttonText}>Close</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
+                                    <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
+                                        <Text style={styles.buttonText}>Close</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </TouchableOpacity>
                     </TouchableOpacity>
-                </TouchableOpacity>
-            </Modal>
-        </View>
+                </Modal>
+            </View>
+        </SafeAreaView>
+
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+
     container: {
         flex: 1,
         padding: 20,
         alignItems: 'center',
-        backgroundColor:'#B7B5B5FF'
+        // backgroundColor:'#B7B5B5FF'
     },
     title: {
         fontSize: 24,

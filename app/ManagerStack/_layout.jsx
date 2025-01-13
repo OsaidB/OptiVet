@@ -83,7 +83,7 @@ export default function ManagerStackLayout() {
                 </Link>
                 <Link
                     href={{
-                        pathname: "/ManagerStack/ManagerScheduleScreen",
+                        pathname: "/ManagerStack/ManagerAppointmentsScreen",
                         params: { userId: managerInfo?.userId },
                     }}
                     asChild
