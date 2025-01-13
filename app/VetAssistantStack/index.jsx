@@ -245,19 +245,26 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     categoryListContainer: {
-        marginBottom: Platform.OS === 'web' ? 10 : -160,
         flexDirection: 'row',
+        justifyContent: 'space-between', // Ensure even spacing between items
+        alignItems: 'center', // Align items vertically in the center
+        paddingHorizontal: 10, // Add padding for better spacing
+        position: 'absolute', // Fix the position
+        top: 0, // Stick it to the top
+        left: 0,
+        right: 0,
+        backgroundColor: '#F0F4F8', // Match the background color
+        zIndex: 1, // Ensure it stays above other content
+        paddingVertical: 10,
     },
     categoryItem: {
         backgroundColor: '#d1e1f6', // Soft blue for unselected categories
         paddingVertical: 8,
         paddingHorizontal: 15,
         borderRadius: 25,
-        marginRight: 10,
+        marginHorizontal: 5, // Add horizontal spacing between items
         alignItems: 'center',
         justifyContent: 'center',
-        width: 100, // Fixed width for consistent size
-        height: 40, // Fixed height for consistent size
     },
     selectedCategoryItem: {
         backgroundColor: '#3498DB', // Accent color for selected categories

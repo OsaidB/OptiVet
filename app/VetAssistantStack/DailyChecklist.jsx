@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch } from 'react-native';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import DailyChecklistService from '../../Services/DailyChecklistService';
+import platform from "react-native-web/src/exports/Platform";
 
 const DailyChecklist = () => {
     const router = useRouter();
@@ -30,6 +31,14 @@ const DailyChecklist = () => {
     });
 
     const handleSubmitChecklist = async () => {
+        if (!poopNormal && poopNotes.trim() === '') {
+            alert(
+                'Please provide notes for poop when "Is poop normal?" is unchecked',
+                'Please provide notes for poop when "Is poop normal?" is unchecked.',
+            );
+            return;
+        }
+
         try {
             const checklistData = {
                 date: today.toISOString(),
@@ -50,6 +59,7 @@ const DailyChecklist = () => {
             };
 
             await DailyChecklistService.createDailyChecklist(checklistData);
+
             Alert.alert('Success', 'Checklist submitted successfully!');
             router.back();
         } catch (error) {

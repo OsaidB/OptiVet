@@ -130,6 +130,7 @@ const LoginScreen = () => {
                 autoCorrect={false}
                 autoCapitalize="none"
                 keyboardType="email-address"
+                placeholderTextColor={'gray'}
             />
             <TextInput
                 style={styles.input}
@@ -137,6 +138,7 @@ const LoginScreen = () => {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                placeholderTextColor={'gray'}
                 onSubmitEditing={handleLogin} // Trigger login on "Enter" key press
                 returnKeyType="done" // Changes the keyboard "Enter" button to "Done"
             />
@@ -175,6 +177,7 @@ const LoginScreen = () => {
             <Text style={styles.tempEmailsTitle}>Temporary Login Emails</Text>
             <Text style={styles.tempEmail}>Vet Assistant: <Text style={styles.email}>vetAS@ex</Text></Text>
             <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet@vet</Text></Text>
+            <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet2@mail.com with testtest</Text></Text>
             <Text style={styles.tempEmail}>Secretary: <Text style={styles.email}>sec@ex</Text></Text>
             <Text style={styles.tempEmail}>Client: <Text style={styles.email}>test@test</Text></Text>
           </View>
