@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Text, TouchableOpacity, View, Alert, Image, StyleSheet, ScrollView } from "react-native";
-import { Link } from "expo-router";
+import { Text, View, StyleSheet, Image, ScrollView, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
-import ManagerStackLayout from './_layout'; // Adjust path as needed
+import PetService from "../../Services/PetService";
+import { Ionicons } from "@expo/vector-icons";
 
 const ManagerStack = () => {
     const [managerInfo, setManagerInfo] = useState(null);
     const [email, setEmail] = useState(null);
-    // console.log(ManagerStackLayout);
+    const [criticalNotes, setCriticalNotes] = useState(0);
+    const [registeredPets, setRegisteredPets] = useState(0);
+    const [appointments, setAppointments] = useState(15); // Example value for appointments
+    const [clients, setClients] = useState(0);
 
     useEffect(() => {
         const fetchEmail = async () => {
@@ -17,12 +20,11 @@ const ManagerStack = () => {
                 if (storedEmail) {
                     setEmail(storedEmail);
                 } else {
-                    console.error("No email found in AsyncStorage");
                     Alert.alert("Error", "No email found. Please log in again.");
                 }
             } catch (error) {
-                console.error("Error fetching email from AsyncStorage:", error);
                 Alert.alert("Error", "Failed to retrieve email.");
+                console.error(error);
             }
         };
 
@@ -32,18 +34,35 @@ const ManagerStack = () => {
                 const data = await UserService.getUserByEmail(email);
                 setManagerInfo(data);
             } catch (error) {
-                console.error("Error fetching manager info:", error);
                 Alert.alert("Error", "Failed to load manager information.");
+                console.error(error);
+            }
+        };
+
+        const fetchMetrics = async () => {
+            try {
+                const [notesCount, petsCount, clientsCount] = await Promise.all([
+                    UserService.getCriticalNotesCount(),
+                    PetService.getPetsCount(),
+                    UserService.getClientsCount(),
+                ]);
+                setCriticalNotes(notesCount);
+                setRegisteredPets(petsCount);
+                setClients(clientsCount);
+            } catch (error) {
+                Alert.alert("Error", "Failed to fetch metrics.");
+                console.error(error);
             }
         };
 
         fetchEmail();
         fetchManagerInfo();
+        fetchMetrics();
     }, [email]);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            {/* Profile Header */}
+            {/* Profile Section */}
             <View style={styles.profileCard}>
                 <Image
                     source={{ uri: "https://via.placeholder.com/100" }}
@@ -61,86 +80,47 @@ const ManagerStack = () => {
                 )}
             </View>
 
-            {/* Navigation Buttons */}
-            <View style={styles.navSection}>
-                <Text style={styles.sectionTitle}>Appointments</Text>
-                <Link
-                    href={{
-                        pathname: "/ManagerStack/ManagerScheduleScreen",
-                        params: { userId: managerInfo?.userId },
-                    }}
-                    asChild
-                >
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>Manage Your Schedule</Text>
-                    </TouchableOpacity>
-                </Link>
+            {/* Metrics Section */}
+            <View style={styles.metricsContainer}>
+                <View style={styles.metricBox}>
+                    <Ionicons name="alert-circle-outline" size={28} color="#007BFF" />
+                    <Text style={styles.metricValue}>{criticalNotes}</Text>
+                    <Text style={styles.metricLabel}>Critical Notes</Text>
+                </View>
+                <View style={styles.metricBox}>
+                    <Ionicons name="paw-outline" size={28} color="#007BFF" />
+                    <Text style={styles.metricValue}>{registeredPets}</Text>
+                    <Text style={styles.metricLabel}>Registered Pets</Text>
+                </View>
+                <View style={styles.metricBox}>
+                    <Ionicons name="calendar-outline" size={28} color="#007BFF" />
+                    <Text style={styles.metricValue}>{appointments}</Text>
+                    <Text style={styles.metricLabel}>Appointments</Text>
+                </View>
+                <View style={styles.metricBox}>
+                    <Ionicons name="people-outline" size={28} color="#007BFF" />
+                    <Text style={styles.metricValue}>{clients}</Text>
+                    <Text style={styles.metricLabel}>Clients</Text>
+                </View>
+            </View>
 
-                <Link
-                    href={{
-                        pathname: "/ManagerStack/ManagerAppointmentsScreen",
-                        params: { userId: managerInfo?.userId },
-                    }}
-                    asChild
-                >
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>View Appointments</Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <Text style={styles.sectionTitle}>Clients</Text>
-                <Link
-                    href={{
-                        pathname: "/ManagerStack/WalkInClientsScreen",
-                        params: { vetId: managerInfo?.userId },
-                    }}
-                    asChild
-                >
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>Handle Walk-in Clients</Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <Text style={styles.sectionTitle}>Other</Text>
-                <Link
-                    href={{
-                        pathname: "/ManagerStack/MsgsScreen",
-                        params: { userId: managerInfo?.userId },
-                    }}
-                    asChild
-                >
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>Important Messages</Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <Link
-                    href={{
-                        pathname: "ManagerStack/Products",
-                        params: { userId: managerInfo?.userId },
-                    }}
-                    asChild
-                >
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>Products</Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <Link href="ManagerStack/AddEmployee" asChild>
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>Create Employee Account</Text>
-                    </TouchableOpacity>
-                </Link>
-
-
-
-                <Link href="ManagerStack/Products" asChild>
-                    <TouchableOpacity style={styles.navButton}>
-                        <Text style={styles.navButtonText}>Products</Text>
-                    </TouchableOpacity>
-                </Link>
-
-
+            {/* Highlights Section */}
+            <View style={styles.highlightsSection}>
+                <Text style={styles.sectionTitle}>Quick Actions</Text>
+                <View style={styles.actionCard}>
+                    <Text style={styles.actionTitle}>Manage Your Schedule</Text>
+                    <Text style={styles.actionDescription}>View and update your availability for appointments.</Text>
+                </View>
+                <View style={styles.actionCard}>
+                    <Text style={styles.actionTitle}>Handle Walk-In Clients</Text>
+                    <Text style={styles.actionDescription}>
+                        Quickly address the needs of walk-in clients and their pets.
+                    </Text>
+                </View>
+                <View style={styles.actionCard}>
+                    <Text style={styles.actionTitle}>Important Messages</Text>
+                    <Text style={styles.actionDescription}>Stay updated with critical messages and notifications.</Text>
+                </View>
             </View>
         </ScrollView>
     );
@@ -150,60 +130,98 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         backgroundColor: "#F3F7FA",
-        paddingHorizontal: 20,
-        paddingVertical: 30,
+        padding: 20,
     },
     profileCard: {
-        alignItems: "center",
-        backgroundColor: "#007BFF",
+        backgroundColor: "#3498DB",
         padding: 20,
         borderRadius: 12,
-        marginBottom: 30,
+        alignItems: "center",
+        marginBottom: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 5,
     },
     profileImage: {
         width: 100,
         height: 100,
         borderRadius: 50,
         marginBottom: 10,
+        borderWidth: 2,
+        borderColor: "#FFFFFF",
     },
     profileName: {
         fontSize: 22,
-        color: "white",
+        color: "#FFFFFF",
         fontWeight: "bold",
     },
     profileEmail: {
         fontSize: 16,
         color: "#D1E8E2",
     },
+    metricsContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 20,
+    },
+    metricBox: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+        padding: 15,
+        borderRadius: 12,
+        alignItems: "center",
+        marginHorizontal: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    metricValue: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#2C3E50",
+        marginVertical: 5,
+    },
+    metricLabel: {
+        fontSize: 14,
+        color: "#7F8C8D",
+    },
+    highlightsSection: {
+        marginBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: "600",
+        color: "#1D3D47",
+        marginBottom: 15,
+    },
+    actionCard: {
+        backgroundColor: "#FFFFFF",
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 15,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    actionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#2C3E50",
+        marginBottom: 5,
+    },
+    actionDescription: {
+        fontSize: 14,
+        color: "#7F8C8D",
+    },
     loadingText: {
         fontSize: 16,
         color: "#666",
-    },
-    navSection: {
-        marginTop: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#1D3D47",
-        marginBottom: 10,
-    },
-    navButton: {
-        backgroundColor: "#FFFFFF",
-        padding: 15,
-        borderRadius: 8,
-        marginBottom: 15,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 5,
-        elevation: 3,
-        alignItems: "center",
-    },
-    navButtonText: {
-        fontSize: 16,
-        color: "#1D3D47",
-        fontWeight: "bold",
     },
 });
 
