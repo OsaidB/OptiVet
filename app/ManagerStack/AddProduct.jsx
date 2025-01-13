@@ -255,8 +255,6 @@ export default function AddProduct() {
 
     const addProductHandle = async () => {
 
-
-
         if (!productName) {
             Alert.alert('entering the name of the product in mandatory');
             console.log('entering the name of the product in mandatory');
