@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground} from 'react-native';
+import {Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground, TouchableOpacity} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
 import PetService from '../../Services/PetService';
@@ -82,6 +82,14 @@ const ClientStack = () => {
                 </View>
             </View>
 
+            {/* Adopt a Pet Button */}
+            <TouchableOpacity
+                style={styles.adoptButton}
+                onPress={() => console.log('Navigate to Adoption Screen')} // Replace with router.push('/AdoptionScreen')
+            >
+                <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
+            </TouchableOpacity>
+
             {/* Highlights Section */}
             <View style={styles.highlightsSection}>
                 <Text style={styles.sectionTitle}>Pet Highlights</Text>
@@ -107,6 +115,51 @@ const ClientStack = () => {
 };
 
 const styles = StyleSheet.create({
+
+    adoptButton: {
+        backgroundColor: '#1D3D47', // Dark green for a bold button
+        paddingVertical: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    adoptButtonText: {
+        color: '#FFFFFF', // White text
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+
+    navigationButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 30,
+    },
+    navigationButton: {
+        flex: 1,
+        marginHorizontal: 5,
+        backgroundColor: '#2C3E50', // Dark theme color
+        paddingVertical: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    navigationButtonText: {
+        color: '#FFFFFF', // White text
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
     backgroundImage: {
         flex: 1,
         justifyContent: "center",

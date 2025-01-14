@@ -117,12 +117,13 @@ export default function ClientStackLayout() {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.footerButton}
-                    onPress={() => router.push('/ClientStack/settings')}
+                    onPress={() => router.push('/ClientStack/Products')}
                 >
-                    <Ionicons name="settings-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
-                    <Text style={styles.footerButtonText}>Settings</Text>
+                    <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                    <Text style={styles.footerButtonText}>Store</Text>
                 </TouchableOpacity>
             </View>
+
 
             {/* Global Toast Notifications */}
             <Toast config={CustomToast} />

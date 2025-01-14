@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
 
 
     photoButton: {
-        backgroundColor: '#1D3D47',
+        backgroundColor: 'rgba(29,61,71,0.55)',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: 'center',
-        backgroundColor: '#6200ee',
+        backgroundColor: '#5DADE2',
         elevation: 3,
     },
     createButtonText: {
