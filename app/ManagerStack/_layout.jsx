@@ -184,13 +184,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E0E0E0",
+        backgroundColor: "#D1E1F6",
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#FFF",
+        color: "#FFFFFF",
     },
     iconButton: {
         padding: 5,
@@ -202,7 +201,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modalContent: {
-        backgroundColor: "#FFF",
+        backgroundColor: "#FFFFFF",
         padding: 20,
         borderRadius: 12,
         width: "80%",
@@ -212,6 +211,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 15,
+        color: "#2C3E50",
     },
     profileImage: {
         width: 100,
@@ -223,33 +223,33 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 5,
+        color: "#2C3E50",
     },
     profileEmail: {
         fontSize: 16,
-        color: "#666",
+        color: "#7F8C8D",
         marginBottom: 5,
     },
     profilePhone: {
         fontSize: 14,
-        color: "#666",
+        color: "#7F8C8D",
     },
     closeButton: {
         marginTop: 15,
-        backgroundColor: "#007BFF",
+        backgroundColor: "#E74C3C",
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,
     },
     closeButtonText: {
-        color: "#FFF",
+        color: "#FFFFFF",
         fontWeight: "bold",
     },
     footer: {
         flexDirection: "row",
         justifyContent: "space-around",
         paddingVertical: 10,
-        borderTopWidth: 1,
-        borderTopColor: "#E0E0E0",
+        backgroundColor: "#2C3E50",
     },
     footerButton: {
         alignItems: "center",
@@ -257,6 +257,6 @@ const styles = StyleSheet.create({
     footerButtonText: {
         fontSize: 12,
         marginTop: 5,
-        color: "#FFF",
+        color: "#D1E1F6",
     },
 });
