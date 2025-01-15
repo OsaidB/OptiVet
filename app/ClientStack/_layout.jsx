@@ -63,7 +63,7 @@ export default function ClientStackLayout() {
                 <TouchableOpacity onPress={() => console.log('Back pressed')} style={styles.iconButton}>
                     <Ionicons name="arrow-back" size={24} color="#FFF" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Client Dashboard</Text>
+                <Text style={styles.headerTitle}>🐾OptiVet</Text>
                 <TouchableOpacity onPress={() => console.log('Profile pressed')} style={styles.iconButton}>
                     <Ionicons name="person-circle" size={24} color="#FFF" />
                 </TouchableOpacity>
@@ -117,12 +117,13 @@ export default function ClientStackLayout() {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.footerButton}
-                    onPress={() => router.push('/ClientStack/settings')}
+                    onPress={() => router.push('/ClientStack/Products')}
                 >
-                    <Ionicons name="settings-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
-                    <Text style={styles.footerButtonText}>Settings</Text>
+                    <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                    <Text style={styles.footerButtonText}>Store</Text>
                 </TouchableOpacity>
             </View>
+
 
             {/* Global Toast Notifications */}
             <Toast config={CustomToast} />
@@ -136,13 +137,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: '#3498DB', // Primary blue
         borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
+        borderBottomColor: '#CED6E0',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 5,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 24, // Updated for better visibility
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#FFFFFF', // White text
     },
     iconButton: {
         padding: 5,
@@ -150,26 +157,34 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        paddingVertical: 10,
+        alignItems: 'center',
+        paddingVertical: 15,
+        backgroundColor: '#FFFFFF', // Neutral white
         borderTopWidth: 1,
-        borderTopColor: '#E0E0E0',
+        borderTopColor: '#CED6E0',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 5,
     },
     footerButton: {
         alignItems: 'center',
     },
     footerButtonText: {
-        fontSize: 12,
+        fontSize: 14, // Standard font size
+        fontWeight: '600', // Medium weight for text
         marginTop: 5,
-        color: '#1D3D47',
+        color: '#2C3E50', // Dark gray for text
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F9F9F9',
+        backgroundColor: '#F9F9F9', // Light background
     },
     loadingText: {
         fontSize: 16,
-        color: '#555',
+        color: '#7F8C8D', // Neutral gray
     },
 });

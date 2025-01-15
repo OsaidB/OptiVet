@@ -65,10 +65,14 @@ const ManagerStack = () => {
 
     return (
         <ImageBackground
-            source={require("../../assets/images/dog-and-cat.avif")} // Add your background image
-            resizeMode="cover" // Adjust how the image fits
+            source={require("../../assets/images/dog-and-cat.jpeg")} // Add your background image
+            resizeMode="center" // Adjust how the image fits
             style={styles.backgroundImage}
         >
+            {/*<Image*/}
+            {/*    source={require("../../assets/images/dr-ahmad-khalil.jpg")} // Local static image*/}
+            {/*    style={styles.profileImage}*/}
+            {/*/>*/}
         <ScrollView contentContainerStyle={styles.container}>
             {/* Profile Section */}
             <View style={styles.profileCard}>
@@ -148,14 +152,14 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     profileCard: {
-        backgroundColor: "#3498DB",
+        backgroundColor: "#2C3E50", // Theme dark gray
         padding: 20,
         borderRadius: 12,
         alignItems: "center",
         marginBottom: 20,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
     },
@@ -165,7 +169,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         marginBottom: 10,
         borderWidth: 2,
-        borderColor: "#FFFFFF",
+        borderColor: "#DFF6E4", // Light green for contrast
     },
     profileName: {
         fontSize: 22,
@@ -174,7 +178,7 @@ const styles = StyleSheet.create({
     },
     profileEmail: {
         fontSize: 16,
-        color: "#D1E8E2",
+        color: "#D1E1F6", // Light blue for subtler text
     },
     metricsContainer: {
         flexDirection: "row",
@@ -191,19 +195,19 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
     },
     metricValue: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#2C3E50",
+        color: "#34495E", // Neutral dark for text
         marginVertical: 5,
     },
     metricLabel: {
         fontSize: 14,
-        color: "#7F8C8D",
+        color: "#7F8C8D", // Subtle gray for labels
     },
     highlightsSection: {
         marginBottom: 20,
@@ -211,7 +215,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#1D3D47",
+        color: "#1D3D47", // Theme dark teal
         marginBottom: 15,
     },
     actionCard: {
@@ -221,25 +225,26 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
     },
     actionTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#2C3E50",
+        color: "#2C3E50", // Neutral dark for headings
         marginBottom: 5,
     },
     actionDescription: {
         fontSize: 14,
-        color: "#7F8C8D",
+        color: "#7F8C8D", // Subtle gray for descriptions
     },
     loadingText: {
         fontSize: 16,
         color: "#666",
     },
 });
+
 
 
 export default ManagerStack;

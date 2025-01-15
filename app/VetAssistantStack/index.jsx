@@ -9,7 +9,7 @@ import {
     Modal,
     Image,
     Alert,
-    Platform
+    Platform, StatusBar
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PetService from '../../Services/PetService';
@@ -136,7 +136,7 @@ const VetAssistantStack = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Vet Assistant Dashboard</Text>
+            <StatusBar translucent backgroundColor="transparent" />
 
             {vetAssistantInfo ? (
                 <>
@@ -220,7 +220,7 @@ const VetAssistantStack = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 0,
         backgroundColor: '#F0F4F8', // Light grayish blue for a soothing background
     },
     title: {
@@ -230,32 +230,40 @@ const styles = StyleSheet.create({
         color: '#2C3E50', // Darker shade for better contrast
     },
     searchInput: {
+        position: 'absolute', // Position it at the top
+        top: 20, // Distance from the top of the container
+        left: 20, // Distance from the left
+        right: 20, // Distance from the right
         height: 45,
         borderColor: '#CED6E0', // Light border color
         borderWidth: 1,
         borderRadius: 12,
         paddingHorizontal: 15,
-        marginBottom: 20,
         backgroundColor: '#FFFFFF',
         fontSize: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3
+        elevation: 3,
+        zIndex: 2, // Ensure it stays above other elements
     },
     categoryListContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between', // Ensure even spacing between items
-        alignItems: 'center', // Align items vertically in the center
-        paddingHorizontal: 10, // Add padding for better spacing
-        position: 'absolute', // Fix the position
-        top: 0, // Stick it to the top
-        left: 0,
-        right: 0,
+        justifyContent: 'space-around', // Ensure even spacing between items
+        alignItems: 'center',
+        marginBottom: 50, // Add spacing between the category bar and pets list
+        marginTop: 70,
         backgroundColor: '#F0F4F8', // Match the background color
-        zIndex: 1, // Ensure it stays above other content
         paddingVertical: 10,
+        // borderRadius: 8,
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 4,
+        elevation: 3,
+        height: 70, // Fixed height for the categories bar
+        paddingHorizontal: 10, // Optional: Add some padding for better spacing
     },
     categoryItem: {
         backgroundColor: '#d1e1f6', // Soft blue for unselected categories

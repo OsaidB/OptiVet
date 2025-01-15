@@ -30,6 +30,7 @@ export default function ManagerStackLayout() {
                 if (storedEmail) {
                     setEmail(storedEmail);
                 } else {
+                    console.error("No email found in AsyncStorage");
                     Alert.alert("Error", "No email found. Please log in again.");
                 }
             } catch (error) {
@@ -63,7 +64,7 @@ export default function ManagerStackLayout() {
             <View
                 style={[
                     styles.header,
-                    { backgroundColor: colorScheme === "dark" ? "#1D3D47" : "#A1CEDC" },
+                    { backgroundColor : "#A1CEDC" },
                 ]}
             >
                 <TouchableOpacity style={styles.iconButton}>
@@ -118,7 +119,7 @@ export default function ManagerStackLayout() {
             <Stack
                 screenOptions={{
                     headerShown: false,
-                    contentStyle: { backgroundColor: colorScheme === "dark" ? "#121212" : "#F9F9F9" },
+                    contentStyle: { backgroundColor: "#F9F9F9" },
                 }}
             >
                 <Stack.Screen name="index" />
@@ -126,14 +127,52 @@ export default function ManagerStackLayout() {
             </Stack>
 
             {/* Footer */}
-            <View style={[styles.footer, { backgroundColor: colorScheme === "dark" ? "#1D3D47" : "#FFFFFF" }]}>
+            <View style={[styles.footer, { backgroundColor:  "#1D3D47"  }]}>
                 <Link href="/ManagerStack" asChild>
                     <TouchableOpacity style={styles.footerButton}>
                         <Ionicons name="home-outline" size={24} color="#FFF" />
                         <Text style={styles.footerButtonText}>Home</Text>
                     </TouchableOpacity>
                 </Link>
-                {/* Other footer links */}
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/ManagerScheduleScreen",
+                        params: { userId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.footerButton}>
+                        <Ionicons name="calendar-outline" size={24} color={ '#FFF' } />
+                        <Text style={styles.footerButtonText}>Appointments</Text>
+                    </TouchableOpacity>
+                </Link>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/WalkInClientsScreen",
+                        params: { vetId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity style={styles.footerButton}>
+                        <Ionicons name="people-outline" size={24} color={'#FFF' } />
+                        <Text style={styles.footerButtonText}>Clients</Text>
+                    </TouchableOpacity>
+                </Link>
+                <Link
+                    href={{
+                        pathname: "/ManagerStack/MsgsScreen",
+                        params: { userId: managerInfo?.userId },
+                    }}
+                    asChild
+                >
+                    <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() => console.log('Messages')}
+                    >
+                        <Ionicons name="chatbox-outline" size={24} color={'#FFF' } />
+                        <Text style={styles.footerButtonText}>Messages</Text>
+                    </TouchableOpacity>
+                </Link>
             </View>
         </ThemeProvider>
     );
@@ -145,13 +184,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E0E0E0",
+        backgroundColor: "#D1E1F6",
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#FFF",
+        color: "#FFFFFF",
     },
     iconButton: {
         padding: 5,
@@ -163,7 +201,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modalContent: {
-        backgroundColor: "#FFF",
+        backgroundColor: "#FFFFFF",
         padding: 20,
         borderRadius: 12,
         width: "80%",
@@ -173,6 +211,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 15,
+        color: "#2C3E50",
     },
     profileImage: {
         width: 100,
@@ -184,33 +223,33 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 5,
+        color: "#2C3E50",
     },
     profileEmail: {
         fontSize: 16,
-        color: "#666",
+        color: "#7F8C8D",
         marginBottom: 5,
     },
     profilePhone: {
         fontSize: 14,
-        color: "#666",
+        color: "#7F8C8D",
     },
     closeButton: {
         marginTop: 15,
-        backgroundColor: "#007BFF",
+        backgroundColor: "#E74C3C",
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,
     },
     closeButtonText: {
-        color: "#FFF",
+        color: "#FFFFFF",
         fontWeight: "bold",
     },
     footer: {
         flexDirection: "row",
         justifyContent: "space-around",
         paddingVertical: 10,
-        borderTopWidth: 1,
-        borderTopColor: "#E0E0E0",
+        backgroundColor: "#2C3E50",
     },
     footerButton: {
         alignItems: "center",
@@ -218,6 +257,6 @@ const styles = StyleSheet.create({
     footerButtonText: {
         fontSize: 12,
         marginTop: 5,
-        color: "#FFF",
+        color: "#D1E1F6",
     },
 });

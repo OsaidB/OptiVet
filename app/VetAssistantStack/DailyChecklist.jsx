@@ -73,25 +73,25 @@ const DailyChecklist = () => {
             <Text style={styles.title}>Daily Checklist for {petName} - Today, {formattedDate}</Text>
 
             {/* Health Observations */}
-            <View style={styles.section}>
-                <Text style={styles.label}>Is {petName} eating well?</Text>
-                <Switch value={eatingWell} onValueChange={setEatingWell} />
+            <View style={styles.gridContainer}>
+                <View style={styles.gridItem}>
+                    <Text style={styles.label}>Is {petName} eating well?</Text>
+                    <Switch value={eatingWell} onValueChange={setEatingWell} />
+                </View>
+                <View style={styles.gridItem}>
+                    <Text style={styles.label}>Is {petName} drinking enough water?</Text>
+                    <Switch value={drinkingWater} onValueChange={setDrinkingWater} />
+                </View>
+                <View style={styles.gridItem}>
+                    <Text style={styles.label}>Is {petName} showing active behavior?</Text>
+                    <Switch value={activeBehavior} onValueChange={setActiveBehavior} />
+                </View>
+                <View style={styles.gridItem}>
+                    <Text style={styles.label}>Are {petName}'s vital signs normal?</Text>
+                    <Switch value={normalVitalSigns} onValueChange={setNormalVitalSigns} />
+                </View>
             </View>
 
-            <View style={styles.section}>
-                <Text style={styles.label}>Is {petName} drinking enough water?</Text>
-                <Switch value={drinkingWater} onValueChange={setDrinkingWater} />
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.label}>Is {petName} showing active behavior?</Text>
-                <Switch value={activeBehavior} onValueChange={setActiveBehavior} />
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.label}>Are {petName}'s vital signs normal?</Text>
-                <Switch value={normalVitalSigns} onValueChange={setNormalVitalSigns} />
-            </View>
 
             <View style={styles.section}>
                 <Text style={styles.label}>Health Observations</Text>
@@ -103,36 +103,39 @@ const DailyChecklist = () => {
                 />
             </View>
 
-            {/* Feeding and Living Space */}
-            <View style={styles.section}>
-                <Text style={styles.label}>Is feeding completed?</Text>
-                <Switch value={feedingCompleted} onValueChange={setFeedingCompleted} />
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.label}>Is living space cleaned?</Text>
-                <Switch value={cleanedLivingSpace} onValueChange={setCleanedLivingSpace} />
+            {/* Feeding and Living Space in a Row */}
+            <View style={styles.rowContainer}>
+                <View style={styles.halfWidthSection}>
+                    <Text style={styles.label2}>Is feeding completed?</Text>
+                    <Switch value={feedingCompleted} onValueChange={setFeedingCompleted} />
+                </View>
+                <View style={styles.halfWidthSection}>
+                    <Text style={styles.label2}>Is living space cleaned?</Text>
+                    <Switch value={cleanedLivingSpace} onValueChange={setCleanedLivingSpace} />
+                </View>
             </View>
 
             {/* Poop Observations */}
             <View style={styles.section}>
-                <Text style={styles.label}>Is poop normal?</Text>
+                <Text style={styles.label2}>Is poop normal?</Text>
                 <Switch value={poopNormal} onValueChange={setPoopNormal} />
+                {!poopNormal && (
+                    <>
+                        <Text style={styles.label2}>Poop Notes</Text>
+                        <TextInput
+                            value={poopNotes}
+                            onChangeText={setPoopNotes}
+                            placeholder="Enter any notes on poop..."
+                            style={styles.input}
+                        />
+                    </>
+                )}
             </View>
 
-            <View style={styles.section}>
-                <Text style={styles.label}>Poop Notes</Text>
-                <TextInput
-                    value={poopNotes}
-                    onChangeText={setPoopNotes}
-                    placeholder="Enter any notes on poop..."
-                    style={styles.input}
-                />
-            </View>
 
             {/* Weight and Injuries */}
             <View style={styles.section}>
-                <Text style={styles.label}>Weight Change</Text>
+                <Text style={styles.label2}>Weight Change</Text>
                 <TextInput
                     value={weightChange}
                     onChangeText={setWeightChange}
@@ -142,7 +145,7 @@ const DailyChecklist = () => {
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.label}>Injuries or Wounds</Text>
+                <Text style={styles.label2}>Injuries or Wounds</Text>
                 <TextInput
                     value={injuriesOrWounds}
                     onChangeText={setInjuriesOrWounds}
@@ -153,13 +156,13 @@ const DailyChecklist = () => {
 
             {/* Critical Issue Flag */}
             <View style={styles.section}>
-                <Text style={styles.label}>Mark as Critical Issue</Text>
+                <Text style={styles.label2}>Mark as Critical Issue</Text>
                 <Switch value={criticalIssueFlag} onValueChange={setCriticalIssueFlag} />
             </View>
 
             {criticalIssueFlag && (
                 <View style={styles.section}>
-                    <Text style={styles.label}>Critical Notes</Text>
+                    <Text style={styles.label2}>Critical Notes</Text>
                     <TextInput
                         value={criticalNotes}
                         onChangeText={setCriticalNotes}
@@ -178,47 +181,115 @@ const DailyChecklist = () => {
 };
 
 const styles = StyleSheet.create({
+
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    halfWidthSection: {
+        width: '48%',
+        backgroundColor: '#FFFFFF',
+        padding: 15,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+
+
+    gridContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap', // Allow wrapping to create rows
+        justifyContent: 'space-between', // Space out items evenly
+        marginBottom: 20,
+    },
+    gridItem: {
+        width: '48%', // Take up approximately half the width
+        backgroundColor: '#FFFFFF',
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 15,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#34495E', // Neutral dark for labels
+        marginBottom: 10,
+        textAlign: 'center', // Center-align text for consistency
+    },
     container: {
         flexGrow: 1,
         padding: 20,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#F8F9FA', // Neutral background
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#333',
+        color: '#2C3E50', // Dark gray for title
         textAlign: 'center',
     },
     section: {
         marginBottom: 15,
+        backgroundColor: '#FFFFFF', // White background for sections
+        padding: 15,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
-    label: {
+    label2: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#555',
-        marginBottom: 5,
+        color: '#34495E', // Neutral dark for labels
+        marginBottom: 10,
     },
     input: {
         height: 40,
-        borderColor: '#ccc',
+        borderColor: '#CED6E0', // Light gray border
         borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 10,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF', // White background
+        color: '#34495E', // Dark text color
+        fontSize: 14,
+        marginTop: 10,
     },
     submitButton: {
-        backgroundColor: '#007BFF',
+        backgroundColor: '#5DADE2', // Theme soft green
         paddingVertical: 15,
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     submitButtonText: {
-        color: '#fff',
+        color: '#FFFFFF', // White text
         fontSize: 16,
         fontWeight: 'bold',
     },
+    switchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+    },
 });
+
 
 export default DailyChecklist;

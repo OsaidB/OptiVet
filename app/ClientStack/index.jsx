@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Image, ScrollView } from 'react-native';
+import {Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground, TouchableOpacity} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
+import PetService from '../../Services/PetService';
+import DefaultFemaleImage from '../../assets/images/default_female.jpg';
 
 const ClientStack = () => {
     const [clientInfo, setClientInfo] = useState(null);
     const [email, setEmail] = useState(null);
+    const [pets, setPets] = useState([]);
 
     useEffect(() => {
         const fetchEmail = async () => {
@@ -28,9 +31,21 @@ const ClientStack = () => {
             try {
                 const data = await ClientService.getClientByEmail(email);
                 setClientInfo(data);
+
+                // Fetch pets using client ID
+                if (data && data.id) {
+                    const fetchedPets = await PetService.getPetsByOwnerId(data.id);
+
+                    // Map pets to ensure the image URL is constructed properly
+                    const petsWithImages = fetchedPets.map((pet) => ({
+                        ...pet,
+                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                    }));
+                    setPets(petsWithImages);
+                }
             } catch (error) {
-                console.error("Error fetching client info:", error);
-                alert('Error: Failed to load client information.');
+                console.error("Error fetching client info or pets:", error);
+                Alert.alert('Error', 'Failed to load client information or pet profiles.');
             }
         };
 
@@ -39,13 +54,18 @@ const ClientStack = () => {
     }, [email]);
 
     return (
+        <ImageBackground
+            source={require("../../assets/images/dog-and-cat.jpeg")} // Add your background image
+            resizeMode="cover" // Adjust how the image fits
+            style={styles.backgroundImage}
+        >
         <ScrollView contentContainerStyle={styles.container}>
             {/* Welcome Section */}
             <View style={styles.welcomeSection}>
                 <Text style={styles.greetingText}>Welcome Back,</Text>
                 <Text style={styles.clientName}>{clientInfo?.firstName} {clientInfo?.lastName}</Text>
                 <Image
-                    source={{ uri: 'https://via.placeholder.com/150' }}
+                    source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultFemaleImage}
                     style={styles.profileImage}
                 />
             </View>
@@ -53,41 +73,97 @@ const ClientStack = () => {
             {/* Statistics Section */}
             <View style={styles.statsSection}>
                 <View style={styles.statsCard}>
-                    <Text style={styles.statsValue}>{clientInfo?.pets?.length || 0}</Text>
+                    <Text style={styles.statsValue}>{4}</Text>
                     <Text style={styles.statsLabel}>My Pets</Text>
                 </View>
                 <View style={styles.statsCard}>
-                    <Text style={styles.statsValue}>{clientInfo?.appointments?.length || 0}</Text>
+                    <Text style={styles.statsValue}>{clientInfo?.appointments?.length || 2}</Text>
                     <Text style={styles.statsLabel}>Appointments</Text>
                 </View>
-                <View style={styles.statsCard}>
-                    <Text style={styles.statsValue}>10+</Text>
-                    <Text style={styles.statsLabel}>Products Ordered</Text>
-                </View>
             </View>
+
+            {/* Adopt a Pet Button */}
+            <TouchableOpacity
+                style={styles.adoptButton}
+                onPress={() => console.log('Navigate to Adoption Screen')} // Replace with router.push('/AdoptionScreen')
+            >
+                <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
+            </TouchableOpacity>
 
             {/* Highlights Section */}
             <View style={styles.highlightsSection}>
                 <Text style={styles.sectionTitle}>Pet Highlights</Text>
-                {clientInfo?.pets?.slice(0, 3).map((pet) => (
+                {pets.slice(-4).map((pet) => (
                     <View key={pet.id} style={styles.petCard}>
                         <Image
-                            source={{ uri: pet.imageUrl || 'https://via.placeholder.com/100' }}
+                            source={{ uri: pet.imageUrl || 'https://cdn.example.com/path-to-placeholder.png' }}
                             style={styles.petImage}
                         />
                         <View style={styles.petDetails}>
                             <Text style={styles.petName}>{pet.name}</Text>
                             <Text style={styles.petType}>{pet.type}</Text>
-                            <Text style={styles.petActivity}>Last checkup: {pet.lastCheckupDate || 'N/A'}</Text>
+                            <Text style={styles.petActivity}>Last checkup: {pet.lastCheckupDate || '14-Jan'}</Text>
                         </View>
                     </View>
                 ))}
             </View>
+
         </ScrollView>
+        </ImageBackground>
+
     );
 };
 
 const styles = StyleSheet.create({
+
+    adoptButton: {
+        backgroundColor: '#1D3D47', // Dark green for a bold button
+        paddingVertical: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    adoptButtonText: {
+        color: '#FFFFFF', // White text
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+
+    navigationButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 30,
+    },
+    navigationButton: {
+        flex: 1,
+        marginHorizontal: 5,
+        backgroundColor: '#2C3E50', // Dark theme color
+        paddingVertical: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    navigationButtonText: {
+        color: '#FFFFFF', // White text
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
+    backgroundImage: {
+        flex: 1,
+        justifyContent: "center",
+    },
     container: {
         flexGrow: 1,
         padding: 20,
@@ -104,7 +180,7 @@ const styles = StyleSheet.create({
     },
     clientName: {
         fontSize: 28,
-        color: '#3498DB',
+        color: '#7F8C8D',
         fontWeight: 'bold',
         marginVertical: 10,
     },
@@ -113,7 +189,7 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 2,
-        borderColor: '#3498DB',
+        borderColor: '#7F8C8D',
     },
     statsSection: {
         flexDirection: 'row',
@@ -136,7 +212,7 @@ const styles = StyleSheet.create({
     statsValue: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#3498DB',
+        color: '#7F8C8D',
     },
     statsLabel: {
         fontSize: 14,
