@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
         border: '1px solid #ccc',
         fontSize: 14,
         color: '#000000',
-        outline: 'none',
+        // outline: 'none',
         backgroundColor: '#f0f0f0',
         transition: 'border-color 0.3s ease-in-out',
     },
