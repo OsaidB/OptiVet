@@ -246,10 +246,10 @@ const MedicalHistoryService = {
         try {
             const token = await MedicalHistoryService.getToken();
             const formData = new FormData();
-    
+
             if (Platform.OS === 'web') {
                 const response = await fetch(imageUri);
-               
+
                 const blob = await response.blob();
                 formData.append('image', blob, 'MedicalHistoryImage.jpg');
             } else {
@@ -266,7 +266,7 @@ const MedicalHistoryService = {
                     'X-Auth-Token': token,
                 },
             });
-    console.log(response.data);
+            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Error uploading medical history image:', error);

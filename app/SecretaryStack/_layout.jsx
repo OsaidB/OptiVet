@@ -1,10 +1,11 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import CustomToast from '../Toast.config';
+import { Link } from 'expo-router';
 
 export default function SecretaryStackLayout() {
     const colorScheme = useColorScheme();
@@ -38,13 +39,21 @@ export default function SecretaryStackLayout() {
             {/* Footer */}
             <View style={[styles.footer, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#FFFFFF' }]}>
                 <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Home')}>
-                    <Ionicons name="home-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                    <Ionicons name="location-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
                     <Text style={styles.footerButtonText}>Home</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Products')}>
                     <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
                     <Text style={styles.footerButtonText}>Products</Text>
                 </TouchableOpacity>
+                
+                <Link href="/SecretaryStack/PetsForAdoption" asChild>
+                    <TouchableOpacity style={styles.footerButton}>
+                                <Image source={require('../../assets/images/cat (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
+                        <Text style={styles.footerButtonText}>Pets For Adoption</Text>
+                    </TouchableOpacity>
+                </Link>
+
                 <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Settings')}>
                     <Ionicons name="settings-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
                     <Text style={styles.footerButtonText}>Settings</Text>
