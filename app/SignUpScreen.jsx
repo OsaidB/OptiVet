@@ -12,6 +12,7 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
+import CustomToast from './Toast.config';
 import AuthService from '../Services/authService';
 
 const SignUpScreen = () => {
@@ -161,7 +162,7 @@ const SignUpScreen = () => {
                     Log In
                 </Text>
             </Text>
-            <Toast />
+            {typeof window !== 'undefined' && <Toast config={CustomToast}/>}
         </ScrollView>
     );
 };

@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
 import { useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
+// import SafeToast from '../SafeToast';
+
 import CustomToast from '../Toast.config';
 
 export default function ClientStackLayout() {

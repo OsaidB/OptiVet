@@ -5,6 +5,7 @@ import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import CustomToast from '../Toast.config';
+import React from "react";
 
 export default function VetAssistantStackLayout() {
     const colorScheme = useColorScheme();
@@ -52,7 +53,7 @@ export default function VetAssistantStackLayout() {
             </View>
 
             {/* Global Toast Notifications */}
-            <Toast config={CustomToast} />
+            {typeof window !== 'undefined' && <Toast config={CustomToast}/>}
         </ThemeProvider>
     );
 }

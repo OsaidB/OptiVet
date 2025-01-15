@@ -11,9 +11,10 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
+import CustomToast from './Toast.config';
 import AuthService from '../Services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import UserService from '../Services/UserService'; // Import UserService for fetching user data
+// import UserService from '../Services/UserService'; // Import UserService for fetching user data
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -170,17 +171,17 @@ const LoginScreen = () => {
           </Text>
 
           {/* Toast Notification */}
-          <Toast />
+          {typeof window !== 'undefined' && <Toast config={CustomToast}/>}
 
           {/* Temporary Login Emails */}
-          <View style={styles.tempEmailsContainer}>
-            <Text style={styles.tempEmailsTitle}>Temporary Login Emails</Text>
-            <Text style={styles.tempEmail}>Vet Assistant: <Text style={styles.email}>vetAS@ex</Text></Text>
-            <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet@vet</Text></Text>
-            <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet2@mail.com with testtest</Text></Text>
-            <Text style={styles.tempEmail}>Secretary: <Text style={styles.email}>sec@ex</Text></Text>
-            <Text style={styles.tempEmail}>Client: <Text style={styles.email}>test@test</Text></Text>
-          </View>
+          {/*<View style={styles.tempEmailsContainer}>*/}
+          {/*  <Text style={styles.tempEmailsTitle}>Temporary Login Emails</Text>*/}
+          {/*  <Text style={styles.tempEmail}>Vet Assistant: <Text style={styles.email}>vetAS@ex</Text></Text>*/}
+          {/*  <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet@vet</Text></Text>*/}
+          {/*  <Text style={styles.tempEmail}>Veterinarian: <Text style={styles.email}>vet2@mail.com with testtest</Text></Text>*/}
+          {/*  <Text style={styles.tempEmail}>Secretary: <Text style={styles.email}>sec@ex</Text></Text>*/}
+          {/*  <Text style={styles.tempEmail}>Client: <Text style={styles.email}>test@test</Text></Text>*/}
+          {/*</View>*/}
 
         </ScrollView>
       </SafeAreaView>

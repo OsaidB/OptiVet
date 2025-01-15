@@ -8,9 +8,24 @@ const CustomToast = ({ text1, text2, ...props }) => (
 );
 
 const ToastConfig = {
-  success: (props) => <CustomToast {...props} />,
-  error: (props) => <CustomToast {...props} />,
-  info: (props) => <CustomToast {...props} />,
+  success: (props) => {
+    if (typeof window === 'undefined') {
+      return null; // Do not render on the server
+    }
+    return <CustomToast {...props} />;
+  },
+  error: (props) => {
+    if (typeof window === 'undefined') {
+      return null; // Do not render on the server
+    }
+    return <CustomToast {...props} />;
+  },
+  info: (props) => {
+    if (typeof window === 'undefined') {
+      return null; // Do not render on the server
+    }
+    return <CustomToast {...props} />;
+  },
 };
 
 export default ToastConfig;

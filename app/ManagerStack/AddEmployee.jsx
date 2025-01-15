@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
+import CustomToast from '../Toast.config';
 import AuthService from '../../Services/authService';
 
 const AddEmployee = () => {
@@ -200,8 +201,8 @@ const AddEmployee = () => {
                 </Text>
             </TouchableOpacity>
 
-            {/* Toast Notification */}
-            <Toast />
+            {/* Safe Toast Notification */}
+            {typeof window !== 'undefined' && <Toast config={CustomToast}/>}
         </ScrollView>
     );
 };
