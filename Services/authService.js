@@ -2,8 +2,18 @@
 
 import axios from 'axios';
 
+// import axios from 'react-native-axios';
+// import https from 'https';
 import baseURL from './config'; // Adjust the path as necessary
 const BASE_URL= `${baseURL.USED_BASE_URL}/auth`;
+
+// // Create an Axios instance with SSL verification disabled
+// const axiosInstance = axios.create({
+//     baseURL: BASE_URL,
+//     timeout: 10000, // Optional: Add a timeout for requests
+//     validateStatus: () => true, // Accept all status codes
+// });
+
 
 class AuthService {
 
