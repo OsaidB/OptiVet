@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground } from "react-native";
+import {Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground, TouchableOpacity} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
 import PetService from "../../Services/PetService";
 import { Ionicons } from "@expo/vector-icons";
+import {Link} from "expo-router";
 
 const ManagerStack = () => {
     const [managerInfo, setManagerInfo] = useState(null);

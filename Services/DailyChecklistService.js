@@ -42,6 +42,7 @@ const DailyChecklistService = {
         }
     },
 
+
     // Get all Daily Checklists
     async getAllDailyChecklists() {
         try {
@@ -95,6 +96,22 @@ const DailyChecklistService = {
             return response.data;
         } catch (error) {
             console.error("Error fetching critical daily checklists:", error);
+            throw error;
+        }
+    },
+
+    // Add this method to the DailyChecklistService
+    async getDailyChecklistsByPetId(petId) {
+        try {
+            const token = await this.getToken();
+            const response = await axios.get(`${BASE_URL}/${petId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching daily checklists by pet ID:", error);
             throw error;
         }
     }
