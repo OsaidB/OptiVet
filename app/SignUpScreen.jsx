@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router'; // Updated for navigation
 import Toast from 'react-native-toast-message';
 import CustomToast from './Toast.config';
 import AuthService from '../Services/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUpScreen = () => {
     const [email, setEmail] = useState('');
@@ -45,12 +46,13 @@ const SignUpScreen = () => {
                 dateOfBirth: dateOfBirth.toISOString().split('T')[0], // Format for API
             };
             await AuthService.register(userData);
+            await AsyncStorage.setItem('email', email);
             Toast.show({
                 type: 'success',
                 text1: 'Success',
                 text2: 'Your account has been created!',
             });
-            router.push('/home'); // Navigate to login screen
+            router.push('../ClientStack');
         } catch (error) {
             console.error('Error during sign up:', error);
             Toast.show({
