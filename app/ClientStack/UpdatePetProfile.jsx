@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -14,66 +14,86 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import PetService from '../../Services/PetService';
 import Slider from "@react-native-community/slider";
+// import Slider from '@react-native-slider/slider';
 
 const UpdatePetProfile = () => {
-    const { petId, clientId, name, type, breed, birthDate, medicalHistory, imageUrl, residencyType } = useLocalSearchParams();
-    const [petAgeMonths, setPetAgeMonths] = useState(0);
+    const { petId, clientId, name, type, breed, birthDate, medicalHistory, imageUrl } = useLocalSearchParams();
     const router = useRouter();
-    const ageInYears = Math.floor(petAgeMonths / 12);
-    const remainingMonths = petAgeMonths % 12;
-    const { petId2 } = useLocalSearchParams();
 
-    console.log(petId);
-
-    const calculateBirthDate = (ageInMonths) => {
+    const calculateAgeInMonths = (birthDateString) => {
+        if (!birthDateString) return 0;
+        const birthDate = new Date(birthDateString);
         const today = new Date();
-        const birthDateEstimate = new Date(today.setMonth(today.getMonth() - ageInMonths));
-        const year = birthDateEstimate.getFullYear();
-        const month = String(birthDateEstimate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-        const day = String(birthDateEstimate.getDate()).padStart(2, '0');
-
-        return `${year}-${month}-${day}`;
+        return (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
     };
+
+    const calculateBirthDateFromMonths = (months) => {
+        const today = new Date();
+        today.setMonth(today.getMonth() - months);
+        return today.toISOString().split('T')[0];
+    };
+
+    const initialAgeMonths = calculateAgeInMonths(birthDate);
 
     const [petDetails, setPetDetails] = useState({
         name: name || '',
         type: type || '',
         breed: breed || '',
-        birthDate: calculateBirthDate(petAgeMonths) || '',
+        birthDate: birthDate || calculateBirthDateFromMonths(initialAgeMonths),
         medicalHistory: medicalHistory || '',
         imageUrl: imageUrl || '',
-        // residencyType: residencyType || '',
+        ownerId: clientId,
     });
 
+    const [petAgeMonths, setPetAgeMonths] = useState(initialAgeMonths);
+
+    useEffect(() => {
+        setPetDetails((prevDetails) => ({
+            ...prevDetails,
+            birthDate: calculateBirthDateFromMonths(petAgeMonths),
+        }));
+    }, [petAgeMonths]);
+
     const handleInputChange = (field, value) => {
-        setPetDetails({ ...petDetails, [field]: value });
+        setPetDetails((prevDetails) => ({
+            ...prevDetails,
+            [field]: value,
+        }));
     };
 
     const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 1,
-        });
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 1,
+            });
 
-        if (!result.canceled) {
-            handleInputChange('imageUrl', result.assets[0].uri);
+            if (!result.canceled) {
+                setPetDetails((prevDetails) => ({
+                    ...prevDetails,
+                    imageUrl: result.assets[0].uri,
+                }));
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
         }
     };
 
     const handleSubmit = async () => {
-        console.log("Updating pet with ID:", petId);
-        console.log("Payload:", petDetails);
         try {
+            console.log("Updating pet:", petDetails);
             await PetService.updatePet(petId, petDetails);
-            Alert.alert('Success', 'Pet profile updated successfully.');
+            Alert.alert('Success', 'Pet profile updated successfully!');
             router.back();
         } catch (error) {
             console.error('Error updating pet:', error.response?.data || error);
-            const errorMessage = error.response?.data?.message || 'Failed to update pet profile. Please try again.';
-            Alert.alert('Error', errorMessage);
+            Alert.alert('Error', 'Failed to update pet profile. Please try again.');
         }
     };
+
+    const ageInYears = Math.floor(petAgeMonths / 12);
+    const remainingMonths = petAgeMonths % 12;
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -102,9 +122,7 @@ const UpdatePetProfile = () => {
             />
 
             <Text style={styles.label}>
-                Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} (
-                {ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month
-                {remainingMonths !== 1 ? 's' : ''})
+                Age: {ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''}
             </Text>
             <Slider
                 style={styles.slider}
@@ -118,42 +136,16 @@ const UpdatePetProfile = () => {
                 thumbTintColor="#1D3D47"
             />
 
-            {/*<Text style={styles.label}>Birth Date</Text>*/}
-            {/*<TextInput*/}
-            {/*    style={styles.input}*/}
-            {/*    value={petDetails.birthDate}*/}
-            {/*    onChangeText={(value) => handleInputChange('birthDate', value)}*/}
-            {/*    placeholder="Enter birth date (YYYY-MM-DD)"*/}
-            {/*    keyboardType="numeric"*/}
-            {/*/>*/}
-
-            {/*<Text style={styles.label}>Medical History</Text>*/}
-            {/*<TextInput*/}
-            {/*    style={styles.input}*/}
-            {/*    value={petDetails.medicalHistory}*/}
-            {/*    onChangeText={(value) => handleInputChange('medicalHistory', value)}*/}
-            {/*    placeholder="Enter medical history"*/}
-            {/*    multiline*/}
-            {/*/>*/}
-
-            {/*<Text style={styles.label}>Residency Type</Text>*/}
-            {/*<TextInput*/}
-            {/*    style={styles.input}*/}
-            {/*    value={petDetails.residencyType}*/}
-            {/*    onChangeText={(value) => handleInputChange('residencyType', value)}*/}
-            {/*    placeholder="Enter residency type"*/}
-            {/*/>*/}
-
             <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton}>
-                <Text style={styles.imagePickerText}>Update the Image</Text>
+                <Text style={styles.imagePickerText}>Update Image</Text>
             </TouchableOpacity>
 
             {petDetails.imageUrl ? (
                 <Image source={{ uri: petDetails.imageUrl }} style={styles.imagePreview} />
             ) : null}
 
-            <TouchableOpacity onPress={handleSubmit} style={styles.imagePickerButton}>
-                <Text style={styles.imagePickerText}>Update Profile</Text>
+            <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+                <Text style={styles.submitText}>Update Profile</Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -178,7 +170,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     imagePickerButton: {
-        backgroundColor: '#1d3d47',
+        backgroundColor: '#1D3D47',
         padding: 10,
         borderRadius: 8,
         alignItems: 'center',
@@ -199,6 +191,16 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 16,
         alignSelf: 'center',
+    },
+    submitButton: {
+        backgroundColor: '#1D3D47',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    submitText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });
 
