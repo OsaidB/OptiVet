@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
 import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import PetService from "../../Services/PetService";
-import { useFocusEffect } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export default function PetProfiles() {
     const { clientId } = useLocalSearchParams();
     const [pets, setPets] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -27,6 +26,30 @@ export default function PetProfiles() {
             console.error("Error fetching pets:", error);
             Alert.alert('Error', 'Failed to load pet profiles.');
         }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true); // Start the refreshing indicator
+        await fetchPets(); // Fetch updated pet data
+        setRefreshing(false); // Stop the refreshing indicator
+    };
+
+    const handleUpdatePet = (pet) => {
+        router.push({
+            pathname: "../ClientStack/UpdatePetProfile",
+            params: {
+                petId: pet.id,
+                clientId,
+                name: pet.name,
+                type: pet.type,
+                breed: pet.breed,
+                birthDate: pet.birthDate,
+                medicalHistory: pet.medicalHistory,
+                imageUrl: pet.imageUrl,
+                residencyType: pet.residencyType,
+            },
+        });
+        fetchPets();
     };
 
     const deletePet = async (petId) => {
@@ -52,13 +75,6 @@ export default function PetProfiles() {
             ]
         );
     };
-
-    // const navigateToUpdatePet = (pet) => {
-    //     router.push({
-    //         pathname: "../ClientStack/UpdatePetProfile",
-    //         params: { ...pet, clientId },
-    //     });
-    // };
 
     const calculateAge = (birthDate) => {
         const today = new Date();
@@ -95,34 +111,22 @@ export default function PetProfiles() {
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity
                                 style={[styles.iconButton, styles.updateButton]}
-                                onPress={() => router.push({
-                                    pathname: "../ClientStack/UpdatePetProfile",
-                                    params: { petId: item.id, clientId, name: item.name, type: item.type, breed: item.breed, birthDate: item.birthDate, medicalHistory: item.medicalHistory, imageUrl: item.imageUrl, residencyType: item.residencyType }
-                                })}
+                                onPress={() => handleUpdatePet(item)}
                             >
-                                <View>
-                                    {/*<Icon name="edit" size={24} color="white" />*/}
-                                    <FontAwesome name="edit" size={24} color="white" />
-                                </View>
+                                <FontAwesome name="edit" size={24} color="white" />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.iconButton, styles.deleteButton]}
                                 onPress={() => deletePet(item.id)}
                             >
-                                <View>
-                                    {/*<Icon name="delete" size={24} color="white" />*/}
-                                    <FontAwesome name="trash" size={24} color="white" />
-                                </View>
+                                <FontAwesome name="trash" size={24} color="white" />
                             </TouchableOpacity>
                         </View>
-
-                        {/*<Link onPress={() => { (item.id) }} href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id }, }} asChild>*/}
-                        {/*    <TouchableOpacity style={styles.addButton}>*/}
-                        {/*        <Text style={styles.buttonText}>Medical History</Text>*/}
-                        {/*    </TouchableOpacity>*/}
-                        {/*</Link>*/}
                     </View>
                 )}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                }
             />
             <Link href={{ pathname: "/ClientStack/createPetProfile", params: { clientId } }} asChild>
                 <TouchableOpacity style={styles.addButton}>
@@ -167,12 +171,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         marginTop: 10,
     },
-    button: {
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 5,
-        marginHorizontal: 5,
-    },
     addButton: {
         backgroundColor: '#1D3D47',
         paddingVertical: 12,
@@ -190,10 +188,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
     },
     updateButton: {
-        backgroundColor: '#4CAF50', // Green for update
+        backgroundColor: '#4CAF50',
     },
     deleteButton: {
-        backgroundColor: '#F44336', // Red for delete
+        backgroundColor: '#F44336',
     },
     buttonText: {
         color: 'white',
