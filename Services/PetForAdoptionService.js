@@ -221,7 +221,7 @@ console.log(response.data);
 
 
 
-    updatePetForAdoptionById: async (petForAdoptionId, petForAdoptionData) => {
+    updatePetForAdoptionById: async (petForAdoptionData, petForAdoptionId ) => {
         try {
             const token = await PetForAdoptionService.getToken();
             const response = await axios.put(`${BASE_URL}/${petForAdoptionId}`, petForAdoptionData, {

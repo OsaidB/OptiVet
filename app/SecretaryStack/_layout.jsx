@@ -42,11 +42,12 @@ export default function SecretaryStackLayout() {
                     <Ionicons name="location-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
                     <Text style={styles.footerButtonText}>Home</Text>
                 </TouchableOpacity>
+                <Link href="/SecretaryStack/Products" asChild>
                 <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Products')}>
                     <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
                     <Text style={styles.footerButtonText}>Products</Text>
                 </TouchableOpacity>
-                
+                </Link>
                 <Link href="/SecretaryStack/PetsForAdoption" asChild>
                     <TouchableOpacity style={styles.footerButton}>
                                 <Image source={require('../../assets/images/cat (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
