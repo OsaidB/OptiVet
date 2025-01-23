@@ -89,16 +89,32 @@ const DailyChecklistService = {
             throw error;
         }
     },
+    async getNumberOfCriticalNotes() {
+        try {
+            const criticalChecklists = await this.getCriticalDailyChecklists();
+            // Return the number of critical checklists
+            return criticalChecklists.length;
+        } catch (error) {
+            console.error("Error fetching the number of critical notes:", error);
+            throw error; // Re-throw the error for further handling
+        }
+    },
 
     async getCriticalDailyChecklists() {
         try {
-            const response = await axios.get(`${BASE_URL}/critical`);
-            return response.data;
+            const token = await this.getToken(); // Retrieve the token
+            const response = await axios.get(`${BASE_URL}/critical`, {
+                headers: {
+                    'X-Auth-Token': token, // Include the token in the headers
+                },
+            });
+            return response.data; // Return the data
         } catch (error) {
             console.error("Error fetching critical daily checklists:", error);
-            throw error;
+            throw error; // Re-throw the error for further handling
         }
     },
+
 
     // Add this method to the DailyChecklistService
     async getDailyChecklistsByPetId(petId) {

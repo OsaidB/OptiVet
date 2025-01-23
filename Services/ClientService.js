@@ -124,6 +124,22 @@ const ClientService = {
             throw error;
         }
     },
+
+    // Get total number of pets
+    getTotalClientsCount: async () => {
+        try {
+            const token = await ClientService.getToken();
+            const response = await axios.get(`${API_URL}/count`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data; // Returns the total count of pets
+        } catch (error) {
+            console.error('Error fetching total pets count:', error);
+            throw error; // Rethrow the error for further handling
+        }
+    },
 };
 
 export default ClientService;
