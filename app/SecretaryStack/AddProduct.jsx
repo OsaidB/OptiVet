@@ -314,10 +314,10 @@ export default function AddProduct() {
 
 
                 else {
-                    console.log('heyyyyyy');
-                    console.log(productImage);
+                    
+                    
                     const image = await ProductService.uploadProductImages(productImage);
-                    console.log(image);
+                    
 
 
 
@@ -332,7 +332,7 @@ export default function AddProduct() {
                 }
 
                 router.push({
-                    pathname: '/ManagerStack/Products',
+                    pathname: '/SecretaryStack/Products',
 
                 });
             } catch (error) {

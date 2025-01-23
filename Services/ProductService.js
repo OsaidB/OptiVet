@@ -15,26 +15,6 @@ const ProductService = {
     },
 
 
-    // Create a new product
-    // createProduct: async (product) => {
-    //     try {
-    //         const token = await ProductService.getToken();
-    //         const response = await axios.post(`${BASE_URL}`, product, {
-    //             headers: {
-    //                 'X-Auth-Token': token,
-    //             },
-
-    //         });
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error("Error creating product:", error);
-    //         throw error;
-    //     }
-    // },
-
-
-
-
     createProduct: async (productData) => {
         try {
             const token = await ProductService.getToken();
@@ -49,93 +29,6 @@ const ProductService = {
             throw error;
         }
     },
-
-
-
-    // uploadImage: async (imageUri) => {
-    //     try {
-    //         const token = await PetService.getToken();
-    //         const formData = new FormData();
-
-    //         if (Platform.OS === 'web') {
-    //             const response = await fetch(imageUri);
-    //             const blob = await response.blob();
-    //             formData.append('image', blob, 'petImage.jpg');
-    //         } else {
-    //             formData.append('image', {
-    //                 uri: imageUri,
-    //                 name: 'petImage.jpg',
-    //                 type: 'image/jpeg',
-    //             });
-    //         }
-
-    //         const response = await axios.post(`${BASE_URL}/uploadImage`, formData, {
-    //             headers: {
-    //                 'Content-Type': 'multipart/form-data',
-    //                 'X-Auth-Token': token,
-    //             },
-    //         });
-
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error('Error uploading pet image:', error);
-    //         throw error;
-    //     }
-    // },
-
-
-
-
-
-    // uploadProductImages: async (imageUris) => {
-    //     try {
-    //         const token = await ProductService.getToken();
-    //         const fdd = new FormData();
-
-    //         if (Platform.OS === 'web') {
-
-    //             const rr = await fetch(imageUris);
-    //             const blobb = await rr.blob();
-    //             fdd.append('image', blobb, 'productImage.jpg');
-
-    //         } else {
-
-
-    //             fdd.append('image', {
-
-    //                 uri: imageUris,
-    //                 name: 'productImage.jpg',
-    //                 type: 'image/jpeg'
-    //             });
-
-
-
-    //         }
-
-    //         const rrr = await axios.post(`${BASE_URL}/uploadImage`, fdd, {
-
-    //             headers: {
-
-    //                 'Content-Type': 'multipart/form-data',
-    //                 'X-Auth-Token': token,
-
-    //             }
-    //         });
-
-    //         return rrr.data;
-    //     } catch (eee) {
-    //         console.error("error uploading product image", eee);
-    //         throw eee;
-    //     }
-
-
-    // },
-
-
-
-
-
-
 
 
     uploadProductImages: async (imageUri) => {
@@ -162,15 +55,13 @@ const ProductService = {
                     'X-Auth-Token': token,
                 },
             });
-console.log(response.data);
+            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Error uploading product image:', error);
             throw error;
         }
     },
-
-
 
 
 
@@ -223,28 +114,6 @@ console.log(response.data);
 
 
 
-    // serveImage: (imagePath) => {
-    //     if (!imagePath) {
-    //         console.error('Error: Image path is required to serve the image.');
-    //         return null;
-    //     }
-    //     // If the path already starts with '/uploads', use it as-is
-    //     if (imagePath.startsWith('/uploads')) {
-    //         return `${BASE_URL}${imagePath}`;
-    //     }
-    //     // Otherwise, assume it's a filename and construct the full path
-    //     return `${BASE_URL}/uploads/${imagePath}`;
-    // },
-
-
-
-
-
-
-
-
-
-
     deleteProduct: async (productId) => {
         try {
             const token = await ProductService.getToken();
@@ -263,11 +132,6 @@ console.log(response.data);
 
 
 
-
-
-
-
-
     handleUpload: async (imageUri) => {
 
         try {
@@ -282,10 +146,8 @@ console.log(response.data);
                         'X-Auth-Token': token,
                     },
                 });
-                //console.log(response);
                 const blob = await response.blob();
                 formData.append('image', blob, 'productImage.jpg');
-                //console.log(formData);
             } else {
                 formData.append('image', {
                     uri: imageUri,
@@ -308,108 +170,7 @@ console.log(response.data);
         }
 
 
-
-
-
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-
-
-        //         const token = await ProductService.getToken();
-        //         console.log(imageUri);
-        //         const imageData = new FormData();
-
-
-
-        //         fetch(BASE_URL_IMG + imageUri, {
-        //             method: "GET",
-        //         }).then(response => response.blob()).then(response => {
-        //             console.log("Getting success", response);
-        //             imageData.append('productImage', response, 'productImage.jpg');
-
-        //             alert("Getting Success")
-        //         }).catch(error => { console.log("Getting error", error); alert("Getting failed !") });
-
-        // console.log(imageData);
-
-
-
-        //         //imageData.append("productImage", imagee);
-        //        // console.log(imageData.get().type() + 'heyyyy');
-
-
-        //         //imageData.append('productImage', imagee, 'productImage.jpg');
-
-        //         // imageData.append("productImage", {
-        //         //     name: 'productImage.jpg',
-        //         //     type:'image/jpeg' });
-
-
-
-        //         // Object.keys(imageData).forEach(key => {
-
-        //         //   image
-
-        //         // });
-
-
-        //         // fetch(`${BASE_URL}/uploadImage`, {
-        //         //     method: "POST", body: imageData, headers: {
-        //         //         'Content-Type': 'multipart/form-data',
-        //         //         'X-Auth-Token': token,
-        //         //     },
-        //         // }).then(response => response.blob()).then(response => {
-        //         //     console.log("Upload success", response);
-        //         //     alert("Upload Success")
-        //         // }).catch(error => { console.log("Upload error", error); alert("Upload failed !") });
-
-
-
-
-
-
-
-
-
-        //         const response = await axios.post(`${BASE_URL}/uploadImage`, imageData, {
-        //             headers: {
-        //                 'Content-Type': 'multipart/form-data',
-        //                 'X-Auth-Token': token,
-        //             },
-        //         });
-
-        //         return response.data;
-
-
-
-
-
-
-
-        //////////////////////////////////////////
-
-
-        // const response = await axios.post(`${BASE_URL}/uploadImage`, imageData, {
-        //     headers: {
-        //         'Content-Type': 'multipart/form-data',
-        //         'X-Auth-Token': token,
-        //     },
-        // });
-
-        // return response.data;
-
     },
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -429,18 +190,7 @@ console.log(response.data);
     },
 
 
-
-
-
-
-
-
-
-
-
-
-
-    updateProductById: async (productId, productData) => {
+    updateProductById: async (productData, productId) => {
         try {
             const token = await ProductService.getToken();
             const response = await axios.put(`${BASE_URL}/${productId}`, productData, {
@@ -454,38 +204,6 @@ console.log(response.data);
             throw error;
         }
     },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
