@@ -41,23 +41,25 @@ const ClientStack = () => {
 
                     // Fetch medical sessions for each pet
                     const petsWithSessions = await Promise.all(
-                        fetchedPets.map(async (pet) => {
-                            try {
-                                const sessions = await MedicalSessionService.getSessionsByPetId(pet.id);
-                                return {
-                                    ...pet,
-                                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-                                    lastCheckupDate: getLastCheckupDate(sessions),
-                                };
-                            } catch (error) {
-                                console.error(`Error fetching sessions for pet ${pet.id}:`, error);
-                                return {
-                                    ...pet,
-                                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-                                    lastCheckupDate: "No checkup",
-                                };
-                            }
-                        })
+                        fetchedPets
+                            .filter((pet) => !pet.deleted) // Exclude deleted pets
+                            .map(async (pet) => {
+                                try {
+                                    const sessions = await MedicalSessionService.getSessionsByPetId(pet.id);
+                                    return {
+                                        ...pet,
+                                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                                        lastCheckupDate: getLastCheckupDate(sessions),
+                                    };
+                                } catch (error) {
+                                    console.error(`Error fetching sessions for pet ${pet.id}:`, error);
+                                    return {
+                                        ...pet,
+                                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                                        lastCheckupDate: "No checkup",
+                                    };
+                                }
+                            })
                     );
 
                     setPets(petsWithSessions);

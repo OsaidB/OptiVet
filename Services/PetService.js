@@ -186,6 +186,21 @@ const PetService = {
         }
     },
 
+    // Soft delete a pet by its ID
+    softDeletePet: async (petId) => {
+        try {
+            const token = await PetService.getToken();
+            const response = await axios.put(`${BASE_URL}/soft-delete/${petId}`, {}, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data; // Returns a success message
+        } catch (error) {
+            console.error('Error soft-deleting pet:', error);
+            throw error; // Rethrow the error for further handling
+        }
+    },
 
 };
 

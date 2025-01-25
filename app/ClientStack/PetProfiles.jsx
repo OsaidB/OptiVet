@@ -17,10 +17,13 @@ export default function PetProfiles() {
     const fetchPets = async () => {
         try {
             const fetchedPets = await PetService.getPetsByOwnerId(clientId);
-            const petsWithImages = fetchedPets.map((pet) => ({
-                ...pet,
-                imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-            }));
+            console.log(fetchedPets);
+            const petsWithImages = fetchedPets
+                .filter(pet => !pet.deleted) // Filter out deleted pets
+                .map(pet => ({
+                    ...pet,
+                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                }));
             setPets(petsWithImages);
         } catch (error) {
             console.error("Error fetching pets:", error);
@@ -63,7 +66,7 @@ export default function PetProfiles() {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            await PetService.deletePet(petId);
+                            await PetService.softDeletePet(petId);
                             Alert.alert("Success", "Pet deleted successfully.");
                             fetchPets(); // Refresh the pet list
                         } catch (error) {
