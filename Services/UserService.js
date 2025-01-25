@@ -194,6 +194,23 @@ const UserService = {
         const isUser = await UserService.isUser();
         return isAuthenticated && isUser;
     },
+
+    // Get total number of pets
+    getTotalUsersCount: async () => {
+        try {
+            const token = await UserService.getToken();
+            const response = await axios.get(`${USERS_API_BASE_URL}/count`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data; // Returns the total count of pets
+        } catch (error) {
+            console.error('Error fetching total pets count:', error);
+            throw error; // Rethrow the error for further handling
+        }
+    },
+
 };
 
 export default UserService;

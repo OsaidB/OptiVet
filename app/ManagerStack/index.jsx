@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground } from "react-native";
+import {Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground, TouchableOpacity} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
 import PetService from "../../Services/PetService";
 import { Ionicons } from "@expo/vector-icons";
+import {Link} from "expo-router";
+import DailyChecklistService from "../../Services/DailyChecklistService";
+import ClientService from "../../Services/ClientService";
 
 const ManagerStack = () => {
     const [managerInfo, setManagerInfo] = useState(null);
@@ -39,16 +42,31 @@ const ManagerStack = () => {
             }
         };
 
+        const fetchCriticalNotesCount = async () => {
+            try {
+                const count = await DailyChecklistService.getNumberOfCriticalNotes();
+                console.log(`Number of critical notes: ${count}`);
+                return count;
+            } catch (error) {
+                console.error("Failed to fetch the number of critical notes:", error);
+                return 0; // Return a fallback value if an error occurs
+
+            }
+        };
+
         const fetchMetrics = async () => {
             try {
+                // console.log(fetchCriticalNotesCount)
                 const [notesCount, petsCount, clientsCount] = await Promise.all([
-                    // UserService.getCriticalNotesCount(),
-                    // PetService.getPetsCount(),
-                    // UserService.getClientsCount(),
-                    4,
-                   31,
-                    17,
+                    fetchCriticalNotesCount(),
+                    PetService.getTotalPetsCount(),
+                    ClientService.getTotalClientsCount(),
+                    // 4,
+                   // 31,
+                   //  17,
                 ]);
+                console.log("Metrics fetched:", { notesCount, petsCount, clientsCount });
+
                 setCriticalNotes(notesCount);
                 setRegisteredPets(petsCount);
                 setClients(clientsCount);
@@ -135,6 +153,17 @@ const ManagerStack = () => {
                     <Text style={styles.actionDescription}>Stay updated with critical messages and notifications.</Text>
                 </View>
             </View>
+            {/*<Link*/}
+            {/*    href={{*/}
+            {/*        pathname: "/ManagerStack/AddEmployee",*/}
+            {/*        // params: { userId : managerInfo.userId }, // Pass clientId here*/}
+            {/*    }}*/}
+            {/*    asChild*/}
+            {/*>*/}
+            {/*    <TouchableOpacity style={styles.button}>*/}
+            {/*        <Text style={styles.buttonText}>Add New Appointment</Text>*/}
+            {/*    </TouchableOpacity>*/}
+            {/*</Link>*/}
         </ScrollView>
 </ImageBackground>
 

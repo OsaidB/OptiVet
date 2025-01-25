@@ -1,13 +1,27 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Platform,Image } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import {
+    View,
+    Text,
+    TextInput,
+    Button,
+    StyleSheet,
+    Alert,
+    TouchableOpacity,
+    Platform,
+    Image,
+    ScrollView, SafeAreaView
+} from 'react-native';
+import {Picker, PickerIOS} from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as SplashScreen from "expo-splash-screen";
 import {useFonts} from "expo-font";
 import PetService from "../../Services/PetService";
-import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import PickerItem from "react-native-web/src/exports/Picker/PickerItem";
+import {color} from "@rneui/base"; // Import useLocalSearchParams
 
 export default function CreatePetProfile() {
     const router = useRouter();
@@ -245,10 +259,10 @@ export default function CreatePetProfile() {
     }
 
     return (
-        <View style={styles.container}>
+
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Create Pet Profile</Text>
 
-            {/* Text input for Pet Name */}
             <TextInput
                 style={styles.input}
                 placeholder="Pet Name"
@@ -256,37 +270,64 @@ export default function CreatePetProfile() {
                 onChangeText={setPetName}
             />
 
-            {/* Dropdown for selecting Pet Type */}
-            <Picker
-                selectedValue={petType}
-                style={styles.picker}
-                onValueChange={(itemValue) => {
-                    setPetType(itemValue);
-                    setPetBreed(''); // Reset breed when pet type changes
-                }}
-                prompt="Select a Pet Type"
-            >
-                <Picker.Item label="Select a pet type" value=""/>
-                <Picker.Item label="Dog" value="Dog"/>
-                <Picker.Item label="Cat" value="Cat"/>
-                <Picker.Item label="Bird" value="Bird"/>
-            </Picker>
+            {Platform.OS === 'ios' ? (
+                <TouchableOpacity
+                    style={[styles.pickerContainer, petType ? styles.pickerSelected : styles.pickerDefault]}
+                    onPress={() => {
+                        Alert.alert('Pet Type', 'Please select a pet type', [
+                            {text: 'Dog', onPress: () => setPetType('Dog')},
+                            {text: 'Cat', onPress: () => setPetType('Cat')},
+                            {text: 'Bird', onPress: () => setPetType('Bird')},
+                        ]);
+                    }}>
+                    <Text style={styles.pickerText}>{petType || "Select a pet type"}</Text>
+                </TouchableOpacity>
+            ) : (
+                <Picker
+                    selectedValue={petType}
+                    style={styles.picker}
+                    onValueChange={(itemValue) => {
+                        setPetType(itemValue);
+                        setPetBreed('');
+                    }}
+                >
+                    <Picker.Item label="Select a pet type" value="" />
+                    <Picker.Item label="Dog" value="Dog" />
+                    <Picker.Item label="Cat" value="Cat" />
+                    <Picker.Item label="Bird" value="Bird" />
+                </Picker>
+            )}
 
-            {/* Dropdown for selecting Pet Breed based on Pet Type */}
-            <Picker
-                selectedValue={petBreed}
-                style={styles.picker}
-                onValueChange={(itemValue) => setPetBreed(itemValue)}
-                enabled={!!petType}
-                prompt="Select a breed"
-            >
-                <Picker.Item label="Select a breed" value=""/>
-                {petData[petType]?.map((breed, index) => (
-                    <Picker.Item key={index} label={breed.label} value={breed.value || ''}/>
-                ))}
-            </Picker>
+            {Platform.OS === 'ios' ? (
+                <TouchableOpacity
+                    style={[styles.pickerContainer, petBreed ? styles.pickerSelected : styles.pickerDefault]}
+                    onPress={() => {
+                        if (!petType) {
+                            Alert.alert('Error', 'Please select a pet type first!');
+                            return;
+                        }
+                        const breeds = petData[petType] || [];
+                        Alert.alert('Pet Breed', 'Please select a pet breed', breeds.map((breed) => ({
+                            text: breed.label,
+                            onPress: () => setPetBreed(breed.value),
+                        })));
+                    }}>
+                    <Text style={styles.pickerText}>{petBreed || "Select a breed"}</Text>
+                </TouchableOpacity>
+            ) : (
+                <Picker
+                    selectedValue={petBreed}
+                    style={styles.picker}
+                    onValueChange={setPetBreed}
+                    enabled={!!petType}
+                >
+                    <Picker.Item label="Select a breed" value="" />
+                    {petData[petType]?.map((breed, index) => (
+                        <Picker.Item key={index} label={breed.label} value={breed.value} />
+                    ))}
+                </Picker>
+            )}
 
-            {/* Slider for selecting Pet Age in Months */}
             <Text style={styles.label}>
                 Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} (
                 {ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month
@@ -299,12 +340,11 @@ export default function CreatePetProfile() {
                 step={1}
                 value={petAgeMonths}
                 onValueChange={setPetAgeMonths}
-                minimumTrackTintColor={Platform.OS === 'android' ? '#FFD700' : '#1D3D47'} // Gold for Android
+                minimumTrackTintColor="#1D3D47"
                 maximumTrackTintColor="#ccc"
-                thumbTintColor={Platform.OS === 'android' ? '#FFD700' : '#1D3D47'} // Gold for Android
+                thumbTintColor="#1D3D47"
             />
 
-            {/* Medical History Input */}
             <TextInput
                 style={styles.input}
                 placeholder="Medical History"
@@ -312,33 +352,33 @@ export default function CreatePetProfile() {
                 onChangeText={setPetMedicalHistory}
             />
 
-            {/* Photo Picker Button */}
             <TouchableOpacity onPress={pickImage} style={styles.photoButton}>
                 <Text style={styles.photoButtonText}>{petPhoto ? 'Change Photo' : 'Select Photo'}</Text>
             </TouchableOpacity>
 
-            {/* Display Selected Photo with Delete Button */}
             {petPhoto && (
                 <View style={styles.photoContainer}>
-                    <Image source={{uri: petPhoto}} style={styles.petImage}/>
+                    <Image source={{ uri: petPhoto }} style={styles.petImage} />
                     <TouchableOpacity onPress={removePhoto} style={styles.removeButton}>
                         <Text style={styles.removeButtonText}>X</Text>
                     </TouchableOpacity>
                 </View>
             )}
-
-            {/* Submission Buttons */}
-            <View style={styles.buttonContainer}>
-                <Button
-                    title="Create Profile"
-                    onPress={handleSubmit}
-                    color={Platform.OS === 'android' ? '#1D3D47' : undefined}
-                />
+            <View>
+                {/*<Button*/}
+                {/*    title="Create Profile"*/}
+                {/*    onPress={handleSubmit}*/}
+                {/*    color={Platform.OS === 'ios' ? '#1D3D47' : undefined}*/}
+                {/*/>*/}
+                <TouchableOpacity style={styles.createButton} onPress={handleSubmit}>
+                    <Text style={styles.resetButtonText}>Create Profile</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
                     <Text style={styles.resetButtonText}>Reset</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
+
     );
 }
 
@@ -363,6 +403,15 @@ const styles = StyleSheet.create({
     picker: {
         height: 50,
         marginBottom: 12,
+    },
+    pickerContainer: {
+        height: 50,
+        justifyContent: 'center',
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 12,
+        paddingHorizontal: 10,
     },
     slider: {
         width: '100%',
@@ -412,6 +461,15 @@ const styles = StyleSheet.create({
     buttonContainer: {
         marginTop: 20,
     },
+
+    createButton: {
+        marginTop: 10,
+        backgroundColor: '#74b3c4',
+        paddingVertical: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+
     resetButton: {
         marginTop: 10,
         backgroundColor: '#f0ad4e',

@@ -91,14 +91,14 @@ const SecretaryStack = () => {
 
 
                 <View style={{ backgroundColor: '#a0cedd', width: '100%', height: 240, justifyContent: 'space-evenly', alignItems: 'center' }}>
-                    <Link href={{ pathname: "/SecretaryStack/AddPetForAdoption" }} asChild>
+                    <Link href={{ pathname: "/SecretaryStack/PetsForAdoption" }} asChild>
                         <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', width: '40%', borderRadius: 18, height: 50, padding: 12, marginVertical: 10 }}>
                             <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Pets for adoption</Text>
                         </TouchableOpacity>
                     </Link>
 
 
-                    <Link href={{ pathname: "/SecretaryStack/AddPetForAdoption" }} asChild>
+                    <Link href={{ pathname: "/SecretaryStack/Products" }} asChild>
                         <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, width: '40%', height: 50, padding: 12, marginVertical: 10 }}>
                             <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Store</Text>
                         </TouchableOpacity>

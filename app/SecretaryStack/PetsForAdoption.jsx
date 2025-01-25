@@ -35,19 +35,22 @@ const imagess = [];
 
 const PetsForAdoption = () => {
     const navigation = useNavigation();
-   //const router = useRouter();
+    //const router = useRouter();
 
 
-    const [pets, setPets] = useState([{id:0,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2222.png'},{id:1,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2225.png'},{id:2,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 222814.png'},{id:3,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 207.png'},{id:4,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 223128.png'}]);
+
+    //const [pets, setPets] = useState([{id:0,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2222.png'},{id:1,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2225.png'},{id:2,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 222814.png'},{id:3,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 207.png'},{id:4,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 223128.png'}]);
+    const [pets, setPets] = useState([]);
     const [viewModal, setViewModal] = useState(false);
     const [petId, setpPetId] = useState();
-    const [selectedPet,setSelectedPet] = useState('');
-    const[petForEdit, setPetForEdit] = useState();
+    const [selectedPet, setSelectedPet] = useState('');
+    const [petForEdit, setPetForEdit] = useState();
+   // const [petToView,setPetToView] = useState();
 
 
 
     useEffect(() => {
-        const fetchPetsForAdoption = async () => {
+        const fetchPetForAdoption = async () => {
             try {
                 const fetchPetsForAdoption = await PetForAdoptionService.getpetsForAdoption();
                 setPets(fetchPetsForAdoption);
@@ -58,10 +61,9 @@ const PetsForAdoption = () => {
             }
         };
 
-        fetchPetsForAdoption();
+        fetchPetForAdoption();
 
     }, []);
-
 
 
     return (
@@ -80,9 +82,9 @@ const PetsForAdoption = () => {
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <View style={{ margin: 20, backgroundColor: 'white', borderRadius: 20, padding: 35, alignItems: 'center', width: 540, height: '90%', backgroundColor: '#97989c', borderWidth: 4 }}>
 
-                        <View style={{ borderWidth: 2, borderRadius: 4, backgroundColor: 'white', marginBottom: 20 }}>
+                        <View style={{ borderWidth: 2, borderRadius: 4, marginBottom: 20 }}>
 
-                            <Image source={require('../../assets/images/pencil (2).png')} style={{ height: 120, width: 120,borderRadius:'100%' }} resizeMode='cover' ></Image>
+                            <Image source={{ uri: `${BASE_URL_IMAGES}${selectedPet.petForAdoptionImageUrl}` }} style={{ height: 120, width: 120 }} resizeMode='cover' ></Image>
 
 
                         </View>
@@ -91,15 +93,15 @@ const PetsForAdoption = () => {
                         <TextInput editable={false} value={selectedPet.name} style={{ borderWidth: 3, borderRadius: 4, marginBottom: 20, padding: 4 }}></TextInput>
 
                         <Text style={{ fontSize: 20, marginBottom: 4 }}>Type</Text>
-                        <TextInput editable={false} value="heyyyy" style={{ borderWidth: 3, marginBottom: 20, padding: 4, borderRadius: 4 }}></TextInput>
+                        <TextInput editable={false} value={selectedPet.type} style={{ borderWidth: 3, marginBottom: 20, padding: 4, borderRadius: 4 }}></TextInput>
 
-                        <Text style={{ fontSize: 20, marginBottom: 4 }}>Age</Text>
-                        <TextInput editable={false} value="heyyyy" style={{ borderWidth: 3, marginBottom: 20, padding: 4, borderRadius: 4 }}></TextInput>
+                        <Text style={{ fontSize: 20, marginBottom: 4 }}>Date of Birth</Text>
+                        <TextInput editable={false} value={selectedPet.birthDate} style={{ borderWidth: 3, marginBottom: 20, padding: 4, borderRadius: 4 }}></TextInput>
 
 
 
                         <Text style={{ fontSize: 20, marginBottom: 4 }}>Description</Text>
-                        <TextInput multiline editable={false} value="" style={{ borderWidth: 3, padding: 4, borderRadius: 4, height: 120, width: 400, marginBottom: 20 }}></TextInput>
+                        <TextInput multiline editable={false} value={selectedPet.petForAdoptionDescription} style={{ borderWidth: 3, padding: 4, borderRadius: 4, height: 120, width: 400, marginBottom: 20 }}></TextInput>
 
 
                         <TouchableOpacity>
@@ -120,7 +122,7 @@ const PetsForAdoption = () => {
 
 
 
-{/* ////////////////////////////////////////////////////////////////////////////////////////////////////////// */}
+            {/* ////////////////////////////////////////////////////////////////////////////////////////////////////////// */}
 
 
             <ScrollView
@@ -128,30 +130,35 @@ const PetsForAdoption = () => {
 
 
 
-                        <View style={{ width: '20%', backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
+
+                {pets.map((item) => {
+
+                    return (
+
+                        <View key={item.id} style={{ flexShrink: 1, width: (Platform.OS == 'web' ? '20%' : '40%'), backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
 
 
-                            <View style={{ width: '90%', height: '30%', marginTop: 5,marginBottom:12 }}>
-                                <Image source={require('../../assets/images/Screenshot 2025-01-13 2222.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
+                            <View style={{ borderRadius: '100%', width: '90%', height: '40%', maxHeight: 120, maxWidth: 120, marginTop: 5, marginBottom: 4 }}>
+                                <Image source={{ uri: `${BASE_URL_IMAGES}${item.petForAdoptionImageUrl}` }} style={{ borderRadius: '100%', width: '100%', height: '100%' }} resizeMode="cover"></Image>
                             </View>
 
 
-                            <Text style={{ fontSize: 20, color: 'white',marginBottom:4 }} numberOfLines={1} >Buddy</Text>
+                            <Text style={{ height: '20%', fontSize: 20, color: 'white', marginBottom: 4 }} numberOfLines={1} >{item.name}</Text>
 
 
 
 
-                            <Text numberOfLines={1} style={{ fontSize: 24, color: '#97989c' }}>Cat - Persian</Text>
+                            <Text numberOfLines={1} style={{ height: '20%', fontSize: 20, color: '#97989c', marginBottom: 20 }}>{item.type} - {item.breed}</Text>
 
 
 
 
 
 
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '24%' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '12%' }}>
 
 
-                                <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: 'EditPetForAdoption' }} asChild>
+                                <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: '../SecretaryStack/EditPetForAdoption', params: {petId}}} onPress={() => {setpPetId(item.id)}} asChild>
                                     <TouchableOpacity>
 
                                         <Image source={require('../../assets/images/pencil (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
@@ -173,316 +180,15 @@ const PetsForAdoption = () => {
 
 
 
-                            <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); }}>
+                            <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); setSelectedPet(item); }}>
                                 <Text style={{ fontSize: 12, fontWeight: 'bold' }} numberOfLines={1}>View Details</Text>
                             </TouchableOpacity>
                         </View>
 
+                    )
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <View  style={{ width: '20%', backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
-
-
-                            <View style={{ width: '90%', height: '30%', marginTop: 5,marginBottom:12 }}>
-                                <Image source={require('../../assets/images/Screenshot 2025-01-13 2225.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
-                            </View>
-
-
-                            <Text style={{ fontSize: 20, color: 'white',marginBottom:4 }} numberOfLines={1} >Loola</Text>
-
-
-
-
-                            <Text numberOfLines={1} style={{ fontSize: 24, color: '#97989c' }}>Cat - Siamese</Text>
-
-
-
-
-
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '24%' }}>
-
-
-                                <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: 'EditPetForAdoption'  }} asChild>
-                                    <TouchableOpacity>
-
-                                        <Image source={require('../../assets/images/pencil (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-                                    </TouchableOpacity>
-                                </Link>
-
-
-
-                                <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}>
-
-                                    <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-                                </TouchableOpacity>
-
-
-
-                            </View>
-
-
-
-                            <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); }}>
-                                <Text style={{ fontSize: 12, fontWeight: 'bold' }} numberOfLines={1}>View Details</Text>
-                            </TouchableOpacity>
-                        </View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <View  style={{ width: '20%', backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
-
-
-<View style={{ width: '90%', height: '30%', marginTop: 5,marginBottom:12 }}>
-    <Image source={require('../../assets/images/Screenshot 2025-01-13 222814.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
-</View>
-
-
-<Text style={{ fontSize: 20, color: 'white',marginBottom:4 }} numberOfLines={1} >Bas</Text>
-
-
-
-
-<Text numberOfLines={1} style={{ fontSize: 24, color: '#97989c' }}>Cat - Siamese</Text>
-
-
-
-
-
-
-<View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '24%' }}>
-
-
-    <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: 'EditPetForAdoption'  }} asChild>
-        <TouchableOpacity>
-
-            <Image source={require('../../assets/images/pencil (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-        </TouchableOpacity>
-    </Link>
-
-
-
-    <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}>
-
-        <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-    </TouchableOpacity>
-
-
-
-</View>
-
-
-
-<TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); }}>
-    <Text style={{ fontSize: 12, fontWeight: 'bold' }} numberOfLines={1}>View Details</Text>
-</TouchableOpacity>
-</View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<View  style={{ width: '20%', backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
-
-
-<View style={{ width: '90%', height: '30%', marginTop: 5,marginBottom:12 }}>
-    <Image source={require('../../assets/images/Screenshot 2025-01-13 223128.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
-</View>
-
-
-<Text style={{ fontSize: 20, color: 'white',marginBottom:4 }} numberOfLines={1} >doln</Text>
-
-
-
-
-<Text numberOfLines={1} style={{ fontSize: 24, color: '#97989c' }}>Dog - Golden Retriever</Text>
-
-
-
-
-
-
-<View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '24%' }}>
-
-
-    <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: 'EditPetForAdoption'  }} asChild>
-        <TouchableOpacity>
-
-            <Image source={require('../../assets/images/pencil (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-        </TouchableOpacity>
-    </Link>
-
-
-
-    <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}>
-
-        <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-    </TouchableOpacity>
-
-
-
-</View>
-
-
-
-<TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); }}>
-    <Text style={{ fontSize: 12, fontWeight: 'bold' }} numberOfLines={1}>View Details</Text>
-</TouchableOpacity>
-</View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<View  style={{ width: '20%', backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
-
-
-<View style={{ width: '90%', height: '30%', marginTop: 5,marginBottom:12 }}>
-    <Image source={require('../../assets/images/Screenshot 2025-01-13 207.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
-</View>
-
-
-<Text style={{ fontSize: 20, color: 'white',marginBottom:4 }} numberOfLines={1} >heyyy</Text>
-
-
-
-
-<Text numberOfLines={1} style={{ fontSize: 24, color: '#97989c' }}>Dog - Poodle</Text>
-
-
-
-
-
-
-<View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '24%' }}>
-
-
-    <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: 'EditPetForAdoption'  }} asChild>
-        <TouchableOpacity>
-
-            <Image source={require('../../assets/images/pencil (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-        </TouchableOpacity>
-    </Link>
-
-
-
-    <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}>
-
-        <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-
-    </TouchableOpacity>
-
-
-
-</View>
-
-
-
-<TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); }}>
-    <Text style={{ fontSize: 12, fontWeight: 'bold' }} numberOfLines={1}>View Details</Text>
-</TouchableOpacity>
-</View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                })}
 
 
 

@@ -92,9 +92,9 @@ export default function Products() {
 
     const SearchProduct = (searchString) => {
 
-        console.log(selectedCategory);
+        //console.log(selectedCategory);
 
-        console.log(searchText);
+        //console.log(searchText);
         // if(searchString === undefined){
         // searchString = '1';
         // }
@@ -103,7 +103,7 @@ export default function Products() {
         // setProducts(filteredProducts);
 
         if (selectedCategory !== 'ALL') {
-            console.log(selectedCategory);
+            //console.log(selectedCategory);
             const categorized = products.filter(product => product.productCategory.toLowerCase().includes(selectedCategory.toLowerCase()));
 
             // const productName = product.name.toLowerCase();
@@ -181,7 +181,7 @@ export default function Products() {
 
 
         <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center' }}>
-            <View style={{ alignSelf: 'center' }}><Text style={{ fontSize: 40 }}>Products</Text></View>
+            <View style={{ alignSelf: 'center' }}><Text style={{ fontSize: 40 }}>Store</Text></View>
 
 
             <View style={{ marginVertical: 10, marginHorizontal: 15, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', borderWidth: 1, borderRadius: 8, borderColor: 'black', width: '90%', padding: 10 }}>
@@ -344,19 +344,103 @@ export default function Products() {
 
 
 
-
-
-
-
             <ScrollView
                 contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }} style={{ alignSelf: 'center', width: '90%', marginVertical: 10 }}>
 
 
 
+
                 {searchedProducts.map((item) => {
+
                     return (
 
-                        // <View key={item.id} style={{ width: widthRatio, flexDirection: 'row', backgroundColor: 'brown', height: 300, margin: 20, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }} SearchProduct = {SearchProduct} setProducts = {setProducts}>
+                        <View key={item.id} style={{ flexShrink: 1, width: (Platform.OS == 'web' ? '20%' : '40%'), backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center', paddingTop:12 }} >
+
+
+                            <View style={{ borderRadius: '100%', width: '90%', height: '40%', maxHeight: 120, maxWidth: 120, marginTop: 5, marginBottom: 4 }}>
+                                <Image source={{ uri: `${BASE_URL_IMAGES}${item.productImageUrl}` }} style={{ borderRadius: '100%', width: '100%', height: '100%' }} resizeMode="stretch"></Image>
+                            </View>
+
+
+                            <Text style={{  fontSize: 20, color: 'white' }} numberOfLines={1} >{item.name}</Text>
+
+
+
+                            <Text numberOfLines={1} style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
+
+
+
+
+
+
+
+                            <Text numberOfLines={1} style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold',marginBottom:12 }}>{item.productCategory}</Text>
+
+
+
+
+
+
+
+
+
+
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '12%' }}>
+
+
+                                <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: '../SecretaryStack/UpdateProduct', params: {productId}}} onPress={() => {setProductId(item.id)}} asChild>
+                                    <TouchableOpacity>
+
+                                        <Image source={require('../../assets/images/pencil (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
+
+                                    </TouchableOpacity>
+                                </Link>
+
+
+
+                                <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} onPress={() => deleteProductHandle(item.id)} >
+
+                                    <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
+
+                                </TouchableOpacity>
+
+
+
+                            </View>
+
+
+
+                        </View>
+
+                    )
+
+
+                })}
+
+
+
+
+
+            </ScrollView>
+
+
+
+
+
+
+
+
+
+            {/* <ScrollView
+                contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }} style={{ alignSelf: 'center', width: '90%', marginVertical: 10 }}>
+
+
+
+                {searchedProducts.map((item) => {
+                    return ( */}
+
+                        {/* // <View key={item.id} style={{ width: widthRatio, flexDirection: 'row', backgroundColor: 'brown', height: 300, margin: 20, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }} SearchProduct = {SearchProduct} setProducts = {setProducts}>
                         //     <Text style={{ fontSize: 20, color: 'white' }}>{item.name}</Text>
                         // </View>
 
@@ -372,26 +456,26 @@ export default function Products() {
 
 
                         //     <Text style={{ fontSize: 20, color: 'white' }}>{item.productImageUrl}</Text>
-                        // </View>
+                        // </View> */}
 
 
 
 
-                        <View key={item.id} style={{ width: widthRatio, backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center', borderRadius: 15 }} SearchProduct={SearchProduct} setSearchText={setSearchText}>
+                        {/* <View key={item.id} style={{ width: widthRatio, backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center', borderRadius: 15 }} SearchProduct={SearchProduct} setSearchText={setSearchText}>
 
                             <View style={{ width: '90%', height: '50%', marginTop: 5 }}>
                                 <Image source={{ uri: `${BASE_URL_IMAGES}${item.productImageUrl}` }} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
                             </View>
 
 
-                            <Text style={{ fontSize: 20, color: 'white' }}>{item.name}</Text>
+                            <Text style={{ fontSize: 20, color: 'white' }}>{item.name}</Text> */}
 
 
                             {/* source={`${BASE_URL}${item.productImageUrl}`} */}
 
 
 
-                            <Text style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
+                            {/* <Text style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
 
 
 
@@ -403,7 +487,7 @@ export default function Products() {
 
 
                             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '30%', height: '30%' }}>
-
+ */}
 
                                 {/* <View style={{ backgroundColor: 'white', borderRadius: '100%', width:40, height:40 }}>
 
@@ -415,7 +499,7 @@ export default function Products() {
                                     </View> */}
 
                                 {/* <View style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 10, marginHorizontal: 10 }}> */}
-                                <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId } }} onPress={() => { setProductId(item.id) }} asChild>
+                                {/* <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId } }} onPress={() => { setProductId(item.id) }} asChild>
                                     <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }}>
 
                                         <Image source={require('../../assets/images/pencil (2).png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
@@ -431,7 +515,7 @@ export default function Products() {
 
                                     <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
 
-                                </TouchableOpacity>
+                                </TouchableOpacity> */}
 
 
 
@@ -445,28 +529,28 @@ export default function Products() {
                                 </Link> */}
 
 
-
+{/* 
 
                             </View>
                         </View>
 
 
                     )
-                })}
+                })} */}
 
 
                 {/* <Image source={{ uri: products[0].productImageUrl }}  style={{width:80, height:80}}></Image> */}
-
-            </ScrollView>
-
-
+{/* 
+            </ScrollView> */}
 
 
 
 
 
 
-            <Link href={{ pathname: "/ManagerStack/AddProduct" }} asChild>
+
+
+            <Link href={{ pathname: "/SecretaryStack/AddProduct" }} asChild>
                 <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, width: '50%', marginVertical: 10 }}>
                     <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Add New Product</Text>
                 </TouchableOpacity>

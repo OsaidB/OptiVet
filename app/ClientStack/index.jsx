@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground, TouchableOpacity} from 'react-native';
+import { Text, View, StyleSheet, Image, ScrollView, Alert, ImageBackground, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
 import PetService from '../../Services/PetService';
+import AppointmentService from '../../Services/AppointmentService';
+import MedicalSessionService from '../../Services/MedicalSessionService';
 import DefaultFemaleImage from '../../assets/images/default_female.jpg';
 
 const ClientStack = () => {
     const [clientInfo, setClientInfo] = useState(null);
     const [email, setEmail] = useState(null);
     const [pets, setPets] = useState([]);
+    const [appointments, setAppointments] = useState([]);
 
     useEffect(() => {
         const fetchEmail = async () => {
@@ -18,11 +21,11 @@ const ClientStack = () => {
                     setEmail(storedEmail);
                 } else {
                     console.error("No email found in AsyncStorage");
-                    alert('Error: No email found. Please log in again.');
+                    Alert.alert('Error', 'No email found. Please log in again.');
                 }
             } catch (error) {
                 console.error("Error fetching email from AsyncStorage:", error);
-                alert('Error: Failed to retrieve email.');
+                Alert.alert('Error', 'Failed to retrieve email.');
             }
         };
 
@@ -32,16 +35,37 @@ const ClientStack = () => {
                 const data = await ClientService.getClientByEmail(email);
                 setClientInfo(data);
 
-                // Fetch pets using client ID
                 if (data && data.id) {
+                    // Fetch pets
                     const fetchedPets = await PetService.getPetsByOwnerId(data.id);
 
-                    // Map pets to ensure the image URL is constructed properly
-                    const petsWithImages = fetchedPets.map((pet) => ({
-                        ...pet,
-                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-                    }));
-                    setPets(petsWithImages);
+                    // Fetch medical sessions for each pet
+                    const petsWithSessions = await Promise.all(
+                        fetchedPets.map(async (pet) => {
+                            try {
+                                const sessions = await MedicalSessionService.getSessionsByPetId(pet.id);
+                                return {
+                                    ...pet,
+                                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                                    lastCheckupDate: getLastCheckupDate(sessions),
+                                };
+                            } catch (error) {
+                                console.error(`Error fetching sessions for pet ${pet.id}:`, error);
+                                return {
+                                    ...pet,
+                                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                                    lastCheckupDate: "No checkup",
+                                };
+                            }
+                        })
+                    );
+
+                    setPets(petsWithSessions);
+
+                    // Fetch appointments
+                    const fetchedAppointments = await AppointmentService.getAppointmentsByClient(data.id);
+                    const upcomingAppointments = getUpcomingAppointments(fetchedAppointments);
+                    setAppointments(upcomingAppointments);
                 }
             } catch (error) {
                 console.error("Error fetching client info or pets:", error);
@@ -53,66 +77,90 @@ const ClientStack = () => {
         fetchClientInfo();
     }, [email]);
 
+    const getLastCheckupDate = (sessions) => {
+        if (!sessions || sessions.length === 0) return "No checkup";
+
+        const latestSession = sessions.reduce((latest, current) => {
+            const latestDate = new Date(latest.sessionDate);
+            const currentDate = new Date(current.sessionDate);
+            return currentDate > latestDate ? current : latest;
+        });
+
+        return new Date(latestSession.sessionDate).toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    };
+
+    const getUpcomingAppointments = (appointments) => {
+        const today = new Date().setHours(0, 0, 0, 0);
+        return appointments.filter((appointment) => {
+            const appointmentDate = new Date(appointment.appointmentDate).setHours(0, 0, 0, 0);
+            return appointmentDate >= today;
+        });
+    };
+
     return (
         <ImageBackground
-            source={require("../../assets/images/dog-and-cat.jpeg")} // Add your background image
-            resizeMode="cover" // Adjust how the image fits
+            source={require("../../assets/images/dog-and-cat.jpeg")}
+            resizeMode="cover"
             style={styles.backgroundImage}
         >
-        <ScrollView contentContainerStyle={styles.container}>
-            {/* Welcome Section */}
-            <View style={styles.welcomeSection}>
-                <Text style={styles.greetingText}>Welcome Back,</Text>
-                <Text style={styles.clientName}>{clientInfo?.firstName} {clientInfo?.lastName}</Text>
-                <Image
-                    source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultFemaleImage}
-                    style={styles.profileImage}
-                />
-            </View>
-
-            {/* Statistics Section */}
-            <View style={styles.statsSection}>
-                <View style={styles.statsCard}>
-                    <Text style={styles.statsValue}>{4}</Text>
-                    <Text style={styles.statsLabel}>My Pets</Text>
+            <ScrollView contentContainerStyle={styles.container}>
+                {/* Welcome Section */}
+                <View style={styles.welcomeSection}>
+                    <Text style={styles.greetingText}>Welcome Back,</Text>
+                    <Text style={styles.clientName}>{clientInfo?.firstName} {clientInfo?.lastName}</Text>
+                    <Image
+                        source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultFemaleImage}
+                        style={styles.profileImage}
+                    />
                 </View>
-                <View style={styles.statsCard}>
-                    <Text style={styles.statsValue}>{clientInfo?.appointments?.length || 2}</Text>
-                    <Text style={styles.statsLabel}>Appointments</Text>
-                </View>
-            </View>
 
-            {/* Adopt a Pet Button */}
-            <TouchableOpacity
-                style={styles.adoptButton}
-                onPress={() => console.log('Navigate to Adoption Screen')} // Replace with router.push('/AdoptionScreen')
-            >
-                <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
-            </TouchableOpacity>
-
-            {/* Highlights Section */}
-            <View style={styles.highlightsSection}>
-                <Text style={styles.sectionTitle}>Pet Highlights</Text>
-                {pets.slice(-4).map((pet) => (
-                    <View key={pet.id} style={styles.petCard}>
-                        <Image
-                            source={{ uri: pet.imageUrl || 'https://cdn.example.com/path-to-placeholder.png' }}
-                            style={styles.petImage}
-                        />
-                        <View style={styles.petDetails}>
-                            <Text style={styles.petName}>{pet.name}</Text>
-                            <Text style={styles.petType}>{pet.type}</Text>
-                            <Text style={styles.petActivity}>Last checkup: {pet.lastCheckupDate || '14-Jan'}</Text>
-                        </View>
+                {/* Statistics Section */}
+                <View style={styles.statsSection}>
+                    <View style={styles.statsCard}>
+                        <Text style={styles.statsValue}>{pets.length}</Text>
+                        <Text style={styles.statsLabel}>My Pets</Text>
                     </View>
-                ))}
-            </View>
+                    <View style={styles.statsCard}>
+                        <Text style={styles.statsValue}>{appointments.length}</Text>
+                        <Text style={styles.statsLabel}>Appointments</Text>
+                    </View>
+                </View>
 
-        </ScrollView>
+                {/* Adopt a Pet Button */}
+                <TouchableOpacity
+                    style={styles.adoptButton}
+                    onPress={() => console.log('Navigate to Adoption Screen')}
+                >
+                    <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
+                </TouchableOpacity>
+
+                {/* Highlights Section */}
+                <View style={styles.highlightsSection}>
+                    <Text style={styles.sectionTitle}>Pet Highlights</Text>
+                    {pets.slice(-4).map((pet) => (
+                        <View key={pet.id} style={styles.petCard}>
+                            <Image
+                                source={{ uri: pet.imageUrl || 'https://cdn.example.com/path-to-placeholder.png' }}
+                                style={styles.petImage}
+                            />
+                            <View style={styles.petDetails}>
+                                <Text style={styles.petName}>{pet.name}</Text>
+                                <Text style={styles.petType}>{pet.type}</Text>
+                                <Text style={styles.petActivity}>Last checkup: {pet.lastCheckupDate}</Text>
+                            </View>
+                        </View>
+                    ))}
+                </View>
+
+            </ScrollView>
         </ImageBackground>
-
     );
 };
+
 
 const styles = StyleSheet.create({
 

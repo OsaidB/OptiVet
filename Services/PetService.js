@@ -169,6 +169,24 @@ const PetService = {
             throw error;
         }
     },
+
+    // Get total number of pets
+    getTotalPetsCount: async () => {
+        try {
+            const token = await PetService.getToken();
+            const response = await axios.get(`${BASE_URL}/count`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data; // Returns the total count of pets
+        } catch (error) {
+            console.error('Error fetching total pets count:', error);
+            throw error; // Rethrow the error for further handling
+        }
+    },
+
+
 };
 
 export default PetService;

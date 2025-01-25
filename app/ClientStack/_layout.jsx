@@ -1,15 +1,15 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter } from 'expo-router';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, Platform} from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
-// import SafeToast from '../SafeToast';
 
 import CustomToast from '../Toast.config';
+import DefaultFemaleImage from "../../assets/images/default_female.jpg";
 
 export default function ClientStackLayout() {
     const colorScheme = useColorScheme();
@@ -17,6 +17,9 @@ export default function ClientStackLayout() {
 
     const [clientInfo, setClientInfo] = useState(null);
     const [email, setEmail] = useState(null);
+    const [isModalVisible, setModalVisible] = useState(false);
+
+    console.log('Client Info:', clientInfo);
 
     // Fetch client info and email
     useEffect(() => {
@@ -50,6 +53,10 @@ export default function ClientStackLayout() {
         fetchClientInfo();
     }, [email]);
 
+    const toggleModal = () => {
+        setModalVisible(!isModalVisible);
+    };
+
     if (!clientInfo) {
         return (
             <View style={styles.loadingContainer}>
@@ -62,14 +69,64 @@ export default function ClientStackLayout() {
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             {/* Header */}
             <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
-                <TouchableOpacity onPress={() => console.log('Back pressed')} style={styles.iconButton}>
+                <TouchableOpacity onPress={() => router.push('/ClientStack')} style={styles.iconButton}>
                     <Ionicons name="arrow-back" size={24} color="#FFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>🐾OptiVet</Text>
-                <TouchableOpacity onPress={() => console.log('Profile pressed')} style={styles.iconButton}>
+                <TouchableOpacity onPress={toggleModal} style={styles.iconButton}>
                     <Ionicons name="person-circle" size={24} color="#FFF" />
                 </TouchableOpacity>
+
             </View>
+
+            <Modal
+                visible={isModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={toggleModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
+                            <Text style={styles.closeButtonText}>x</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.modalTitle}>Profile Information</Text>
+                        {/* Static Image */}
+                        <Image
+                            source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultFemaleImage}
+                            style={styles.profileImage}
+                        />
+                        {clientInfo ? (
+                            <>
+                                {/*<Image*/}
+                                {/*    source={{ uri: "https://via.placeholder.com/100" }}*/}
+                                {/*    style={styles.profileImage}*/}
+                                {/*/>*/}
+                                <Text style={styles.profileName}>
+                                    {clientInfo.firstName} {clientInfo.lastName}
+                                </Text>
+                                <Text style={styles.profileEmail}>{clientInfo.email}</Text>
+                                <Text style={styles.profilePhone}>
+                                    Phone: {clientInfo.phoneNumber || "N/A"}
+                                </Text>
+                            </>
+                        ) : (
+                            <Text style={styles.loadingText}>Loading profile...</Text>
+                        )}
+                        <View>
+                            <TouchableOpacity onPress={() => {
+                                toggleModal();
+                                router.push('/ClientStack/settings');
+                            }} style={styles.settingsButton}>
+                                <Text style={styles.settingsButtonText}>Settings</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={toggleModal} style={styles.logOutButton}>
+                                <Text style={styles.logOutButtonText}>Logout</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Main Stack Navigation */}
             <Stack
@@ -125,7 +182,6 @@ export default function ClientStackLayout() {
                     <Text style={styles.footerButtonText}>Store</Text>
                 </TouchableOpacity>
             </View>
-
 
             {/* Global Toast Notifications */}
             <Toast config={CustomToast} />
@@ -184,6 +240,80 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F9F9F9', // Light background
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        backgroundColor: "#FFFFFF",
+        padding: 20,
+        borderRadius: 12,
+        width: Platform.OS === 'web' ? '30%' : '80%',
+        alignItems: "center",
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 15,
+        color: "#2C3E50",
+    },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 15,
+    },
+    profileName: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 5,
+        color: "#2C3E50",
+    },
+    profileEmail: {
+        fontSize: 16,
+        color: "#7F8C8D",
+        marginBottom: 5,
+    },
+    profilePhone: {
+        fontSize: 14,
+        color: "#7F8C8D",
+    },
+    logOutButton: {
+        marginTop: 15,
+        backgroundColor: "#E74C3C",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    logOutButtonText: {
+        color: "#FFFFFF",
+        fontWeight: "bold",
+        marginLeft: 5
+    },
+    settingsButton: {
+        marginTop: 15,
+        backgroundColor: "#3498db",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    settingsButtonText: {
+        color: "#FFFFFF",
+        fontWeight: "bold",
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 10,
+    },
+    closeButtonText: {
+        fontSize: 20,
+        //fontWeight: 'bold',
+        color: 'black',
     },
     loadingText: {
         fontSize: 16,

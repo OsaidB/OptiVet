@@ -184,19 +184,14 @@ export default function AddPetForAdoption() {
             console.log('entering the breed of the pet in mandatory');
         }
 
-        else if (!petDescription) {
-            Alert.alert('entering the description of the pet in mandatory');
-            console.log('entering the description of the pet in mandatory');
-        }
-
-
-
+        // else if (!petDescription) {
+        //     Alert.alert('entering the description of the pet in mandatory');
+        //     console.log('entering the description of the pet in mandatory');
+        // }
 
         else {
 
-
             try {
-                //const categoryByCategoryId = await CategoryService.getCategoryById(selectedCategoryId);
 
 
                 if (!petImage) {
@@ -211,33 +206,13 @@ export default function AddPetForAdoption() {
                     setPetImage(getFile);
 
 
-
-                    // else {
-                    //     const image = await ProductService.handleUpload(categoryByCategoryId.categoryImageUrl);
-                    //     console.log(image);
-
-                    //     //console.log(productImage);
-
-                    //     const product = await ProductService.createProduct({
-
-                    //         name: productName,
-                    //         productImageUrl: image,
-                    //         price: priceValue,
-                    //         productCategory: categoryByCategoryId.name
-                    //     });
-
-
-                    // }
                 }
 
 
                 else {
 
-                    console.log('heyyyyyy');
 
-                    // console.log(productImage);
                     const image = await PetForAdoptionService.uploadPetForAdoptionImages(petImage);
-                    //console.log(image);
 
                     const dateOfBirth = calcBirthDate(petAge);
 
@@ -261,14 +236,10 @@ export default function AddPetForAdoption() {
                 Alert.alert('error creating pet for adoption', error);
             }
 
-
-
         }
 
 
     };
-
-
 
 
     return (
@@ -317,7 +288,7 @@ export default function AddPetForAdoption() {
 
                 <View style={{}}>
                     <Text style={{ marginLeft: 10, fontSize: 25 }}>Pet Age: {petAge} month{petAge !== 1 ? 's' : ''} (
-                        {ageYears} year{ageYears !== 1 ? 's' : ''} {remainingMonths} month {remainingMonths !== 1 ? 's' : ''} )</Text>
+                        {ageYears} year{ageYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''} )</Text>
 
                     <Slider
                         style={styles.slider}
