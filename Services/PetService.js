@@ -131,12 +131,29 @@ const PetService = {
                     'X-Auth-Token': token,
                 },
             });
+            console.log(response.data)
             return response.data;
         } catch (error) {
             console.error('Error fetching pets by owner ID:', error);
             throw error;
         }
     },
+    // Get pet summaries by owner's ID (excluding medical history)
+    getPetSummariesByOwnerId: async (ownerId) => {
+        try {
+            const token = await PetService.getToken();
+            const response = await axios.get(`${BASE_URL}/owner/${ownerId}/summary`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data; // Returns a list of PetSummaryDTO
+        } catch (error) {
+            console.error('Error fetching pet summaries by owner ID:', error);
+            throw error;
+        }
+    },
+
 
     // Update a pet by its ID
     updatePet: async (petId, petData) => {
