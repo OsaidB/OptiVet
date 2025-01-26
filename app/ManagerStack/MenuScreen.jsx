@@ -1,9 +1,25 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import AuthService from "../../Services/authService"; // Import AuthService for logout logic
 
 const MenuScreen = () => {
     const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            const success = await AuthService.logout();
+            if (success) {
+                console.log("Logged out successfully");
+                router.replace(""); // Redirect to the login screen
+            } else {
+                Alert.alert("Logout Failed", "An error occurred during logout. Please try again.");
+            }
+        } catch (error) {
+            console.error("Logout Error:", error);
+            Alert.alert("Logout Error", "Something went wrong. Please try again.");
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -27,14 +43,7 @@ const MenuScreen = () => {
             >
                 <Text style={styles.menuButtonText}>Add Employee</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.menuButton}
-                onPress={() => {
-                    console.log("Logging out");
-                    // Perform logout logic here
-                    router.push("/LoginScreen"); // Replace with your login screen route
-                }}
-            >
+            <TouchableOpacity style={styles.menuButton} onPress={handleLogout}>
                 <Text style={styles.menuButtonText}>Logout</Text>
             </TouchableOpacity>
         </View>

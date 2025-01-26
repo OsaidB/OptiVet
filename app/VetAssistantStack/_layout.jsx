@@ -6,11 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import CustomToast from '../Toast.config';
 import React from "react";
+import AuthGuard from "../AuthGuard";
 
 export default function VetAssistantStackLayout() {
     const colorScheme = useColorScheme();
 
     return (
+        <AuthGuard allowedRoles={['VET_ASSISTANT']}>
+
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             {/* Header */}
             <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
@@ -55,6 +58,8 @@ export default function VetAssistantStackLayout() {
             {/* Global Toast Notifications */}
             {typeof window !== 'undefined' && <Toast config={CustomToast}/>}
         </ThemeProvider>
+        </AuthGuard>
+
     );
 }
 

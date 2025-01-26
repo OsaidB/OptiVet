@@ -6,10 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
 import React, { useState, useEffect } from 'react';
+import AuthGuard from '../AuthGuard'; // Import the AuthGuard component
 import Toast from 'react-native-toast-message';
 
 import CustomToast from '../Toast.config';
 import DefaultFemaleImage from "../../assets/images/default_female.jpg";
+import AuthService from "../../Services/authService";
 
 export default function ClientStackLayout() {
     const colorScheme = useColorScheme();
@@ -57,6 +59,29 @@ export default function ClientStackLayout() {
         setModalVisible(!isModalVisible);
     };
 
+
+    // Logout function
+    const handleLogout = async () => {
+        try {
+            const success = await AuthService.logout();
+            if (success) {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Logged Out',
+                    text2: 'You have been successfully logged out.',
+                });
+                toggleModal(); // Close the modal
+                router.replace(''); // Redirect to the login screen
+            } else {
+                Alert.alert('Logout Failed', 'An error occurred during logout. Please try again.');
+            }
+        } catch (error) {
+            console.error('Logout Error:', error);
+            Alert.alert('Logout Error', 'Something went wrong. Please try again.');
+        }
+    };
+
+
     if (!clientInfo) {
         return (
             <View style={styles.loadingContainer}>
@@ -66,7 +91,9 @@ export default function ClientStackLayout() {
     }
 
     return (
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AuthGuard allowedRoles={['ROLE_CLIENT']}> {/* Ensure only clients can access this stack */}
+
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             {/* Header */}
             <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
                 <TouchableOpacity onPress={() => router.push('/ClientStack')} style={styles.iconButton}>
@@ -120,7 +147,7 @@ export default function ClientStackLayout() {
                             }} style={styles.settingsButton}>
                                 <Text style={styles.settingsButtonText}>Settings</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={toggleModal} style={styles.logOutButton}>
+                            <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
                                 <Text style={styles.logOutButtonText}>Logout</Text>
                             </TouchableOpacity>
                         </View>
@@ -186,6 +213,7 @@ export default function ClientStackLayout() {
             {/* Global Toast Notifications */}
             <Toast config={CustomToast} />
         </ThemeProvider>
+        </AuthGuard>
     );
 }
 

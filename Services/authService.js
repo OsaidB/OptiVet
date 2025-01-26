@@ -1,6 +1,7 @@
 // authService.js
 
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // import axios from 'react-native-axios';
 // import https from 'https';
@@ -89,6 +90,35 @@ class AuthService {
             throw err;
         }
     }
+
+    // Logout method
+    async logout() {
+        try {
+            // Retrieve the token from AsyncStorage
+            const token = await AsyncStorage.getItem('authToken');
+
+            // Notify the backend to invalidate the token
+            if (token) {
+                await axios.post(`${BASE_URL}/logout`, {}, {
+                    headers: {
+                        'X-Auth-Token': token, // Send token in the header
+                    },
+                });
+            }
+
+            // Clear AsyncStorage (authToken, email, role)
+            await AsyncStorage.removeItem('authToken');
+            await AsyncStorage.removeItem('email');
+            await AsyncStorage.removeItem('role');
+
+            console.log('Logout successful.');
+            return true; // Return success
+        } catch (error) {
+            console.error('Error during logout:', error);
+            return false; // Return failure
+        }
+    }
+
 }
 
 export default new AuthService();

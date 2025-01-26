@@ -13,7 +13,7 @@ const ManagerStack = () => {
     const [email, setEmail] = useState(null);
     const [criticalNotes, setCriticalNotes] = useState(0);
     const [registeredPets, setRegisteredPets] = useState(0);
-    const [appointments, setAppointments] = useState(15); // Example value for appointments
+    const [appointments, setAppointments] = useState(-1); // Example value for appointments
     const [clients, setClients] = useState(0);
 
     useEffect(() => {
