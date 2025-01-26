@@ -14,6 +14,8 @@ export default function AddAppointment() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [availableSlots, setAvailableSlots] = useState([]);
     const [vets, setVets] = useState([]);
+    const [managers, setManagers] = useState([]);
+    const [managersAndVets, setManagersAndVets] = useState([]);
     const [pets, setPets] = useState([]);
     const [showCalendar, setShowCalendar] = useState(false);
     const [closestSlotHint, setClosestSlotHint] = useState(null);
@@ -46,6 +48,8 @@ export default function AddAppointment() {
     //     fetchVets();
     // }, [clientId]);
 
+    console.log('Combined Vets:', managersAndVets);
+
     useEffect(() => {
         const fetchVets = async () => {
             try {
@@ -53,16 +57,18 @@ export default function AddAppointment() {
                 const managers = await UserService.getUsersByRole("MANAGER");
                 const vets = await UserService.getUsersByRole("VET");
 
-                // Combine results and remove duplicates if needed
-                const combinedVets = [...new Map([...managers, ...vets].map(user => [user.id, user])).values()];
+                // Combine results and remove duplicates by userId
+                const combined = [...new Map([...managers, ...vets].map(user => [user.userId, user])).values()];
 
-                setVets(combinedVets);
+                setManagersAndVets(combined);
+
             } catch (error) {
                 console.error('Error fetching vets:', error);
             }
         };
         fetchVets();
     }, [clientId]);
+
 
 
     // useEffect(() => {
@@ -218,7 +224,7 @@ export default function AddAppointment() {
                 {/* Vet Selection */}
                 <Text style={styles.label}>Select a Vet</Text>
                 <FlatList
-                    data={vets}
+                    data={managersAndVets}
                     horizontal
                     renderItem={renderVetItem}
                     keyExtractor={(item) => item.userId.toString()}

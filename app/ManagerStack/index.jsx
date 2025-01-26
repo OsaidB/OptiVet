@@ -153,6 +153,17 @@ const ManagerStack = () => {
                     <Text style={styles.actionDescription}>Stay updated with critical messages and notifications.</Text>
                 </View>
             </View>
+            {/*<Link*/}
+            {/*    href={{*/}
+            {/*        pathname: "/ManagerStack/AddEmployee",*/}
+            {/*        // params: { userId : managerInfo.userId }, // Pass clientId here*/}
+            {/*    }}*/}
+            {/*    asChild*/}
+            {/*>*/}
+            {/*    <TouchableOpacity style={styles.button}>*/}
+            {/*        <Text style={styles.buttonText}>Add New Appointment</Text>*/}
+            {/*    </TouchableOpacity>*/}
+            {/*</Link>*/}
         </ScrollView>
 </ImageBackground>
 
