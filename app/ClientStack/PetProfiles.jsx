@@ -106,7 +106,8 @@ export default function PetProfiles() {
                         <Text>Breed: {item.breed}</Text>
                         <Text>Age: {calculateAge(item.birthDate)}</Text>
                         <Text>Medical History: {item.medicalHistory}</Text>
-                        <Link onPress={() => { (item.id) }} href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id }, }} asChild>
+                        {/*<Link onPress={() => { (item.id) }} href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id }, }} asChild>*/}
+                        <Link href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id } }} asChild>
                             <TouchableOpacity style={styles.addButton}>
                                 <Text style={styles.buttonText}>Medical History</Text>
                             </TouchableOpacity>

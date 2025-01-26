@@ -69,11 +69,20 @@ const UpdatePetProfile = () => {
                 quality: 1,
             });
 
-            if (!result.canceled) {
-                setPetDetails((prevDetails) => ({
-                    ...prevDetails,
-                    imageUrl: result.assets[0].uri,
-                }));
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const uri = result.assets[0].uri;
+
+                // Upload the image and update the imageUrl field
+                try {
+                    const uploadedImageUrl = await PetService.uploadImage(uri);
+                    setPetDetails((prevDetails) => ({
+                        ...prevDetails,
+                        imageUrl: uploadedImageUrl, // Use the relative path directly
+                    }));
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    Alert.alert('Error', 'Failed to upload the image. Please try again.');
+                }
             }
         } catch (error) {
             console.error('Error picking image:', error);
@@ -82,12 +91,20 @@ const UpdatePetProfile = () => {
 
     const handleSubmit = async () => {
         try {
-            console.log("Updating pet:", petDetails);
-            await PetService.updatePet(petId, petDetails);
+            const updatedPetDetails = {
+                ...petDetails,
+                birthDate: calculateBirthDateFromMonths(petAgeMonths),
+            };
+
+            console.log('Updating pet details:', updatedPetDetails);
+
+            // Send the updated pet details to the backend
+            await PetService.updatePet(petId, updatedPetDetails);
+
             Alert.alert('Success', 'Pet profile updated successfully!');
             router.back();
         } catch (error) {
-            console.error('Error updating pet:', error.response?.data || error);
+            console.error('Error updating pet profile:', error.response?.data || error);
             Alert.alert('Error', 'Failed to update pet profile. Please try again.');
         }
     };
@@ -141,7 +158,7 @@ const UpdatePetProfile = () => {
             </TouchableOpacity>
 
             {petDetails.imageUrl ? (
-                <Image source={{ uri: petDetails.imageUrl }} style={styles.imagePreview} />
+                <Image source={{ uri: PetService.serveImage(petDetails.imageUrl) }} style={styles.imagePreview} />
             ) : null}
 
             <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
