@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, RefreshControl, Platform} from 'react-native';
 import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import PetService from "../../Services/PetService";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -17,10 +17,13 @@ export default function PetProfiles() {
     const fetchPets = async () => {
         try {
             const fetchedPets = await PetService.getPetsByOwnerId(clientId);
-            const petsWithImages = fetchedPets.map((pet) => ({
-                ...pet,
-                imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-            }));
+            console.log(fetchedPets);
+            const petsWithImages = fetchedPets
+                .filter(pet => !pet.deleted) // Filter out deleted pets
+                .map(pet => ({
+                    ...pet,
+                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                }));
             setPets(petsWithImages);
         } catch (error) {
             console.error("Error fetching pets:", error);
@@ -53,28 +56,50 @@ export default function PetProfiles() {
     };
 
     const deletePet = async (petId) => {
-        Alert.alert(
-            "Confirm Delete",
-            "Are you sure you want to delete this pet?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            await PetService.deletePet(petId);
-                            Alert.alert("Success", "Pet deleted successfully.");
-                            fetchPets(); // Refresh the pet list
-                        } catch (error) {
-                            console.error("Error deleting pet:", error);
-                            Alert.alert("Error", "Failed to delete the pet.");
-                        }
+        console.log(`Delete button clicked for pet ID: ${petId}`); // Debug log
+        if (Platform.OS === 'web') {
+            const confirm = window.confirm("Are you sure you want to delete this pet?");
+            if (!confirm) {
+                console.log("User canceled deletion.");
+                return;
+            }
+
+            try {
+                console.log(`Deleting pet with ID: ${petId}`); // Debug log
+                await PetService.softDeletePet(petId);
+                Alert.alert("Success", "Pet deleted successfully."); // Optional for native platforms
+                fetchPets(); // Refresh the pet list
+            } catch (error) {
+                console.error("Error deleting pet:", error);
+                Alert.alert("Error", "Failed to delete the pet.");
+            }
+        } else {
+            // Native platforms
+            Alert.alert(
+                "Confirm Delete",
+                "Are you sure you want to delete this pet?",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: async () => {
+                            try {
+                                console.log(`Deleting pet with ID: ${petId}`); // Debug log
+                                await PetService.softDeletePet(petId);
+                                Alert.alert("Success", "Pet deleted successfully.");
+                                fetchPets(); // Refresh the pet list
+                            } catch (error) {
+                                console.error("Error deleting pet:", error);
+                                Alert.alert("Error", "Failed to delete the pet.");
+                            }
+                        },
                     },
-                },
-            ]
-        );
+                ]
+            );
+        }
     };
+
 
     const calculateAge = (birthDate) => {
         const today = new Date();
@@ -103,7 +128,8 @@ export default function PetProfiles() {
                         <Text>Breed: {item.breed}</Text>
                         <Text>Age: {calculateAge(item.birthDate)}</Text>
                         <Text>Medical History: {item.medicalHistory}</Text>
-                        <Link onPress={() => { (item.id) }} href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id }, }} asChild>
+                        {/*<Link onPress={() => { (item.id) }} href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id }, }} asChild>*/}
+                        <Link href={{ pathname: "../../ClientStack/MedicalHistory", params: { petId: item.id } }} asChild>
                             <TouchableOpacity style={styles.addButton}>
                                 <Text style={styles.buttonText}>Medical History</Text>
                             </TouchableOpacity>
@@ -118,6 +144,7 @@ export default function PetProfiles() {
                             <TouchableOpacity
                                 style={[styles.iconButton, styles.deleteButton]}
                                 onPress={() => deletePet(item.id)}
+                                // onClick={() => deletePet(item.id)}
                             >
                                 <FontAwesome name="trash" size={24} color="white" />
                             </TouchableOpacity>
@@ -186,6 +213,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginHorizontal: 5,
+        cursor: 'pointer',
     },
     updateButton: {
         backgroundColor: '#4CAF50',

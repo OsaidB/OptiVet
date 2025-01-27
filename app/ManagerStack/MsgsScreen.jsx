@@ -11,16 +11,13 @@ const MsgsScreen = () => {
     useEffect(() => {
         const fetchCriticalMessages = async () => {
             try {
-                const checklists = await DailyChecklistService.getAllDailyChecklists();
-                const filteredMessages = checklists.filter(
-                    (checklist) => checklist.criticalIssueFlag === true
-                );
+                const messages = await DailyChecklistService.getCriticalDailyChecklists();
 
                 // Fetch pet details for each critical checklist entry
                 const messagesWithPetInfo = await Promise.all(
-                    filteredMessages.map(async (message) => {
+                    messages.map(async (message) => {
                         const pet = await PetService.getPetById(message.petId);
-                        return { ...message, pet, done: false }; // Add "done" state initially as false
+                        return { ...message, pet, done: message.done || false }; // Add "done" state if not present
                     })
                 );
 
@@ -35,18 +32,29 @@ const MsgsScreen = () => {
         fetchCriticalMessages();
     }, []);
 
-    const toggleDoneStatus = (id) => {
-        // Toggle the "done" state for the selected message
-        setCriticalMessages((prev) =>
-            prev.map((message) =>
-                message.id === id ? { ...message, done: !message.done } : message
-            )
-        );
+    const toggleDoneStatus = async (id, currentStatus) => {
+        try {
+            const updatedChecklist = await DailyChecklistService.updateDailyChecklist(id, {
+                done: !currentStatus, // Update the "done" field
+            });
+
+            setCriticalMessages((prev) =>
+                prev.map((message) =>
+                    message.id === id ? { ...message, done: updatedChecklist.done } : message
+                )
+            );
+        } catch (error) {
+            console.error("Error updating done status:", error);
+        }
     };
 
-    const handleDeleteMessage = (id) => {
-        // Delete the message
-        setCriticalMessages((prev) => prev.filter((message) => message.id !== id));
+    const handleDeleteMessage = async (id) => {
+        try {
+            await DailyChecklistService.deleteDailyChecklist(id);
+            setCriticalMessages((prev) => prev.filter((message) => message.id !== id));
+        } catch (error) {
+            console.error("Error deleting message:", error);
+        }
     };
 
     const renderMessageItem = ({ item }) => (
@@ -55,7 +63,7 @@ const MsgsScreen = () => {
                 <Text style={styles.dateText}>Date: {item.date}</Text>
                 <View style={styles.actionIcons}>
                     {/* Done Icon */}
-                    <TouchableOpacity onPress={() => toggleDoneStatus(item.id)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => toggleDoneStatus(item.id, item.done)} style={styles.iconButton}>
                         <Ionicons
                             name={item.done ? "checkmark-circle" : "checkmark-circle-outline"}
                             size={24}

@@ -6,10 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ClientService from '../../Services/ClientService';
 import React, { useState, useEffect } from 'react';
+import AuthGuard from '../AuthGuard'; // Import the AuthGuard component
 import Toast from 'react-native-toast-message';
 
 import CustomToast from '../Toast.config';
 import DefaultFemaleImage from "../../assets/images/default_female.jpg";
+import AuthService from "../../Services/authService";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import DefaultUserImage from "../../assets/images/default_user.png";
 
 export default function ClientStackLayout() {
     const colorScheme = useColorScheme();
@@ -57,6 +61,29 @@ export default function ClientStackLayout() {
         setModalVisible(!isModalVisible);
     };
 
+
+    // Logout function
+    const handleLogout = async () => {
+        try {
+            const success = await AuthService.logout();
+            if (success) {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Logged Out',
+                    text2: 'You have been successfully logged out.',
+                });
+                toggleModal(); // Close the modal
+                router.replace(''); // Redirect to the login screen
+            } else {
+                Alert.alert('Logout Failed', 'An error occurred during logout. Please try again.');
+            }
+        } catch (error) {
+            console.error('Logout Error:', error);
+            Alert.alert('Logout Error', 'Something went wrong. Please try again.');
+        }
+    };
+
+
     if (!clientInfo) {
         return (
             <View style={styles.loadingContainer}>
@@ -66,7 +93,9 @@ export default function ClientStackLayout() {
     }
 
     return (
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AuthGuard allowedRoles={['ROLE_CLIENT']}> {/* Ensure only clients can access this stack */}
+
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             {/* Header */}
             <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
                 <TouchableOpacity onPress={() => router.push('/ClientStack')} style={styles.iconButton}>
@@ -79,56 +108,64 @@ export default function ClientStackLayout() {
 
             </View>
 
-            <Modal
-                visible={isModalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={toggleModal}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-                            <Text style={styles.closeButtonText}>x</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.modalTitle}>Profile Information</Text>
-                        {/* Static Image */}
-                        <Image
-                            source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultFemaleImage}
-                            style={styles.profileImage}
-                        />
-                        {clientInfo ? (
-                            <>
-                                {/*<Image*/}
-                                {/*    source={{ uri: "https://via.placeholder.com/100" }}*/}
-                                {/*    style={styles.profileImage}*/}
-                                {/*/>*/}
-                                <Text style={styles.profileName}>
-                                    {clientInfo.firstName} {clientInfo.lastName}
-                                </Text>
-                                <Text style={styles.profileEmail}>{clientInfo.email}</Text>
-                                <Text style={styles.profilePhone}>
-                                    Phone: {clientInfo.phoneNumber || "N/A"}
-                                </Text>
-                            </>
-                        ) : (
-                            <Text style={styles.loadingText}>Loading profile...</Text>
-                        )}
-                        <View>
-                            <TouchableOpacity onPress={() => {
-                                toggleModal();
-                                router.push('/ClientStack/settings');
-                            }} style={styles.settingsButton}>
-                                <Text style={styles.settingsButtonText}>Settings</Text>
+                <Modal
+                    visible={isModalVisible}
+                    transparent={true}
+                    animationType={Platform.OS === 'web' ? 'none' : 'slide'}
+                    onRequestClose={toggleModal}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            {/* Close Icon */}
+                            <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
+                                <FontAwesome name="close" size={24} color="black" />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={toggleModal} style={styles.logOutButton}>
-                                <Text style={styles.logOutButtonText}>Logout</Text>
-                            </TouchableOpacity>
+
+                            <Text style={styles.modalTitle}>Profile Information</Text>
+                            {/* Static Image */}
+                            <Image
+                                source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultUserImage}
+                                style={styles.profileImage}
+                            />
+                            {clientInfo ? (
+                                <>
+                                    <Text style={styles.profileName}>
+                                        {clientInfo.firstName} {clientInfo.lastName}
+                                    </Text>
+                                    <Text style={styles.profileEmail}>{clientInfo.email}</Text>
+                                    <Text style={styles.profilePhone}>
+                                        Phone: {clientInfo.phoneNumber || "N/A"}
+                                    </Text>
+                                </>
+                            ) : (
+                                <Text style={styles.loadingText}>Loading profile...</Text>
+                            )}
+
+                            {/* Settings and Logout Buttons */}
+                            <View style={styles.buttonRow}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        toggleModal();
+                                        router.push('/ClientStack/settings');
+                                    }}
+                                    style={styles.settingsButton}
+                                >
+                                    <FontAwesome name="cogs" size={20} color="#FFFFFF" />
+                                    <Text style={styles.settingsButtonText}>Settings</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
+                                    <FontAwesome name="sign-out" size={20} color="#FFFFFF" />
+                                    <Text style={styles.logOutButtonText}>Logout</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Main Stack Navigation */}
+
+
+                {/* Main Stack Navigation */}
             <Stack
                 screenOptions={{
                     headerShown: false, // Disable the default header
@@ -186,6 +223,7 @@ export default function ClientStackLayout() {
             {/* Global Toast Notifications */}
             <Toast config={CustomToast} />
         </ThemeProvider>
+        </AuthGuard>
     );
 }
 
@@ -281,7 +319,15 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#7F8C8D",
     },
+    buttonRow: {
+        flexDirection: 'row', // Align buttons horizontally
+        justifyContent: 'center', // Center buttons
+        alignItems: 'center', // Vertical alignment
+        marginTop: 20,
+        gap: 15, // Space between buttons (React Native >= 0.71+)
+    },
     logOutButton: {
+
         marginTop: 15,
         backgroundColor: "#E74C3C",
         paddingVertical: 10,

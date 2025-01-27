@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ScrollView, Alert, SafeAreaView } from 'react-native';
-import { format, parseISO, addDays } from 'date-fns';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ScrollView, Alert, SafeAreaView, Platform } from 'react-native';
+import { format, parseISO } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
@@ -14,6 +14,8 @@ export default function AddAppointment() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [availableSlots, setAvailableSlots] = useState([]);
     const [vets, setVets] = useState([]);
+    const [managers, setManagers] = useState([]);
+    const [managersAndVets, setManagersAndVets] = useState([]);
     const [pets, setPets] = useState([]);
     const [showCalendar, setShowCalendar] = useState(false);
     const [closestSlotHint, setClosestSlotHint] = useState(null);
@@ -24,39 +26,31 @@ export default function AddAppointment() {
         const fetchPets = async () => {
             try {
                 const petData = await PetService.getPetsByOwnerId(clientId);
-                setPets(petData);
+                const filteredPets = petData
+                    .filter(pet => !pet.deleted) // Exclude deleted pets
+                    .map(pet => ({
+                        ...pet,
+                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName), // Serve the correct image URL
+                    }));
+                setPets(filteredPets);
             } catch (error) {
                 console.error('Error fetching pets:', error);
+                Alert.alert('Error', 'Failed to load pets.');
             }
         };
         fetchPets();
-    }, []);
-
+    }, [clientId]);
 
     // Fetch vets
-    // useEffect(() => {
-    //     const fetchVets = async () => {
-    //         try {
-    //             const vetsData = await UserService.getUsersByRole("MANAGER");
-    //             setVets(vetsData);
-    //         } catch (error) {
-    //             console.error('Error fetching vets:', error);
-    //         }
-    //     };
-    //     fetchVets();
-    // }, [clientId]);
-
     useEffect(() => {
         const fetchVets = async () => {
             try {
-                // Fetch users for both MANAGER and VET roles
                 const managers = await UserService.getUsersByRole("MANAGER");
                 const vets = await UserService.getUsersByRole("VET");
 
-                // Combine results and remove duplicates if needed
-                const combinedVets = [...new Map([...managers, ...vets].map(user => [user.id, user])).values()];
-
-                setVets(combinedVets);
+                // Combine results and remove duplicates by userId
+                const combined = [...new Map([...managers, ...vets].map(user => [user.userId, user])).values()];
+                setManagersAndVets(combined);
             } catch (error) {
                 console.error('Error fetching vets:', error);
             }
@@ -64,36 +58,19 @@ export default function AddAppointment() {
         fetchVets();
     }, [clientId]);
 
-
-    // useEffect(() => {
-    //     const fetchVets = async () => {
-    //         try {
-    //             console.log("Fetching vets...");
-    //             const vetsData = await UserService.getUsersByRole("MANAGER");
-    //             console.log("Vets Data:", vetsData);
-    //             setVets(vetsData);
-    //         } catch (error) {
-    //             console.error('Error fetching vets:', error);
-    //         }
-    //     };
-    //     fetchVets();
-    // }, []);
-
     // Fetch available slots based on selected vet and date
     useEffect(() => {
         if (selectedVet && selectedDate) {
             const fetchAvailableSlots = async () => {
                 try {
                     const slotData = await AppointmentService.getAvailableSlots(selectedVet.userId);
-                    const filteredSlots = slotData.filter(slot =>
-                        format(parseISO(slot.appointmentDate), 'yyyy-MM-dd') === selectedDate
+                    const filteredSlots = slotData.filter(
+                        slot => format(parseISO(slot.appointmentDate), 'yyyy-MM-dd') === selectedDate
                     );
                     setAvailableSlots(filteredSlots);
 
                     if (filteredSlots.length === 0) {
                         findClosestAvailableSlot(slotData);
-                    } else {
-                        setClosestSlotHint(null);
                     }
                 } catch (error) {
                     console.error('Error fetching available slots:', error);
@@ -106,23 +83,31 @@ export default function AddAppointment() {
         }
     }, [selectedVet, selectedDate]);
 
-    const handleDateSelection = (date) => {
-        setSelectedDate(date);
-        setShowCalendar(false);
-    };
-
     const findClosestAvailableSlot = (slotData) => {
-        const futureSlots = slotData.filter(slot =>
-            parseISO(slot.appointmentDate) > new Date()
-        ).sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
+        const futureSlots = slotData
+            .filter(slot => parseISO(slot.appointmentDate) > new Date())
+            .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
 
         if (futureSlots.length > 0) {
             const closestSlot = futureSlots[0];
-            setClosestSlotHint(`Closest available slot: ${format(parseISO(closestSlot.appointmentDate), 'yyyy-MM-dd')} at ${format(parseISO(closestSlot.appointmentDate), 'h:mm a')}`);
-
+            const hintMessage = `Closest available slot: ${format(parseISO(closestSlot.appointmentDate), 'yyyy-MM-dd')} at ${format(parseISO(closestSlot.appointmentDate), 'h:mm a')}`;
+            showAlert(hintMessage);
         } else {
-            setClosestSlotHint('No upcoming slots are available.');
+            showAlert('No upcoming slots are available.');
         }
+    };
+
+    const showAlert = (message) => {
+        if (Platform.OS === 'web') {
+            window.alert(message);
+        } else {
+            Alert.alert('Closest Slot', message, [{ text: 'OK' }]);
+        }
+    };
+
+    const handleDateSelection = (date) => {
+        setSelectedDate(date);
+        setShowCalendar(false);
     };
 
     const handleSubmit = async () => {
@@ -138,7 +123,7 @@ export default function AddAppointment() {
                 clientId: clientId,
                 petId: selectedPet.id,
                 appointmentDate: selectedSlot.appointmentDate,
-                duration: selectedSlot.duration
+                duration: selectedSlot.duration,
             });
             Alert.alert('Success', 'Appointment successfully scheduled!');
             resetForm();
@@ -148,27 +133,25 @@ export default function AddAppointment() {
         }
     };
 
-    // Function to reset the form and refresh the state
     const resetForm = () => {
         setSelectedPet(null);
         setSelectedVet(null);
         setSelectedSlot(null);
         setSelectedDate(null);
         setAvailableSlots([]);
-        setClosestSlotHint(null);
     };
 
-    const renderPetItem = ({item}) => (
+    const renderPetItem = ({ item }) => (
         <TouchableOpacity
             style={[styles.petCard, selectedPet?.id === item.id && styles.selectedCard]}
             onPress={() => setSelectedPet(item)}
         >
-            <Image source={{uri: PetService.serveImage(item.imageUrl)}} style={styles.petImage}/>
+            <Image source={{ uri: item.imageUrl }} style={styles.petImage} />
             <Text style={styles.petName}>{item.name}</Text>
         </TouchableOpacity>
     );
 
-    const renderVetItem = ({item}) => (
+    const renderVetItem = ({ item }) => (
         <TouchableOpacity
             style={[styles.vetCard, selectedVet?.userId === item.userId && styles.selectedCard]}
             onPress={() => setSelectedVet(item)}
@@ -178,7 +161,7 @@ export default function AddAppointment() {
         </TouchableOpacity>
     );
 
-    const renderSlotItem = ({item}) => (
+    const renderSlotItem = ({ item }) => (
         <TouchableOpacity
             style={[styles.slotCard, selectedSlot?.id === item.id && styles.selectedCard]}
             onPress={() => setSelectedSlot(item)}
@@ -191,18 +174,6 @@ export default function AddAppointment() {
         <SafeAreaView style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.container}>
                 <Text style={styles.title}>Add Appointment</Text>
-
-                {/*<Text style={styles.label}>Select Your Pet</Text>*/}
-                {/*<View style={styles.petListContainer}>*/}
-                {/*    <FlatList*/}
-                {/*        data={pets}*/}
-                {/*        horizontal*/}
-                {/*        renderItem={renderPetItem}*/}
-                {/*        keyExtractor={(item) => item.id.toString()}*/}
-                {/*        showsHorizontalScrollIndicator={false}*/}
-                {/*        style={styles.petList}*/}
-                {/*    />*/}
-                {/*</View>*/}
 
                 {/* Pet Selection */}
                 <Text style={styles.label}>Select Your Pet</Text>
@@ -218,7 +189,7 @@ export default function AddAppointment() {
                 {/* Vet Selection */}
                 <Text style={styles.label}>Select a Vet</Text>
                 <FlatList
-                    data={vets}
+                    data={managersAndVets}
                     horizontal
                     renderItem={renderVetItem}
                     keyExtractor={(item) => item.userId.toString()}
@@ -226,17 +197,16 @@ export default function AddAppointment() {
                     style={styles.vetList}
                 />
 
-                {/* Date Selection Button */}
+                {/* Date Selection */}
                 <TouchableOpacity style={styles.button} onPress={() => setShowCalendar(true)}>
                     <Text style={styles.buttonText}>Select a Date</Text>
                 </TouchableOpacity>
 
-                {/* Calendar for Date Selection */}
                 {showCalendar && (
                     <Calendar
                         onDayPress={(day) => handleDateSelection(day.dateString)}
                         markedDates={{
-                            [selectedDate]: {selected: true, selectedColor: '#1D3D47'},
+                            [selectedDate]: { selected: true, selectedColor: '#1D3D47' },
                         }}
                         theme={{
                             todayTextColor: '#00adf5',
@@ -246,10 +216,9 @@ export default function AddAppointment() {
                 )}
 
                 {/* Time Slot Selection */}
-                {selectedDate && (
+                {selectedDate && availableSlots.length > 0 && (
                     <>
                         <Text style={styles.label}>Available Slots on {selectedDate}</Text>
-                        {availableSlots.length > 0 ? (
                             <FlatList
                                 data={availableSlots}
                                 horizontal
@@ -258,13 +227,9 @@ export default function AddAppointment() {
                                 showsHorizontalScrollIndicator={false}
                                 style={styles.slotList}
                             />
-                        ) : (
-                            <Text style={styles.hintText}>{closestSlotHint || "No available slots found."}</Text>
-                        )}
                     </>
                 )}
 
-                {/* Submit Button */}
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Confirm Appointment</Text>
                 </TouchableOpacity>

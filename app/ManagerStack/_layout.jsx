@@ -9,16 +9,21 @@ import {
     Alert,
     Modal,
     Image,
-    ScrollView,
+    ScrollView, Platform,
 } from "react-native";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import AuthService from "../../Services/authService";
+import Toast from "react-native-toast-message";
+
+import AuthGuard from '../AuthGuard'; // Import the AuthGuard component
 
 export default function ManagerStackLayout() {
     const colorScheme = useColorScheme();
+    const router = useRouter(); // Reintroducing the router for navigation
     const [managerInfo, setManagerInfo] = useState(null);
     const [email, setEmail] = useState(null);
     const [isModalVisible, setModalVisible] = useState(false); // Modal visibility state
@@ -58,8 +63,41 @@ export default function ManagerStackLayout() {
         setModalVisible(!isModalVisible);
     };
 
+
+
+    // Logout function
+    const handleLogout = async () => {
+        try {
+            const success = await AuthService.logout();
+            if (success) {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Logged Out',
+                    text2: 'You have been successfully logged out.',
+                });
+                toggleModal(); // Close the modal
+                router.replace(''); // Redirect to the login screen
+            } else {
+                Alert.alert('Logout Failed', 'An error occurred during logout. Please try again.');
+            }
+        } catch (error) {
+            console.error('Logout Error:', error);
+            Alert.alert('Logout Error', 'Something went wrong. Please try again.');
+        }
+    };
+
+    if (!managerInfo) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>Loading Veterinarian data...</Text>
+            </View>
+        );
+    }
+
     return (
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AuthGuard allowedRoles={['MANAGER', 'VET']}> {/* Ensure only clients can access this stack */}
+
+            <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
             {/* Header */}
             <View
                 style={[
@@ -67,7 +105,11 @@ export default function ManagerStackLayout() {
                     { backgroundColor : "#A1CEDC" },
                 ]}
             >
-                <TouchableOpacity style={styles.iconButton}>
+                {/* Menu Navigation Button */}
+                <TouchableOpacity
+                    onPress={() => router.push("/ManagerStack/MenuScreen")}
+                    style={styles.iconButton}
+                >
                     <Ionicons name="menu" size={24} color="#FFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>🐾OptiVet</Text>
@@ -80,7 +122,7 @@ export default function ManagerStackLayout() {
             <Modal
                 visible={isModalVisible}
                 transparent={true}
-                animationType="slide"
+                animationType={Platform.OS === 'web' ? 'none' : 'slide'}
                 onRequestClose={toggleModal}
             >
                 <View style={styles.modalOverlay}>
@@ -108,9 +150,19 @@ export default function ManagerStackLayout() {
                         ) : (
                             <Text style={styles.loadingText}>Loading profile...</Text>
                         )}
-                        <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
+
+                        <View>
+
+                            <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
+                                <Text style={styles.logOutButtonText}>Logout</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+
+
                     </View>
                 </View>
             </Modal>
@@ -142,7 +194,7 @@ export default function ManagerStackLayout() {
                     asChild
                 >
                     <TouchableOpacity style={styles.footerButton}>
-                        <Ionicons name="calendar-outline" size={24} color={ '#FFF' } />
+                        <Ionicons name="calendar-outline" size={24} color="#FFF" />
                         <Text style={styles.footerButtonText}>Appointments</Text>
                     </TouchableOpacity>
                 </Link>
@@ -154,7 +206,7 @@ export default function ManagerStackLayout() {
                     asChild
                 >
                     <TouchableOpacity style={styles.footerButton}>
-                        <Ionicons name="people-outline" size={24} color={'#FFF' } />
+                        <Ionicons name="people-outline" size={24} color="#FFF" />
                         <Text style={styles.footerButtonText}>Clients</Text>
                     </TouchableOpacity>
                 </Link>
@@ -165,20 +217,31 @@ export default function ManagerStackLayout() {
                     }}
                     asChild
                 >
-                    <TouchableOpacity
-                        style={styles.footerButton}
-                        onPress={() => console.log('Messages')}
-                    >
-                        <Ionicons name="chatbox-outline" size={24} color={'#FFF' } />
+                    <TouchableOpacity style={styles.footerButton}>
+                        <Ionicons name="chatbox-outline" size={24} color="#FFF" />
                         <Text style={styles.footerButtonText}>Messages</Text>
                     </TouchableOpacity>
                 </Link>
             </View>
         </ThemeProvider>
+        </AuthGuard>
     );
 }
 
 const styles = StyleSheet.create({
+    logOutButton: {
+        marginTop: 15,
+        backgroundColor: "#E74C3C",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    logOutButtonText: {
+        color: "#FFFFFF",
+        fontWeight: "bold",
+        marginLeft: 5
+    },
+
     header: {
         flexDirection: "row",
         alignItems: "center",

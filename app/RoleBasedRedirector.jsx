@@ -47,6 +47,8 @@ export default function RoleRedirector() {
             }
 
             const employeeData = await UserService.getUserByEmail(storedEmail);
+            // Save the employee role in local storage
+            await AsyncStorage.setItem('employeeRole', employeeData.role);
             setEmployeeRole(employeeData.role);
         } catch (error) {
             console.error('Error fetching employee info:', error);

@@ -6,6 +6,7 @@ import PetService from '../../Services/PetService';
 import AppointmentService from '../../Services/AppointmentService';
 import MedicalSessionService from '../../Services/MedicalSessionService';
 import DefaultFemaleImage from '../../assets/images/default_female.jpg';
+import DefaultUserImage from "../../assets/images/default_user.png";
 
 const ClientStack = () => {
     const [clientInfo, setClientInfo] = useState(null);
@@ -41,23 +42,25 @@ const ClientStack = () => {
 
                     // Fetch medical sessions for each pet
                     const petsWithSessions = await Promise.all(
-                        fetchedPets.map(async (pet) => {
-                            try {
-                                const sessions = await MedicalSessionService.getSessionsByPetId(pet.id);
-                                return {
-                                    ...pet,
-                                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-                                    lastCheckupDate: getLastCheckupDate(sessions),
-                                };
-                            } catch (error) {
-                                console.error(`Error fetching sessions for pet ${pet.id}:`, error);
-                                return {
-                                    ...pet,
-                                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
-                                    lastCheckupDate: "No checkup",
-                                };
-                            }
-                        })
+                        fetchedPets
+                            .filter((pet) => !pet.deleted) // Exclude deleted pets
+                            .map(async (pet) => {
+                                try {
+                                    const sessions = await MedicalSessionService.getSessionsByPetId(pet.id);
+                                    return {
+                                        ...pet,
+                                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                                        lastCheckupDate: getLastCheckupDate(sessions),
+                                    };
+                                } catch (error) {
+                                    console.error(`Error fetching sessions for pet ${pet.id}:`, error);
+                                    return {
+                                        ...pet,
+                                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName),
+                                        lastCheckupDate: "No checkup",
+                                    };
+                                }
+                            })
                     );
 
                     setPets(petsWithSessions);
@@ -113,7 +116,7 @@ const ClientStack = () => {
                     <Text style={styles.greetingText}>Welcome Back,</Text>
                     <Text style={styles.clientName}>{clientInfo?.firstName} {clientInfo?.lastName}</Text>
                     <Image
-                        source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultFemaleImage}
+                        source={clientInfo?.profileImageUrl ? { uri: clientInfo.profileImageUrl } : DefaultUserImage}
                         style={styles.profileImage}
                     />
                 </View>
