@@ -66,6 +66,12 @@ const PetsForAdoption = () => {
     }, []);
 
 
+    const deletePetForAdoptionHandle = (id) => {
+        PetForAdoptionService.deletePetForAdoption(id);
+        const newPetsForAdoption = pets.filter(pet => pet.id !== id);
+        setPets(newPetsForAdoption);
+    };
+
     return (
 
         <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -168,7 +174,7 @@ const PetsForAdoption = () => {
 
 
 
-                                <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}>
+                                <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}  onPress={() => deletePetForAdoptionHandle(item.id)}>
 
                                     <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
 

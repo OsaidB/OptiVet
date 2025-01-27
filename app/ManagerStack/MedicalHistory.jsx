@@ -23,7 +23,7 @@ import { WINDOWS } from 'nativewind/dist/utils/selector';
 
 
 
-export default function MedicalHistory() {
+const MedicalHistory = () => {
     const [conditionText, setConditionText] = useState('');
     const [allergyText, setAllergyText] = useState('');
     const [vaccinationText, setVaccinationText] = useState('');
@@ -717,7 +717,7 @@ export default function MedicalHistory() {
             </View>
         </ScrollView>
     );
-}
+};
 const styles = StyleSheet.create({
 
     button: {
@@ -740,5 +740,6 @@ const styles = StyleSheet.create({
 
 
 
+export default MedicalHistory;
 
 

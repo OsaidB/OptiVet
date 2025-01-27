@@ -138,6 +138,25 @@ const PetService = {
         }
     },
 
+
+
+
+    getPets: async (ownerId) => {
+        try {
+            const token = await PetService.getToken();
+            const response = await axios.get(`${BASE_URL}/owner/pets/${ownerId}`, {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching pets by owner ID:', error);
+            throw error;
+        }
+    },
+
+
     // Update a pet by its ID
     updatePet: async (petId, petData) => {
         try {

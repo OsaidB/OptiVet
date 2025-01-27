@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, SafeAreaView} from 'react-native';
+import { Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, Modal, SafeAreaView } from 'react-native';
 import ClientService from '../../Services/ClientService';
-import { Link, useRouter, useLocalSearchParams  } from "expo-router"; // Import useRouter
+import { Link, useRouter, useLocalSearchParams } from "expo-router"; // Import useRouter
 
 const WalkInClientsScreen = () => {
     const router = useRouter();
@@ -109,6 +109,13 @@ const WalkInClientsScreen = () => {
                                     <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
                                         <Text style={styles.buttonText}>Start a Medical Session</Text>
                                     </TouchableOpacity>
+
+                                    <Link href={{ pathname: "../ManagerStack/MedicalHistory", params: { petId: selectedPet.id }, }} asChild>
+
+                                        <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
+                                            <Text style={styles.buttonText}>Medical History</Text>
+                                        </TouchableOpacity>
+                                    </Link>
 
                                     <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
                                         <Text style={styles.buttonText}>Close</Text>

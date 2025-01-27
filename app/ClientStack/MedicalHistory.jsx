@@ -18,6 +18,11 @@ import { WINDOWS } from 'nativewind/dist/utils/selector';
 //import { newDate } from 'react-datepicker/dist/date_utils';
 
 
+
+
+
+
+
 export default function MedicalHistory() {
     const [conditionText, setConditionText] = useState('');
     const [allergyText, setAllergyText] = useState('');
@@ -76,13 +81,22 @@ export default function MedicalHistory() {
                 setImages(fetchedImages);
                 //console.log(images.length);
                 //console.log(fetchedImages);
+                const newImages = [];
                 for (let i = 0; i < fetchedImages.length; i++) {
+                    //console.log(fetchedImages[i]);
 
-                    setImageUrls([...imageUrls, { id: i, url: fetchedImages[i] }]);
+                    newImages[i] = { id: i, url: fetchedImages[i] };
+                    //setImageUrls([...imageUrls, { id: i, url: fetchedImages[i] }]);
                 }
-                const counterValue = imageUrls.length + 1;
-                setCounter(counterValue);
+                 setImageUrls(newImages);
+                 const counterValue = imageUrls.length + 1;
+                 setCounter(counterValue);
 
+
+
+
+
+                //console.log(counterValue);
                 //setCounter(imageUrls);
                 //setCounter(counter);
                 //console.log(counter);
@@ -202,6 +216,9 @@ export default function MedicalHistory() {
     }, []);
 
 
+//  console.log(imageUrls);
+//  console.log(images);
+
     const pickImage = async () => {
         const { status } = await ImagePicker.
             requestMediaLibraryPermissionsAsync();
@@ -229,13 +246,7 @@ export default function MedicalHistory() {
                     const medicalHistoryImage = await MedicalHistoryService.uploadMedicalHistoryImages(result.assets[0].uri);
                     setImageUrls([...imageUrls, { id: counter, url: medicalHistoryImage }]);
                     setImages([...images, medicalHistoryImage]);
-                    const fetchedMedicalHistoryy = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...images, medicalHistoryImage] }, petId);
-
-                    //setAddedImage({ id: counter, url: result.assets[0].uri });
-                    //setImageUrls(...imageUrls, {id:10,medicalHistoryImage});
-                    //setImageUrls(...imageUrls, {id:counter,url:medicalHistoryImage});
-
-                    //setPickedImage();
+                    const updatedMedicalHistory = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...images, medicalHistoryImage] }, petId);
 
                 } catch (error) {
                     console.error('Error uploading medical history image', error);
@@ -245,8 +256,6 @@ export default function MedicalHistory() {
 
 
                 setError(null);
-
-
 
 
             }
@@ -350,18 +359,13 @@ export default function MedicalHistory() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+    const deleteImageHandle = async (id, url) => {
+        const newImages = images.filter(image => image !== url);
+        setImages(newImages);
+        const updatedMedicalHistory = await MedicalHistoryService.updateMedicalHistory({ medicalHistoryImageUrls: [...newImages] }, petId);
+        const newImageUrls = imageUrls.filter(imageUrl => imageUrl.id !== id);
+        setImageUrls(newImageUrls);
+    };
 
 
 
@@ -405,14 +409,14 @@ export default function MedicalHistory() {
             <View>
                 <Text style={{ fontSize: 35, marginLeft: 10, alignSelf: 'center', marginTop: 20 }}>Medical History</Text>
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Chronic Conditions</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Chronic Conditions</Text>
                     <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 
                         <TextInput value={conditionText} onChangeText={setConditionText} placeholder='Add chronic condition here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
 
 
-                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ alignSelf: 'center' }} onPress={() => addChronicConditionHandle()}>Add Condition</Text>
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center', padding: 4 }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addChronicConditionHandle()} numberOfLines={1}>Add Condition</Text>
                         </TouchableOpacity>
 
                     </View>
@@ -436,14 +440,14 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Allergies</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Allergies</Text>
                     <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 
                         <TextInput value={allergyText} onChangeText={setAllergyText} numberOfLines={4} placeholder='Add allergy here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
 
 
-                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ alignSelf: 'center' }} onPress={() => addAllergyHandle()}>Add Allergy</Text>
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center', padding: 4 }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addAllergyHandle()} numberOfLines={1}>Add Allergy</Text>
                         </TouchableOpacity>
 
                     </View>
@@ -466,14 +470,14 @@ export default function MedicalHistory() {
                 </View>
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Vaccinations</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Vaccinations</Text>
                     <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 
                         <TextInput value={vaccinationText} onChangeText={setVaccinationText} numberOfLines={4} placeholder='Add vaccination here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
 
 
-                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ alignSelf: 'center' }} onPress={() => addVaccinationHandle()}>Add Vaccination</Text>
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center', padding: 4 }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addVaccinationHandle()} numberOfLines={1}>Add Vaccination</Text>
                         </TouchableOpacity>
 
                     </View>
@@ -497,15 +501,15 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Surgeories</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Surgeories</Text>
 
                     <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 
                         <TextInput value={surgeoryText} onChangeText={setSurgeoryText} numberOfLines={4} placeholder='Add surgeory here' placeholderTextColor={'grey'} style={{ paddingLeft: 10, paddingTop: 'auto', height: 40, marginHorizontal: 10, borderWidth: 2, borderRadius: 8, width: '100%', color: 'white', borderColor: 'white' }} ></TextInput>
 
 
-                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ alignSelf: 'center' }} onPress={() => addSurgeoryHandle()}>Add Surgeory</Text>
+                        <TouchableOpacity style={{ width: '15%', backgroundColor: '#A1CEDC', borderRadius: 10, borderWidth: 2, borderColor: 'black', justifyContent: 'center', alignItems: 'center', padding: 4 }}>
+                            <Text style={{ alignSelf: 'center' }} onPress={() => addSurgeoryHandle()} numberOfLines={1}>Add Surgeory</Text>
                         </TouchableOpacity>
 
                     </View>
@@ -551,7 +555,7 @@ export default function MedicalHistory() {
 
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }}>Medical Sessions</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginVertical: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Medical Sessions</Text>
 
                     <ScrollView style={{ height: 400, backgroundColor: '#508C9B', borderBottomStartRadius: 20, borderBottomEndRadius: 20 }}>
                         {medicalSessions.map((item) => {
@@ -570,7 +574,7 @@ export default function MedicalHistory() {
                                     <TouchableOpacity>
                                         <View style={{ justifyContent: 'flex-start', alignItems: 'center', marginVertical: 3 }}>
                                             <Text style={{ fontWeight: 'bold', color: 'white' }}>By: {item.veterinarian}</Text>
-                                            <Text style={{ fontWeight: 'bold', color: 'white' }}> {item.sessiondate}</Text>
+                                            <Text style={{ fontWeight: 'bold', color: 'white' }}> {item.sessionDate}</Text>
 
                                         </View>
 
@@ -612,7 +616,7 @@ export default function MedicalHistory() {
 
                 <View style={{ justifyContent: 'flex-start', alignItems: 'center', marginTop: 40, marginBottom: 10, marginHorizontal: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
 
-                    <Text style={{ marginLeft: 10, marginVertical: 20, fontSize: 30, color: 'white' }}>Medical History Images </Text>
+                    <Text style={{ marginLeft: 10, marginVertical: 20, fontSize: 30, color: 'white' }} numberOfLines={1}>Medical History Images </Text>
 
 
                     <TouchableOpacity style={{ backgroundColor: 'white', borderRadius: 5, paddingVertical: 10, paddingHorizontal: 20, marginBottom: 20 }}>
@@ -627,12 +631,20 @@ export default function MedicalHistory() {
                         {imageUrls.map((item) => {
                             return (
 
-                                <View key={item.id} style={{ width: '13%', backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center', borderRadius: 15 }}>
+
+                                <View key={item.id} style={{ flexShrink: 1, width: (Platform.OS == 'web' ? '20%' : '40%'), backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'space-evenly', alignItems: 'center' }} >
 
 
-                                    <Image source={{ uri: `${BASE_URL_IMAGES}${item.url}` }} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
+                                    <View style={{ width: '90%', height: '40%', maxHeight: 120, maxWidth: 120, marginTop: 5, marginBottom: 4 }}>
+                                        <Image source={{ uri: `${BASE_URL_IMAGES}${item.url}` }} style={{ borderRadius: '12%', width: '100%', height: '100%' }} resizeMode="stretch"></Image>
+                                    </View>
 
+
+                                    <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'brown', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} deleteImageHandle={deleteImageHandle}>
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: 'white' }} numberOfLines={1} onPress={() => deleteImageHandle(item.id, item.url)}>Delete Image</Text>
+                                    </TouchableOpacity>
                                 </View>
+
 
                             )
 
@@ -660,23 +672,14 @@ export default function MedicalHistory() {
 
 
 
-
-
-
-
                 </View>
 
 
 
 
 
-
-
-
-
-
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginBottom: 10, fontSize: 30, color: 'white' }}>Dietary preferences</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginBottom: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Dietary preferences</Text>
                     <TextInput
                         editable
                         multiline
@@ -689,7 +692,7 @@ export default function MedicalHistory() {
                 </View>
 
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, backgroundColor: '#134B70', borderRadius: 20 }}>
-                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginBottom: 10, fontSize: 30, color: 'white' }}>Notes about the pet</Text>
+                    <Text style={{ alignSelf: 'center', marginLeft: 10, marginBottom: 10, fontSize: 30, color: 'white' }} numberOfLines={1}>Notes about the pet</Text>
 
                     <TextInput
                         editable
@@ -706,7 +709,7 @@ export default function MedicalHistory() {
                 <View style={{ marginTop: 40, marginBottom: 10, marginLeft: 10, marginRight: 10, borderRadius: 20 }}>
                     <Link href={{ pathname: "/ManagerStack/AddProduct" }} asChild>
                         <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, marginVertical: 10 }}>
-                            <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Download medical history (PDF)</Text>
+                            <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }} numberOfLines={1}>Download medical history (PDF)</Text>
                         </TouchableOpacity>
                     </Link>
                 </View>
@@ -732,4 +735,21 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
 
     },
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
