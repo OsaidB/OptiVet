@@ -135,7 +135,7 @@ const ClientStack = () => {
                 </View>
 
                 {/* Adopt a Pet Button */}
-                    <Link href={{ pathname: "../ClientStack/PetsForAdoption"}} asChild>
+                    {/* <Link href={{ pathname: "../ClientStack/PetsForAdoption"}} asChild>
                 
                     <TouchableOpacity
                         style={styles.adoptButton}
@@ -143,7 +143,7 @@ const ClientStack = () => {
                     >
                         <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
                     </TouchableOpacity>
-                </Link>
+                </Link> */}
                 {/* Highlights Section */}
                 <View style={styles.highlightsSection}>
                     <Text style={styles.sectionTitle}>Pet Highlights</Text>

@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter } from 'expo-router';
-import {View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, Platform} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, Platform } from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +8,7 @@ import ClientService from '../../Services/ClientService';
 import React, { useState, useEffect } from 'react';
 import AuthGuard from '../AuthGuard'; // Import the AuthGuard component
 import Toast from 'react-native-toast-message';
-
+import { Link } from 'expo-router';
 import CustomToast from '../Toast.config';
 import DefaultFemaleImage from "../../assets/images/default_female.jpg";
 import AuthService from "../../Services/authService";
@@ -96,17 +96,17 @@ export default function ClientStackLayout() {
         <AuthGuard allowedRoles={['ROLE_CLIENT']}> {/* Ensure only clients can access this stack */}
 
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            {/* Header */}
-            <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
-                <TouchableOpacity onPress={() => router.push('/ClientStack')} style={styles.iconButton}>
-                    <Ionicons name="arrow-back" size={24} color="#FFF" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>🐾OptiVet</Text>
-                <TouchableOpacity onPress={toggleModal} style={styles.iconButton}>
-                    <Ionicons name="person-circle" size={24} color="#FFF" />
-                </TouchableOpacity>
+                {/* Header */}
+                <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
+                    <TouchableOpacity onPress={() => router.push('/ClientStack')} style={styles.iconButton}>
+                        <Ionicons name="arrow-back" size={24} color="#FFF" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>🐾OptiVet</Text>
+                    <TouchableOpacity onPress={toggleModal} style={styles.iconButton}>
+                        <Ionicons name="person-circle" size={24} color="#FFF" />
+                    </TouchableOpacity>
 
-            </View>
+                </View>
 
                 <Modal
                     visible={isModalVisible}
@@ -166,63 +166,69 @@ export default function ClientStackLayout() {
 
 
                 {/* Main Stack Navigation */}
-            <Stack
-                screenOptions={{
-                    headerShown: false, // Disable the default header
-                    contentStyle: {
-                        backgroundColor: colorScheme === 'dark' ? '#121212' : '#F9F9F9',
-                    },
-                }}
-            >
-                <Stack.Screen name="index" />
-                <Stack.Screen name="+not-found" options={{ title: 'Page Not Found' }} />
-            </Stack>
+                <Stack
+                    screenOptions={{
+                        headerShown: false, // Disable the default header
+                        contentStyle: {
+                            backgroundColor: colorScheme === 'dark' ? '#121212' : '#F9F9F9',
+                        },
+                    }}
+                >
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="+not-found" options={{ title: 'Page Not Found' }} />
+                </Stack>
 
-            {/* Footer */}
-            <View style={[styles.footer, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#FFFFFF' }]}>
-                <TouchableOpacity
-                    style={styles.footerButton}
-                    onPress={() => router.push('/ClientStack')}
-                >
-                    <Ionicons name="home-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
-                    <Text style={styles.footerButtonText}>Home</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.footerButton}
-                    onPress={() =>
-                        router.push({
-                            pathname: '/ClientStack/PetProfiles',
-                            params: { clientId: clientInfo.id },
-                        })
-                    }
-                >
-                    <Ionicons name="paw-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
-                    <Text style={styles.footerButtonText}>My Pets</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.footerButton}
-                    onPress={() =>
-                        router.push({
-                            pathname: '/ClientStack/manageAppointments',
-                            params: { clientId: clientInfo.id },
-                        })
-                    }
-                >
-                    <Ionicons name="calendar-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
-                    <Text style={styles.footerButtonText}>Appointments</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.footerButton}
-                    onPress={() => router.push('/ClientStack/Products')}
-                >
-                    <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
-                    <Text style={styles.footerButtonText}>Store</Text>
-                </TouchableOpacity>
-            </View>
+                {/* Footer */}
+                <View style={[styles.footer, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#FFFFFF' }]}>
+                    <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() => router.push('/ClientStack')}
+                    >
+                        <Ionicons name="home-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                        <Text style={styles.footerButtonText}>Home</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() =>
+                            router.push({
+                                pathname: '/ClientStack/PetProfiles',
+                                params: { clientId: clientInfo.id },
+                            })
+                        }
+                    >
+                        <Ionicons name="paw-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                        <Text style={styles.footerButtonText}>My Pets</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() =>
+                            router.push({
+                                pathname: '/ClientStack/manageAppointments',
+                                params: { clientId: clientInfo.id },
+                            })
+                        }
+                    >
+                        <Ionicons name="calendar-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                        <Text style={styles.footerButtonText}>Appointments</Text>
+                    </TouchableOpacity>
+                    <Link href="/ClientStack/PetsForAdoption" asChild>
+                        <TouchableOpacity style={styles.footerButton}>
+                            <Image source={require('../../assets/images/cat (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
+                            <Text style={styles.footerButtonText}>Pets For Adoption</Text>
+                        </TouchableOpacity>
+                    </Link>
+                    <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() => router.push('/ClientStack/Products')}
+                    >
+                        <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                        <Text style={styles.footerButtonText}>Store</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {/* Global Toast Notifications */}
-            <Toast config={CustomToast} />
-        </ThemeProvider>
+                {/* Global Toast Notifications */}
+                <Toast config={CustomToast} />
+            </ThemeProvider>
         </AuthGuard>
     );
 }

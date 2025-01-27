@@ -116,10 +116,10 @@ export default function Products() {
             </View>
 
 
-            <View style={{ flexDirection: 'row', justifyContent: 'center', width: '60%' }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', backgroundColor: '#8d95d6', borderRadius: 15 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', width:'100%' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', backgroundColor: '#8d95d6' }}>
 
-                    <ScrollView horizontal={true} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }} style={{ width: '100%' }}>
+                    <ScrollView horizontal={true} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }} style={{ width: '100%' }} showsHorizontalScrollIndicator = {(Platform.OS == 'web' ? true : false)}>
                         {
                             categories.map((item) => {
 
@@ -157,11 +157,11 @@ export default function Products() {
                                 <Image source={{ uri: `${BASE_URL_IMAGES}${item.productImageUrl}` }} style={{ borderRadius: '100%', width: '100%', height: '100%' }} resizeMode="stretch"></Image>
                             </View>
 
-                            <Text style={{  fontSize: 20, color: 'white' }} numberOfLines={1} >{item.name}</Text>
+                            <Text style={{  fontSize: 20, color: 'white' }} numberOfLines={3} >{item.name}</Text>
 
                             <Text numberOfLines={1} style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
 
-                            <Text numberOfLines={1} style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold',marginBottom:12 }}>{item.productCategory}</Text>
+                            <Text numberOfLines={3} style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold',marginBottom:12 }}>{item.productCategory}</Text>
 
 
                             <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '12%' }}>
