@@ -31,6 +31,7 @@ export default function CreatePetProfile() {
     const [petName, setPetName] = useState('');
     const [petAgeMonths, setPetAgeMonths] = useState(0);
     const [petBreed, setPetBreed] = useState('');
+    const [petGender, setGender] = useState(null); // State for gender
     const [petMedicalHistory, setPetMedicalHistory] = useState('');
     const [petPhoto, setPetPhoto] = useState(null); // State for the pet's photo
 
@@ -198,6 +199,7 @@ export default function CreatePetProfile() {
 
             type: petType,
             breed: petBreed,
+            gender: petGender,
 
             // ageMonths: petAgeMonths,
             birthDate: birthDate,
@@ -260,7 +262,7 @@ export default function CreatePetProfile() {
 
     return (
 
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.title}>Create Pet Profile</Text>
 
             <TextInput
@@ -327,6 +329,27 @@ export default function CreatePetProfile() {
                     ))}
                 </Picker>
             )}
+
+            {/* Gender Selection */}
+            <Text style={styles.label}>Select Gender</Text>
+            <View style={styles.genderToggleContainer}>
+                <TouchableOpacity
+                    style={[styles.genderButton, petGender === 'Male' && styles.genderButtonSelected]}
+                    onPress={() => setGender('Male')}
+                >
+                    <Text style={[styles.genderButtonText, petGender === 'Male' && styles.genderButtonTextSelected]}>
+                        Male
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.genderButton, petGender === 'Female' && styles.genderButtonSelected]}
+                    onPress={() => setGender('Female')}
+                >
+                    <Text style={[styles.genderButtonText, petGender === 'Female' && styles.genderButtonTextSelected]}>
+                        Female
+                    </Text>
+                </TouchableOpacity>
+            </View>
 
             <Text style={styles.label}>
                 Select Pet Age: {petAgeMonths} month{petAgeMonths !== 1 ? 's' : ''} (
@@ -435,7 +458,7 @@ const styles = StyleSheet.create({
     },
     photoContainer: {
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 5,
     },
     petImage: {
         width: 150,
@@ -468,6 +491,33 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 5,
         alignItems: 'center',
+    },
+
+    genderToggleContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginVertical: 10,
+    },
+    genderButton: {
+        flex: 1,
+        paddingVertical: 12,
+        marginHorizontal: 5,
+        borderWidth: 1,
+        borderRadius: 8,
+        borderColor: '#1D3D47',
+        alignItems: 'center',
+    },
+    genderButtonSelected: {
+        backgroundColor: '#1D3D47',
+        borderColor: '#1D3D47',
+    },
+    genderButtonText: {
+        color: '#1D3D47',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    genderButtonTextSelected: {
+        color: '#FFFFFF',
     },
 
     resetButton: {
