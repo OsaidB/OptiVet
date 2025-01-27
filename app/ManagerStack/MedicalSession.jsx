@@ -384,6 +384,33 @@ const MedicalSession = () => {
                         )}
                     </View>
 
+                    <View style={styles.datePickerContainer}>
+                        <Text style={styles.inputLabel}>Next Appointment Time</Text>
+                        {Platform.OS === 'web' ? (
+                            <input
+                                type="time"
+                                value={nextAppointmentDate ? nextAppointmentDate.toISOString().substring(0, 10) : ""}
+                                onChange={(e) => handleWebDateChange(e, setNextAppointmentDate)}
+                                style={styles.webDatePicker}
+                            />
+                        ) : (
+                            <TouchableOpacity onPress={showNextAppointmentDatePicker} style={styles.datePickerButton}>
+                                <Text style={styles.datePickerText}>
+                                    {nextAppointmentDate ? nextAppointmentDate.toLocaleDateString() : 'Select Next Appointment Date'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                        {Platform.OS !== 'web' && (
+                            <DateTimePickerModal
+                                isVisible={isNextAppointmentDatePickerVisible}
+                                mode="date"
+                                onConfirm={handleConfirmNextAppointmentDate}
+                                onCancel={hideNextAppointmentDatePicker}
+                                date={nextAppointmentDate || new Date()}
+                            />
+                        )}
+                    </View>
+
                     {/* Post Treatment Instructions */}
                     <PaperTextInput
                         label="Post Treatment Instructions"

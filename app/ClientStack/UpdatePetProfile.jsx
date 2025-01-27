@@ -121,6 +121,14 @@ const UpdatePetProfile = () => {
                 placeholder="Enter pet breed"
             />
 
+            <Text style={styles.label}>Medical History</Text>
+            <TextInput
+                style={styles.input}
+                value={petDetails.medicalHistory}
+                onChangeText={(value) => handleInputChange('medicalHistory', value)}
+                placeholder="Enter pet medical history"
+            />
+
             <Text style={styles.label}>
                 Age: {ageInYears} year{ageInYears !== 1 ? 's' : ''} {remainingMonths} month{remainingMonths !== 1 ? 's' : ''}
             </Text>
