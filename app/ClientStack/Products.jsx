@@ -127,10 +127,10 @@ export default function Products() {
 
 
 
-            <View style={{ flexDirection: 'row', justifyContent: 'center', width: '60%' }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', backgroundColor: '#8d95d6', borderRadius: 15 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', width:'100%' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', backgroundColor: '#8d95d6' }}>
 
-                    <ScrollView horizontal={true} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }} style={{ width: '100%' }}>
+                    <ScrollView horizontal={true} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }} style={{ width: '100%' }} showsHorizontalScrollIndicator = {(Platform.OS == 'web' ? true : false)}>
                         {
                             categories.map((item) => {
 
@@ -172,7 +172,7 @@ export default function Products() {
 
                             <Text numberOfLines={1} style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
 
-                            <Text numberOfLines={1} style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold',marginBottom:12 }}>{item.productCategory}</Text>
+                            <Text numberOfLines={3} style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold',marginBottom:12 }}>{item.productCategory}</Text>
 
 
 
