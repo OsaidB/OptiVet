@@ -29,6 +29,47 @@ const DailyChecklist = () => {
         month: 'long',
         day: 'numeric',
     });
+    useEffect(() => {
+        if (petId) {
+            fetchDailyChecklist();
+        }
+    }, [petId]);
+
+    const fetchDailyChecklist = async () => {
+        try {
+            const today = new Date().toISOString().split("T")[0];
+            const dailyChecklists = await DailyChecklistService.getDailyChecklists_ByPetId(petId); // Fetch all checklists
+
+            if (Array.isArray(dailyChecklists)) {
+                const todayChecklist = dailyChecklists.find((checklist) => checklist.date === today);
+                if (todayChecklist) {
+                    // Pre-fill the form with today's checklist data
+                    setEatingWell(todayChecklist.eatingWell);
+                    setDrinkingWater(todayChecklist.drinkingWater);
+                    setActiveBehavior(todayChecklist.activeBehavior);
+                    setNormalVitalSigns(todayChecklist.normalVitalSigns);
+                    setHealthObservations(todayChecklist.healthObservations || '');
+                    setWeightChange(todayChecklist.weightChange || '');
+                    setInjuriesOrWounds(todayChecklist.injuriesOrWounds || '');
+                    setFeedingCompleted(todayChecklist.feedingCompleted);
+                    setCleanedLivingSpace(todayChecklist.cleanedLivingSpace);
+                    setPoopNormal(todayChecklist.poopNormal);
+                    setPoopNotes(todayChecklist.poopNotes || '');
+                    setCriticalIssueFlag(todayChecklist.criticalIssueFlag);
+                    setCriticalNotes(todayChecklist.criticalNotes || '');
+                } else {
+                    console.log("No checklist found for today.");
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching daily checklist:", error);
+            Alert.alert("Error", "Failed to fetch today's checklist.");
+        }
+    };
+
+
+
+
 
     const handleSubmitChecklist = async () => {
         if (!poopNormal && poopNotes.trim() === '') {

@@ -86,9 +86,9 @@ export default function VetAssistantStackLayout() {
 
     return (
         <AuthGuard allowedRoles={['VET_ASSISTANT']}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <ThemeProvider value={DefaultTheme}>
                 {/* Header */}
-                <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
+                <View style={styles.header}>
                     <TouchableOpacity onPress={() => console.log('Menu pressed')} style={styles.iconButton}>
                         <Ionicons name="menu" size={24} color="#FFF" />
                     </TouchableOpacity>
@@ -144,33 +144,30 @@ export default function VetAssistantStackLayout() {
                 <Stack
                     screenOptions={{
                         headerShown: false,
-                        contentStyle: {
-                            backgroundColor: colorScheme === 'dark' ? '#121212' : '#F9F9F9',
-                        },
+                        contentStyle: { backgroundColor: '#F9F9F9' },
                     }}
                 >
                     <Stack.Screen name="index" />
-                    <Stack.Screen name="+not-found" options={{ title: 'Page Not Found' }} />
+                    <Stack.Screen name="CheckedPets" options={{ title: 'Checked Pets' }} />
                 </Stack>
 
                 {/* Footer */}
-                <View style={[styles.footer, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#FFFFFF' }]}>
-                    <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Animals')}>
-                        <Ionicons name="paw-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                <View style={styles.footer}>
+                    <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/VetAssistantStack')}>
+                        <Ionicons name="paw-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>All Pets</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Checklist')}>
-                        <Ionicons name="checkmark-done-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                    <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/VetAssistantStack/CheckedPets')}>
+                        <Ionicons name="checkmark-done-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>Checked Pets</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Settings')}>
-                        <Ionicons name="settings-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                        <Ionicons name="settings-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>Settings</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Global Toast Notifications */}
-                <Toast config={CustomToast} />
+                <Toast />
             </ThemeProvider>
         </AuthGuard>
     );

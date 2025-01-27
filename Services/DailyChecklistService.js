@@ -27,10 +27,10 @@ const DailyChecklistService = {
     },
 
     // Get a Daily Checklist by ID
-    async getDailyChecklistById(id) {
+    async getDailyChecklist_ByRecordId(ChecklistId) {
         try {
             const token = await this.getToken();
-            const response = await axios.get(`${BASE_URL}/${id}`, {
+            const response = await axios.get(`${BASE_URL}/${ChecklistId}`, {
                 headers: {
                     'X-Auth-Token': token,
                 },
@@ -117,10 +117,10 @@ const DailyChecklistService = {
 
 
     // Add this method to the DailyChecklistService
-    async getDailyChecklistsByPetId(petId) {
+    async getDailyChecklists_ByPetId(petId) {
         try {
             const token = await this.getToken();
-            const response = await axios.get(`${BASE_URL}/${petId}`, {
+            const response = await axios.get(`${BASE_URL}/pet/${petId}`, {
                 headers: {
                     'X-Auth-Token': token,
                 },
@@ -130,7 +130,42 @@ const DailyChecklistService = {
             console.error("Error fetching daily checklists by pet ID:", error);
             throw error;
         }
-    }
+    },
+
+    // Get pets that have completed checklists for a specific date
+    async getCheckedPets(date) {
+        try {
+            const token = await this.getToken();
+            const response = await axios.get(`${BASE_URL}/checked-pets`, {
+                params: { date },
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching checked pets:", error);
+            throw error;
+        }
+    },
+
+// Get pets that have not completed checklists for a specific date
+    async getUncheckedPets(date) {
+        try {
+            const token = await this.getToken();
+            const response = await axios.get(`${BASE_URL}/unchecked-pets`, {
+                params: { date },
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching unchecked pets:", error);
+            throw error;
+        }
+    },
+
 
 };
 
