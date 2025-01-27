@@ -161,9 +161,9 @@ const CheckedPets = () => {
                             <Text style={styles.modalText}>
                                 Birth Date: {selectedPet.birthDate}
                             </Text>
-                            <Text style={styles.modalText}>
-                                Checklist: {selectedPet.dailyChecklist?.notes || "No notes"}
-                            </Text>
+                            {/*<Text style={styles.modalText}>*/}
+                            {/*    Checklist: {selectedPet.dailyChecklist?.notes || "No notes"}*/}
+                            {/*</Text>*/}
                             <TouchableOpacity
                                 style={styles.button}
                                 onPress={() => {
@@ -174,6 +174,7 @@ const CheckedPets = () => {
                                             petId: selectedPet.id,
                                             clientId: selectedPet.ownerId,
                                             petName: selectedPet.name,
+                                            mode: "update", // Pass update mode
                                         },
                                     });
                                 }}

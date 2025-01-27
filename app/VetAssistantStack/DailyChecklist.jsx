@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch } from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, Platform} from 'react-native';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import DailyChecklistService from '../../Services/DailyChecklistService';
 import platform from "react-native-web/src/exports/Platform";
 
 const DailyChecklist = () => {
     const router = useRouter();
-    const { petId, petName, clientId } = useLocalSearchParams();
+    const { petId, petName, clientId, mode } = useLocalSearchParams();
 
     const [eatingWell, setEatingWell] = useState(false);
     const [drinkingWater, setDrinkingWater] = useState(false);
@@ -21,6 +21,7 @@ const DailyChecklist = () => {
     const [poopNotes, setPoopNotes] = useState('');
     const [criticalIssueFlag, setCriticalIssueFlag] = useState(false);
     const [criticalNotes, setCriticalNotes] = useState('');
+    const [currentChecklist_ID, setCurrentChecklist_ID] = useState('');
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString(undefined, {
@@ -42,6 +43,9 @@ const DailyChecklist = () => {
 
             if (Array.isArray(dailyChecklists)) {
                 const todayChecklist = dailyChecklists.find((checklist) => checklist.date === today);
+
+                setCurrentChecklist_ID(todayChecklist.id);
+
                 if (todayChecklist) {
                     // Pre-fill the form with today's checklist data
                     setEatingWell(todayChecklist.eatingWell);
@@ -70,19 +74,25 @@ const DailyChecklist = () => {
 
 
 
-
-    const handleSubmitChecklist = async () => {
+    const handleChecklist = async () => {
         if (!poopNormal && poopNotes.trim() === '') {
-            alert(
-                'Please provide notes for poop when "Is poop normal?" is unchecked',
-                'Please provide notes for poop when "Is poop normal?" is unchecked.',
-            );
+                if (Platform.OS === 'web') {
+                    alert(
+                        'Validation Error'                    );
+                }else{
+                    Alert.alert(
+                        'Validation Error',
+                        'Please provide notes for poop when "Is poop normal?" is unchecked.'
+                    );
+                }
+
+
             return;
         }
 
         try {
             const checklistData = {
-                date: today.toISOString(),
+                date: today.toISOString().split("T")[0], // ISO date for today
                 petId,
                 eatingWell,
                 drinkingWater,
@@ -99,13 +109,32 @@ const DailyChecklist = () => {
                 criticalNotes,
             };
 
-            await DailyChecklistService.createDailyChecklist(checklistData);
+            if (mode === "update") {
+                // const dailyChecklists = await DailyChecklistService.getDailyChecklists_ByPetId(petId);
+                // const checklistToUpdate = dailyChecklists.find(
+                //     (checklist) => checklist.date === today.toISOString().split("T")[0]
+                // );
 
-            Alert.alert('Success', 'Checklist submitted successfully!');
+                if (currentChecklist_ID) {
+
+                    console.log("Updating checklist with ID:", currentChecklist_ID);
+                    console.log("Updating checklist with info:", checklistData);
+
+                    await DailyChecklistService.updateDailyChecklist(currentChecklist_ID, checklistData);
+                    Alert.alert("Success", "Checklist updated successfully!");
+                } else {
+                    Alert.alert("Error", "Checklist for today not found.");
+                }
+            } else {
+                console.log("Creating new checklist");
+                await DailyChecklistService.createDailyChecklist(checklistData);
+                Alert.alert("Success", "Checklist submitted successfully!");
+            }
+
             router.back();
         } catch (error) {
-            console.error("Error submitting checklist:", error);
-            Alert.alert('Error', 'Failed to submit checklist.');
+            console.error("Error handling checklist:", error);
+            Alert.alert("Error", "Failed to handle the checklist.");
         }
     };
 
@@ -214,9 +243,12 @@ const DailyChecklist = () => {
             )}
 
             {/* Submit Button */}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmitChecklist}>
-                <Text style={styles.submitButtonText}>Submit Checklist</Text>
+            <TouchableOpacity style={styles.submitButton} onPress={handleChecklist}>
+                <Text style={styles.submitButtonText}>
+                    {mode === "update" ? "Update Checklist" : "Submit Checklist"}
+                </Text>
             </TouchableOpacity>
+
         </ScrollView>
     );
 };

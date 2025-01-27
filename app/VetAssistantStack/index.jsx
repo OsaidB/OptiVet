@@ -215,6 +215,7 @@ const VetAssistantStack = () => {
                                             petId: selectedPet.id,
                                             clientId: selectedPet.ownerId,
                                             petName: selectedPet.name,
+                                            mode: "create", // Pass update mode
                                         },
                                     });
                                 }}
