@@ -7,6 +7,7 @@ import AppointmentService from '../../Services/AppointmentService';
 import MedicalSessionService from '../../Services/MedicalSessionService';
 import DefaultFemaleImage from '../../assets/images/default_female.jpg';
 import DefaultUserImage from "../../assets/images/default_user.png";
+import { Link, useRouter, useLocalSearchParams } from "expo-router"; // Import useRouter
 
 const ClientStack = () => {
     const [clientInfo, setClientInfo] = useState(null);
@@ -134,13 +135,15 @@ const ClientStack = () => {
                 </View>
 
                 {/* Adopt a Pet Button */}
-                <TouchableOpacity
-                    style={styles.adoptButton}
-                    onPress={() => console.log('Navigate to Adoption Screen')}
-                >
-                    <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
-                </TouchableOpacity>
-
+                    <Link href={{ pathname: "../ClientStack/PetsForAdoption"}} asChild>
+                
+                    <TouchableOpacity
+                        style={styles.adoptButton}
+                        onPress={() => console.log('Navigate to Adoption Screen')}
+                    >
+                        <Text style={styles.adoptButtonText}>Adopt a Pet !</Text>
+                    </TouchableOpacity>
+                </Link>
                 {/* Highlights Section */}
                 <View style={styles.highlightsSection}>
                     <Text style={styles.sectionTitle}>Pet Highlights</Text>
