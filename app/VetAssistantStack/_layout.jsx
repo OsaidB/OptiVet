@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import {router, Stack} from 'expo-router';
+import {router, Stack, useRouter} from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, Platform } from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,9 +11,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserService from '../../Services/UserService';
 import AuthService from '../../Services/authService';
 import DefaultFemaleImage from "../../assets/images/default_female.jpg";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import DefaultUserImage from "../../assets/images/default_user.png";
 
 export default function VetAssistantStackLayout() {
     const colorScheme = useColorScheme();
+    const router = useRouter();
 
     const [vetAssistantInfo, setVetAssistantInfo] = useState(null);
     const [email, setEmail] = useState(null);
@@ -89,8 +92,8 @@ export default function VetAssistantStackLayout() {
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 {/* Header */}
                 <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
-                    <TouchableOpacity onPress={() => console.log('Menu pressed')} style={styles.iconButton}>
-                        <Ionicons name="menu" size={24} color="#FFF" />
+                    <TouchableOpacity onPress={() => router.push('/VetAssistantStack')} style={styles.iconButton}>
+                        <Ionicons name="arrow-back" size={24} color="#FFF" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>🐾OptiVet</Text>
                     <TouchableOpacity onPress={toggleModal} style={styles.iconButton}>
@@ -107,12 +110,12 @@ export default function VetAssistantStackLayout() {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContent}>
                             <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-                                <Text style={styles.closeButtonText}>x</Text>
+                                <FontAwesome name="close" size={24} color="black" />
                             </TouchableOpacity>
                             <Text style={styles.modalTitle}>Profile Information</Text>
                             {/* Static Image */}
                             <Image
-                                source={vetAssistantInfo?.profileImageUrl ? { uri: vetAssistantInfo.profileImageUrl } : DefaultFemaleImage}
+                                source={vetAssistantInfo?.profileImageUrl ? { uri: vetAssistantInfo.profileImageUrl } : DefaultUserImage}
                                 style={styles.profileImage}
                             />
                             {vetAssistantInfo ? (
@@ -128,11 +131,20 @@ export default function VetAssistantStackLayout() {
                             ) : (
                                 <Text style={styles.loadingText}>Loading profile...</Text>
                             )}
-                            <View>
-                                <TouchableOpacity onPress={toggleModal} style={styles.settingsButton}>
+                            <View style={styles.buttonRow}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        toggleModal();
+                                        router.push('/VetAssistantStack/Settings');
+                                    }}
+                                    style={styles.settingsButton}
+                                >
+                                    <FontAwesome name="cogs" size={20} color="#FFFFFF" />
                                     <Text style={styles.settingsButtonText}>Settings</Text>
                                 </TouchableOpacity>
+
                                 <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
+                                    <FontAwesome name="sign-out" size={20} color="#FFFFFF" />
                                     <Text style={styles.logOutButtonText}>Logout</Text>
                                 </TouchableOpacity>
                             </View>
@@ -257,10 +269,15 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     closeButton: {
-        position: "absolute",
-        top: 15,
-        right: 15,
+        position: 'absolute',
+        top: 10,
+        right: 10,
         padding: 10,
+    },
+    closeButtonText: {
+        fontSize: 20,
+        //fontWeight: 'bold',
+        color: 'black',
     },
     // Header
     header: {

@@ -25,7 +25,7 @@ const DailyChecklist = () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString(undefined, {
         weekday: 'long',
-        year: 'numeric',
+        // year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
@@ -70,7 +70,7 @@ const DailyChecklist = () => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Daily Checklist for {petName} - Today, {formattedDate}</Text>
+            <Text style={styles.title}>Checklist for {petName} - {formattedDate}</Text>
 
             {/* Health Observations */}
             <View style={styles.gridContainer}>
