@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import {router, Stack} from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Modal, Platform } from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,7 +67,7 @@ export default function SecretaryStackLayout() {
                     text2: 'You have been successfully logged out.',
                 });
                 toggleModal(); // Close the modal
-                router.replace('/LoginScreen'); // Redirect to the login screen
+                router.replace(''); // Redirect to the login screen
             } else {
                 Alert.alert('Logout Failed', 'An error occurred during logout. Please try again.');
             }
@@ -102,7 +102,7 @@ export default function SecretaryStackLayout() {
                 <Modal
                     visible={isModalVisible}
                     transparent={true}
-                    animationType="slide"
+                    animationType={Platform.OS === 'web' ? 'none' : 'slide'}
                     onRequestClose={toggleModal}
                 >
                     <View style={styles.modalOverlay}>

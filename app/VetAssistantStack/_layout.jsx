@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import {router, Stack} from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, Platform } from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,7 +66,7 @@ export default function VetAssistantStackLayout() {
                     text2: 'You have been successfully logged out.',
                 });
                 toggleModal(); // Close the modal
-                router.replace('/LoginScreen'); // Redirect to the login screen
+                router.replace(''); // Redirect to the login screen
             } else {
                 Alert.alert('Logout Failed', 'An error occurred during logout. Please try again.');
             }
@@ -101,7 +101,7 @@ export default function VetAssistantStackLayout() {
                 <Modal
                     visible={isModalVisible}
                     transparent={true}
-                    animationType="slide"
+                    animationType={Platform.OS === 'web' ? 'none' : 'slide'}
                     onRequestClose={toggleModal}
                 >
                     <View style={styles.modalOverlay}>
@@ -177,85 +177,148 @@ export default function VetAssistantStackLayout() {
 }
 
 const styles = StyleSheet.create({
+    // Modal Overlay
     modalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+        backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent dark overlay
         justifyContent: "center",
         alignItems: "center",
     },
+    // Modal Content
     modalContent: {
-        backgroundColor: "#FFFFFF", // White background for the modal
+        backgroundColor: "#FFFFFF",
         padding: 20,
-        borderRadius: 12, // Rounded corners
-        width: Platform.OS === 'web' ? '30%' : '80%', // Responsive width
-        alignItems: "center", // Center content
-        shadowColor: "#000", // Shadow for depth
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5, // Shadow for Android
+        borderRadius: 16,
+        width: Platform.OS === "web" ? "30%" : "85%",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 8,
     },
     modalTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 15,
-        color: "#2C3E50", // Dark text color
+        fontSize: 20,
+        fontWeight: "600",
+        marginBottom: 20,
+        color: "#2C3E50",
     },
     profileImage: {
         width: 100,
         height: 100,
-        borderRadius: 50, // Circular image
-        marginBottom: 15,
-        backgroundColor: "#E0E0E0", // Placeholder background
+        borderRadius: 50,
+        marginBottom: 20,
+        backgroundColor: "#F0F0F0", // Light gray placeholder
     },
     profileName: {
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 5,
-        color: "#2C3E50", // Dark gray for text
+        color: "#34495E",
     },
     profileEmail: {
         fontSize: 16,
-        color: "#7F8C8D", // Lighter gray
+        color: "#7F8C8D",
         marginBottom: 5,
     },
     profilePhone: {
         fontSize: 14,
-        color: "#7F8C8D", // Neutral gray
-        marginBottom: 15,
+        color: "#7F8C8D",
+        marginBottom: 20,
     },
     settingsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         marginTop: 15,
-        backgroundColor: "#3498DB", // Primary blue
-        paddingVertical: 10,
+        backgroundColor: "#2ECC71", // Green for settings
+        paddingVertical: 12,
         paddingHorizontal: 20,
-        borderRadius: 8,
+        borderRadius: 10,
     },
     settingsButtonText: {
+        fontSize: 16,
         color: "#FFFFFF",
         fontWeight: "bold",
-        textAlign: "center",
     },
     logOutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         marginTop: 10,
         backgroundColor: "#E74C3C", // Red for logout
-        paddingVertical: 10,
+        paddingVertical: 12,
         paddingHorizontal: 20,
-        borderRadius: 8,
+        borderRadius: 10,
     },
     logOutButtonText: {
+        fontSize: 16,
         color: "#FFFFFF",
         fontWeight: "bold",
-        textAlign: "center",
     },
     closeButton: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
+        position: "absolute",
+        top: 15,
+        right: 15,
         padding: 10,
     },
-    closeButtonText: {
-        fontSize: 20,
-        color: "#7F8C8D", // Neutral gray
+    // Header
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 16,
+        backgroundColor: "#A1CEDC",
+        borderBottomWidth: 1,
+        borderBottomColor: "#CED6E0",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    headerTitle: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#FFFFFF",
+    },
+    iconButton: {
+        padding: 8,
+    },
+    // Footer
+    footer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        paddingVertical: 16,
+        backgroundColor: "#FFFFFF",
+        borderTopWidth: 1,
+        borderTopColor: "#CED6E0",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    footerButton: {
+        alignItems: "center",
+    },
+    footerButtonText: {
+        fontSize: 14,
+        fontWeight: "600",
+        marginTop: 4,
+        color: "#2C3E50",
+    },
+    // Loading View
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#F9F9F9",
+    },
+    loadingText: {
+        fontSize: 16,
+        color: "#7F8C8D",
     },
 });
+

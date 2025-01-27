@@ -111,7 +111,7 @@ export default function ClientStackLayout() {
                 <Modal
                     visible={isModalVisible}
                     transparent={true}
-                    animationType="slide"
+                    animationType={Platform.OS === 'web' ? 'none' : 'slide'}
                     onRequestClose={toggleModal}
                 >
                     <View style={styles.modalOverlay}>

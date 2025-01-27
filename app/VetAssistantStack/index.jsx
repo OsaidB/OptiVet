@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
     Text,
     View,
@@ -9,55 +9,52 @@ import {
     Modal,
     Image,
     Alert,
-    Platform, StatusBar
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import PetService from '../../Services/PetService';
-import UserService from '../../Services/UserService'; // Import the UserService
+    StatusBar,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import PetService from "../../Services/PetService";
+import UserService from "../../Services/UserService";
 import { useRouter } from "expo-router";
 
 const categories = [
-    { id: '1', label: 'All', value: 'ALL' },
-    { id: '2', label: 'Inpatient', value: 'INPATIENT_CARE' },
-    { id: '3', label: 'Unclaimed', value: 'UNCLAIMED' },
-    { id: '4', label: 'Abandoned', value: 'ABANDONED' },
+    { id: "1", label: "All", value: "ALL" },
+    { id: "2", label: "Inpatient", value: "INPATIENT_CARE" },
+    { id: "3", label: "Unclaimed", value: "UNCLAIMED" },
+    { id: "4", label: "Abandoned", value: "ABANDONED" },
 ];
 
 const VetAssistantStack = () => {
     const router = useRouter();
-    const [vetAssistantInfo, setVetAssistantInfo] = useState(null); // Store vet assistant details
+    const [vetAssistantInfo, setVetAssistantInfo] = useState(null);
     const [email, setEmail] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState("");
     const [pets, setPets] = useState([]);
     const [filteredPets, setFilteredPets] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('ALL');
+    const [selectedCategory, setSelectedCategory] = useState("ALL");
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchEmail = async () => {
             try {
-                const storedEmail = await AsyncStorage.getItem('email'); // Fetch stored email
+                const storedEmail = await AsyncStorage.getItem("email");
                 if (storedEmail) {
                     setEmail(storedEmail);
                 } else {
-                    console.error("No email found in AsyncStorage");
-                    Alert.alert('Error', 'No email found. Please log in again.');
+                    Alert.alert("Error", "No email found. Please log in again.");
                 }
             } catch (error) {
-                console.error("Error fetching email from AsyncStorage:", error);
-                Alert.alert('Error', 'Failed to retrieve email.');
+                Alert.alert("Error", "Failed to retrieve email.");
             }
         };
 
         const fetchVetAssistantInfo = async () => {
             if (!email) return;
             try {
-                const data = await UserService.getUserByEmail(email); // Fetch vet assistant by email
+                const data = await UserService.getUserByEmail(email);
                 setVetAssistantInfo(data);
             } catch (error) {
-                console.error("Error fetching vet assistant info:", error);
-                Alert.alert('Error', 'Failed to load vet assistant information.');
+                Alert.alert("Error", "Failed to load vet assistant information.");
             }
         };
 
@@ -75,53 +72,37 @@ const VetAssistantStack = () => {
             setPets(petData);
             setFilteredPets(petData);
         } catch (error) {
-            console.error("Error fetching pets:", error);
-            Alert.alert("Error", "Failed to fetch pets data");
+            Alert.alert("Error", "Failed to fetch pets data.");
         }
     };
 
-    const fetchPetsByResidency = async (category) => {
-        if (category === 'ALL') {
-            fetchPets();
+    const filterPetsByCategory = (category) => {
+        if (category === "ALL") {
+            setFilteredPets(pets);
         } else {
-            try {
-                const petsByResidency = await PetService.getPetsByResidency(category);
-                setFilteredPets(petsByResidency);
-            } catch (error) {
-                console.error("Error fetching pets by residency:", error);
-                Alert.alert("Error", "Failed to fetch pets by residency type");
-            }
+            const filtered = pets.filter((pet) => pet.residency === category);
+            setFilteredPets(filtered);
         }
     };
 
     const handleSearch = (query) => {
         setSearchQuery(query);
-        const filtered = pets.filter(pet =>
-            pet.name.toLowerCase().includes(query.toLowerCase()) ||
-            pet.owner?.firstName.toLowerCase().includes(query.toLowerCase())
+        const filtered = pets.filter(
+            (pet) =>
+                pet.name.toLowerCase().includes(query.toLowerCase()) ||
+                pet.owner?.firstName.toLowerCase().includes(query.toLowerCase())
         );
         setFilteredPets(filtered);
     };
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
-        fetchPetsByResidency(category);
+        filterPetsByCategory(category);
     };
 
     const handlePetPress = (pet) => {
         setSelectedPet(pet);
         setModalVisible(true);
-    };
-
-    const handleViewChecklist = () => {
-        if (selectedPet) {
-            const { id: petId, ownerId: clientId, name: petName } = selectedPet;
-            setModalVisible(false);
-            router.push({
-                pathname: '/VetAssistantStack/DailyChecklist',
-                params: { petId, clientId, petName },
-            });
-        }
     };
 
     const renderPet = ({ item }) => (
@@ -138,225 +119,224 @@ const VetAssistantStack = () => {
         <View style={styles.container}>
             <StatusBar translucent backgroundColor="transparent" />
 
+            {/* Header Section */}
             {vetAssistantInfo ? (
-                <>
-                    {/*<Text>Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!</Text>*/}
-                    {/*<Text>Email: {vetAssistantInfo.email}</Text>*/}
-                    {/*<Text>Phone: {vetAssistantInfo.phoneNumber}</Text>*/}
-                    {/*<Text>ID: {vetAssistantInfo.userId}</Text>*/}
-                </>
+                <Text style={styles.infoText}>
+                    Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!
+                </Text>
             ) : (
-                <Text>Loading vet assistant information...</Text>
+                <Text style={styles.loadingText}>Loading vet assistant information...</Text>
             )}
 
+            {/* Search Bar */}
             <TextInput
                 style={styles.searchInput}
-                placeholder="Search by pet or owner name..."
+                placeholder="Search pets or owners..."
+                placeholderTextColor="#7F8C8D" // Gray for placeholder text
                 value={searchQuery}
                 onChangeText={handleSearch}
-                placeholderTextColor={'gray'}
+                multiline={false} // Prevent dynamic height adjustment
             />
 
-            <FlatList
-                data={categories}
-                horizontal
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
+            {/* Categories Section */}
+            <View style={styles.categoryContainer}>
+                {categories.map((category) => (
                     <TouchableOpacity
+                        key={category.id}
                         style={[
-                            styles.categoryItem,
-                            selectedCategory === item.value && styles.selectedCategoryItem
+                            styles.categoryButton,
+                            selectedCategory === category.value && styles.selectedCategoryButton,
                         ]}
-                        onPress={() => handleCategorySelect(item.value)}
+                        onPress={() => handleCategorySelect(category.value)}
                     >
-                        <Text style={[
-                            styles.categoryText,
-                            selectedCategory === item.value && styles.selectedCategoryText
-                        ]}>
-                            {item.label}
+                        <Text
+                            style={[
+                                styles.categoryText,
+                                selectedCategory === category.value && styles.selectedCategoryText,
+                            ]}
+                        >
+                            {category.label}
                         </Text>
                     </TouchableOpacity>
-                )}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.categoryListContainer}
-            />
+                ))}
+            </View>
 
+            {/* Pets Section */}
             <FlatList
                 data={filteredPets}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.id}
                 renderItem={renderPet}
-                ListEmptyComponent={<Text style={styles.noDataText}>No pets found</Text>}
                 numColumns={2}
+                ListEmptyComponent={<Text style={styles.noDataText}>No pets found</Text>}
+                contentContainerStyle={styles.petListContainer}
             />
 
-            <Modal
-                visible={modalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity style={styles.modalContainer} onPressOut={() => setModalVisible(false)}>
-                    <View style={styles.modalContent}>
-                        {selectedPet && (
-                            <>
-                                <Text style={styles.modalTitle}>Pet Details</Text>
-                                <Text>Name: {selectedPet.name}</Text>
-                                <Text>Type: {selectedPet.type}</Text>
-                                <Text>Breed: {selectedPet.breed}</Text>
-                                <Text>Birth Date: {selectedPet.birthDate}</Text>
-                                <TouchableOpacity style={styles.button} onPress={handleViewChecklist}>
-                                    <Text style={styles.buttonText}>View Daily Checklist</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
+            {/* Modal for Pet Details */}
+            {selectedPet && (
+                <Modal
+                    visible={modalVisible}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalContainer}
+                        onPressOut={() => setModalVisible(false)}
+                    >
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Pet Details</Text>
+                            <Text style={styles.modalText}>Name: {selectedPet.name}</Text>
+                            <Text style={styles.modalText}>Type: {selectedPet.type}</Text>
+                            <Text style={styles.modalText}>Breed: {selectedPet.breed}</Text>
+                            <Text style={styles.modalText}>
+                                Birth Date: {selectedPet.birthDate}
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    router.push({
+                                        pathname: "/VetAssistantStack/DailyChecklist",
+                                        params: {
+                                            petId: selectedPet.id,
+                                            clientId: selectedPet.ownerId,
+                                            petName: selectedPet.name,
+                                        },
+                                    });
+                                }}
+                            >
+                                <Text style={styles.buttonText}>View Daily Checklist</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            )}
         </View>
     );
 };
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 0,
-        backgroundColor: '#F0F4F8', // Light grayish blue for a soothing background
+        backgroundColor: "#F0F4F8",
+        padding: 10,
     },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: '#2C3E50', // Darker shade for better contrast
+    infoText: {
+        fontSize: 20,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: 10,
+    },
+    loadingText: {
+        fontSize: 16,
+        textAlign: "center",
+        marginBottom: 10,
     },
     searchInput: {
-        position: 'absolute', // Position it at the top
-        top: 20, // Distance from the top of the container
-        left: 20, // Distance from the left
-        right: 20, // Distance from the right
-        height: 45,
-        borderColor: '#CED6E0', // Light border color
+        // height: 40, // Fixed height
+        borderColor: "#CED6E0", // Light border color
         borderWidth: 1,
-        borderRadius: 12,
-        paddingHorizontal: 15,
-        backgroundColor: '#FFFFFF',
-        fontSize: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        zIndex: 2, // Ensure it stays above other elements
+        borderRadius: 10,
+        paddingHorizontal: 10, // Padding for horizontal space
+        paddingVertical: 10, // Padding for horizontal space
+        backgroundColor: "#FFF",
+        color: "#000", // Explicit black text color
+        // color: "#000", // Explicit black text color
+        includeFontPadding: false, // Remove extra padding on Android
+
+        fontSize: 16, // Fixed font size
+        lineHeight: 30, // Explicit line height to prevent resizing
+        textAlignVertical: "center", // Center text vertically
+        // overflow: "hidden", // Prevent content overflow
+        marginBottom: 10, // Space below the search bar
     },
-    categoryListContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around', // Ensure even spacing between items
-        alignItems: 'center',
-        marginBottom: 50, // Add spacing between the category bar and pets list
-        marginTop: 70,
-        backgroundColor: '#F0F4F8', // Match the background color
-        paddingVertical: 10,
-        // borderRadius: 8,
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.1,
-        // shadowRadius: 4,
-        elevation: 3,
-        height: 70, // Fixed height for the categories bar
-        paddingHorizontal: 10, // Optional: Add some padding for better spacing
+
+    categoryContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        marginBottom: 10,
     },
-    categoryItem: {
-        backgroundColor: '#d1e1f6', // Soft blue for unselected categories
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 25,
-        marginHorizontal: 5, // Add horizontal spacing between items
-        alignItems: 'center',
-        justifyContent: 'center',
+    categoryButton: {
+        padding: 10,
+        borderRadius: 10,
+        backgroundColor: "#D1E1F6",
+        marginBottom: 10,
+        flexGrow: 1,
+        alignItems: "center",
+        marginHorizontal: 5,
     },
-    selectedCategoryItem: {
-        backgroundColor: '#3498DB', // Accent color for selected categories
+    selectedCategoryButton: {
+        backgroundColor: "#2ECC71",
     },
     categoryText: {
         fontSize: 14,
-        color: '#34495E', // Neutral dark text
+        color: "#34495E",
     },
     selectedCategoryText: {
-        color: '#FFFFFF', // White text for selected categories
-        fontWeight: '600',
+        color: "#FFF",
+    },
+    petListContainer: {
+        flexGrow: 1,
+        paddingBottom: 20,
     },
     petCard: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
+        backgroundColor: "#FFF",
+        borderRadius: 10,
         padding: 10,
-        margin: 8,
-        alignItems: 'center',
-        width: '45%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 4,
+        margin: 5,
+        alignItems: "center",
+        width: "48%",
     },
     petImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         marginBottom: 10,
     },
     petName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#2C3E50',
+        fontSize: 16,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    noDataText: {
+        textAlign: "center",
+        color: "#7F8C8D",
+        fontSize: 16,
+        marginTop: 20,
     },
     modalContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent background
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     modalContent: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFF",
         padding: 20,
-        borderRadius: 16,
-        width: '85%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 6,
-        elevation: 5,
+        borderRadius: 10,
+        width: "80%",
+        alignItems: "center",
     },
     modalTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: '#2C3E50',
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    modalText: {
+        fontSize: 16,
+        marginBottom: 5,
     },
     button: {
-        backgroundColor: '#3498DB',
-        paddingVertical: 14,
+        backgroundColor: "#2ECC71",
+        padding: 10,
         borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 4,
+        marginTop: 10,
     },
     buttonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    noDataText: {
-        textAlign: 'center',
-        marginTop: 20,
-        color: '#7F8C8D', // Grayish text for no data
-        fontSize: 16,
+        color: "#FFF",
+        fontWeight: "bold",
     },
 });
-
-
 
 export default VetAssistantStack;
