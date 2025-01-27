@@ -17,21 +17,13 @@ import UserService from "../../Services/UserService";
 import { useRouter } from "expo-router";
 import DailyChecklistService from "../../Services/DailyChecklistService"; // Import the service
 
-const categories = [
-    { id: "1", label: "All", value: "ALL" },
-    { id: "2", label: "Inpatient", value: "INPATIENT_CARE" },
-    { id: "3", label: "Unclaimed", value: "UNCLAIMED" },
-    { id: "4", label: "Abandoned", value: "ABANDONED" },
-];
-
-const VetAssistantStack = () => {
+const CheckedPets = () => {
     const router = useRouter();
     const [vetAssistantInfo, setVetAssistantInfo] = useState(null);
     const [email, setEmail] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [pets, setPets] = useState([]);
-    const [filteredPets, setFilteredPets] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState("ALL");
+    const [checkedPets, setCheckedPets] = useState([]);
+    const [filteredCheckedPets, setFilteredCheckedPets] = useState([]);
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -63,55 +55,43 @@ const VetAssistantStack = () => {
         fetchVetAssistantInfo();
     }, [email]);
 
-    // Fetch unchecked pets on mount
     useEffect(() => {
-        fetchUncheckedPets();
+        fetchCheckedPets();
     }, []);
 
-    // const fetchPets = async () => {
+    // const fetchCheckedPets = async () => {
     //     try {
     //         const petData = await PetService.getAllPets();
-    //         setPets(petData);
-    //         setFilteredPets(petData);
+    //         // Filter pets that have completed daily checklists
+    //         const completedChecklistPets = petData.filter((pet) => pet.dailyChecklist?.completed);
+    //         setCheckedPets(completedChecklistPets);
+    //         setFilteredCheckedPets(completedChecklistPets);
     //     } catch (error) {
-    //         Alert.alert("Error", "Failed to fetch pets data.");
+    //         Alert.alert("Error", "Failed to fetch checked pets data.");
     //     }
     // };
 
-    const fetchUncheckedPets = async () => {
+    // Fetch checked pets for today
+    const fetchCheckedPets = async () => {
         try {
             const today = new Date().toISOString().split("T")[0]; // Format date as YYYY-MM-DD
-            const petData = await DailyChecklistService.getUncheckedPets(today);
-            setPets(petData); // Update state with unchecked pets
-            setFilteredPets(petData); // Initialize filtered list
+            const petData = await DailyChecklistService.getCheckedPets(today);
+            setCheckedPets(petData); // Update state with checked pets
+            setFilteredCheckedPets(petData); // Initialize filtered list
         } catch (error) {
-            Alert.alert("Error", "Failed to fetch unchecked pets.");
-            console.error("Error fetching unchecked pets:", error);
-        }
-    };
-
-    const filterPetsByCategory = (category) => {
-        if (category === "ALL") {
-            setFilteredPets(pets);
-        } else {
-            const filtered = pets.filter((pet) => pet.residencyType === category);
-            setFilteredPets(filtered);
+            Alert.alert("Error", "Failed to fetch checked pets.");
+            console.error("Error fetching checked pets:", error);
         }
     };
 
     const handleSearch = (query) => {
         setSearchQuery(query);
-        const filtered = pets.filter(
+        const filtered = checkedPets.filter(
             (pet) =>
                 pet.name.toLowerCase().includes(query.toLowerCase()) ||
                 pet.owner?.firstName.toLowerCase().includes(query.toLowerCase())
         );
-        setFilteredPets(filtered);
-    };
-
-    const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
-        filterPetsByCategory(category);
+        setFilteredCheckedPets(filtered);
     };
 
     const handlePetPress = (pet) => {
@@ -136,7 +116,6 @@ const VetAssistantStack = () => {
             {/* Header Section */}
             {vetAssistantInfo ? (
                 <Text style={styles.infoText}>
-                    Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!
                 </Text>
             ) : (
                 <Text style={styles.loadingText}>Loading vet assistant information...</Text>
@@ -146,42 +125,19 @@ const VetAssistantStack = () => {
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search pets or owners..."
-                placeholderTextColor="#7F8C8D" // Gray for placeholder text
+                placeholderTextColor="#7F8C8D"
                 value={searchQuery}
                 onChangeText={handleSearch}
-                multiline={false} // Prevent dynamic height adjustment
+                multiline={false}
             />
-
-            {/* Categories Section */}
-            <View style={styles.categoryContainer}>
-                {categories.map((category) => (
-                    <TouchableOpacity
-                        key={category.id}
-                        style={[
-                            styles.categoryButton,
-                            selectedCategory === category.value && styles.selectedCategoryButton,
-                        ]}
-                        onPress={() => handleCategorySelect(category.value)}
-                    >
-                        <Text
-                            style={[
-                                styles.categoryText,
-                                selectedCategory === category.value && styles.selectedCategoryText,
-                            ]}
-                        >
-                            {category.label}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
 
             {/* Pets Section */}
             <FlatList
-                data={filteredPets}
+                data={filteredCheckedPets}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPet}
                 numColumns={2}
-                ListEmptyComponent={<Text style={styles.noDataText}>No pets found</Text>}
+                ListEmptyComponent={<Text style={styles.noDataText}>No checked pets found</Text>}
                 contentContainerStyle={styles.petListContainer}
             />
 
@@ -205,6 +161,9 @@ const VetAssistantStack = () => {
                             <Text style={styles.modalText}>
                                 Birth Date: {selectedPet.birthDate}
                             </Text>
+                            <Text style={styles.modalText}>
+                                Checklist: {selectedPet.dailyChecklist?.notes || "No notes"}
+                            </Text>
                             <TouchableOpacity
                                 style={styles.button}
                                 onPress={() => {
@@ -219,7 +178,7 @@ const VetAssistantStack = () => {
                                     });
                                 }}
                             >
-                                <Text style={styles.buttonText}>View Daily Checklist</Text>
+                                <Text style={styles.buttonText}>View Checklist Details</Text>
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
@@ -230,6 +189,7 @@ const VetAssistantStack = () => {
 };
 
 const styles = StyleSheet.create({
+    // Reuse styles from VetAssistantStack/index.jsx
     container: {
         flex: 1,
         backgroundColor: "#F0F4F8",
@@ -247,48 +207,15 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     searchInput: {
-        // height: 40, // Fixed height
-        borderColor: "#CED6E0", // Light border color
+        height: 40,
+        borderColor: "#CED6E0",
         borderWidth: 1,
         borderRadius: 10,
-        paddingHorizontal: 10, // Padding for horizontal space
-        paddingVertical: 10, // Padding for horizontal space
+        paddingHorizontal: 10,
         backgroundColor: "#FFF",
-        color: "#000", // Explicit black text color
-        // color: "#000", // Explicit black text color
-        includeFontPadding: false, // Remove extra padding on Android
-
-        fontSize: 16, // Fixed font size
-        lineHeight: 30, // Explicit line height to prevent resizing
-        textAlignVertical: "center", // Center text vertically
-        // overflow: "hidden", // Prevent content overflow
-        marginBottom: 10, // Space below the search bar
-    },
-
-    categoryContainer: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
+        color: "#000",
+        fontSize: 16,
         marginBottom: 10,
-    },
-    categoryButton: {
-        padding: 10,
-        borderRadius: 10,
-        backgroundColor: "#D1E1F6",
-        marginBottom: 10,
-        flexGrow: 1,
-        alignItems: "center",
-        marginHorizontal: 5,
-    },
-    selectedCategoryButton: {
-        backgroundColor: "#2ECC71",
-    },
-    categoryText: {
-        fontSize: 14,
-        color: "#34495E",
-    },
-    selectedCategoryText: {
-        color: "#FFF",
     },
     petListContainer: {
         flexGrow: 1,
@@ -353,4 +280,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default VetAssistantStack;
+export default CheckedPets;
