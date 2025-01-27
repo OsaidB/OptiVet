@@ -4,7 +4,7 @@
     "slug": "OptiVet",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/OptiVet_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -14,19 +14,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bzu.optivet"
+      "bundleIdentifier": "com.bzu.optivet",
+      "icon": "./assets/images/OptiVet_icon.png"
     },
     "android": {
       "package": "com.bzu.optivet",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/OptiVet_icon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/OptiVet_icon.png"
     },
     "plugins": [
       "expo-router",
