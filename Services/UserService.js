@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from './config'; // Adjust the path as necessary
+import AuthService from './authService'; // Import AuthService for authentication-related logic
 
 const USERS_API_BASE_URL = `${baseURL.USED_BASE_URL}/api/users`;
 
@@ -15,6 +16,7 @@ const UserService = {
         try {
             const token = await UserService.getToken();
             if (!token) {
+                console.log("no token");
                 return null;
             }
 
@@ -164,8 +166,9 @@ const UserService = {
 
 
     // Authentication methods
+    // Call AuthService.logout for logout logic
     logout: async () => {
-        await AsyncStorage.removeItem('authToken');
+        return await AuthService.logout();
     },
 
     isAuthenticated: async () => {
