@@ -17,7 +17,7 @@ const MsgsScreen = () => {
                 const messagesWithPetInfo = await Promise.all(
                     messages.map(async (message) => {
                         const pet = await PetService.getPetById(message.petId);
-                        return { ...message, pet, done: message.done || false }; // Add "done" state if not present
+                        return { ...message, pet, done: message.criticalIssueFlag === 0 }; // Set "done" based on the flag
                     })
                 );
 
@@ -32,20 +32,14 @@ const MsgsScreen = () => {
         fetchCriticalMessages();
     }, []);
 
-    const toggleDoneStatus = async (id, currentStatus) => {
-        try {
-            const updatedChecklist = await DailyChecklistService.updateDailyChecklist(id, {
-                done: !currentStatus, // Update the "done" field
-            });
-
-            setCriticalMessages((prev) =>
-                prev.map((message) =>
-                    message.id === id ? { ...message, done: updatedChecklist.done } : message
-                )
-            );
-        } catch (error) {
-            console.error("Error updating done status:", error);
-        }
+    const toggleDoneStatus = (id) => {
+        setCriticalMessages((prev) =>
+            prev.map((message) =>
+                message.id === id
+                    ? { ...message, done: !message.done }
+                    : message
+            )
+        );
     };
 
     const handleDeleteMessage = async (id) => {
@@ -63,7 +57,7 @@ const MsgsScreen = () => {
                 <Text style={styles.dateText}>Date: {item.date}</Text>
                 <View style={styles.actionIcons}>
                     {/* Done Icon */}
-                    <TouchableOpacity onPress={() => toggleDoneStatus(item.id, item.done)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => toggleDoneStatus(item.id)} style={styles.iconButton}>
                         <Ionicons
                             name={item.done ? "checkmark-circle" : "checkmark-circle-outline"}
                             size={24}
