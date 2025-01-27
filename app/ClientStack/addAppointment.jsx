@@ -26,13 +26,20 @@ export default function AddAppointment() {
         const fetchPets = async () => {
             try {
                 const petData = await PetService.getPetsByOwnerId(clientId);
-                setPets(petData);
+                const filteredPets = petData
+                    .filter(pet => !pet.deleted) // Exclude deleted pets
+                    .map(pet => ({
+                        ...pet,
+                        imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName), // Serve the correct image URL
+                    }));
+                setPets(filteredPets);
             } catch (error) {
                 console.error('Error fetching pets:', error);
+                Alert.alert('Error', 'Failed to load pets.');
             }
         };
         fetchPets();
-    }, []);
+    }, [clientId]);
 
 
     // Fetch vets

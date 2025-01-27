@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import UserService from '../Services/UserService'; // Import UserService for role fetching if needed
+import UserService from '../Services/UserService';
 
 const AuthGuard = ({ children, allowedRoles = [] }) => {
     const [loading, setLoading] = useState(true);
@@ -15,34 +15,37 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
                 const token = await AsyncStorage.getItem('authToken');
                 if (!token) {
                     console.log("No token found");
-                    router.replace(''); // Redirect to login if no token
+                    router.replace('');
                     return;
                 }
 
-                // Decode the token to get the user's base role
-                const base64Payload = token.split('.')[1];
-                const decodedPayload = JSON.parse(atob(base64Payload));
-                const role = decodedPayload.role;
+                let decodedPayload;
+                try {
+                    const base64Payload = token.split('.')[1];
+                    decodedPayload = JSON.parse(atob(base64Payload));
+                } catch (error) {
+                    console.error("Invalid token format:", error);
+                    router.replace('');
+                    return;
+                }
 
-                let finalRole = role; // Default to the role from the token
+                const role = decodedPayload.role || '';
+                let finalRole = role;
 
-                // If the role is ROLE_USER, fetch the detailed employeeRole
                 if (role === 'ROLE_USER') {
                     const storedEmployeeRole = await AsyncStorage.getItem('employeeRole');
-
                     if (!storedEmployeeRole) {
-                        // Fetch employee info if not stored
-                        try {
-                            const storedEmail = await AsyncStorage.getItem('email');
-                            if (!storedEmail) {
-                                Alert.alert('Error', 'No email found. Please log in again.');
-                                router.replace('');
-                                return;
-                            }
+                        const storedEmail = await AsyncStorage.getItem('email');
+                        if (!storedEmail) {
+                            Alert.alert('Error', 'No email found. Please log in again.');
+                            router.replace('');
+                            return;
+                        }
 
+                        try {
                             const employeeData = await UserService.getUserByEmail(storedEmail);
-                            finalRole = employeeData.role; // Get the detailed role
-                            await AsyncStorage.setItem('employeeRole', finalRole); // Cache it
+                            finalRole = employeeData.role || '';
+                            await AsyncStorage.setItem('employeeRole', finalRole);
                         } catch (error) {
                             console.error('Error fetching employee info:', error);
                             Alert.alert('Error', 'Failed to load employee information.');
@@ -50,22 +53,20 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
                             return;
                         }
                     } else {
-                        finalRole = storedEmployeeRole; // Use the cached employee role
+                        finalRole = storedEmployeeRole;
                     }
                 }
 
-                // Check if the role is allowed
                 if (!allowedRoles.length || allowedRoles.includes(finalRole)) {
                     setUserRole(finalRole);
-                    setLoading(false); // Allow access
+                    setLoading(false);
                 } else {
                     Alert.alert('Unauthorized', 'You do not have permission to access this page.');
-                    console.log("Unauthorized: You do not have permission to access this page.");
-                    router.replace(''); // Redirect if role is not allowed
+                    router.replace('');
                 }
             } catch (error) {
                 console.error('Authentication error:', error);
-                router.replace(''); // Redirect to login on error
+                router.replace('');
             }
         };
 
@@ -80,7 +81,17 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
         );
     }
 
-    return children; // Render the wrapped components
+    return (
+        <View style={{ flex: 1 }}>
+            {React.Children.map(children, (child) => {
+                if (typeof child === 'string') {
+                    console.warn('Removed invalid child:', child); // Log invalid child
+                    return null;
+                }
+                return child;
+            })}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({

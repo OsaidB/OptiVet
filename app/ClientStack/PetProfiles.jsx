@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image, RefreshControl, Platform} from 'react-native';
 import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import PetService from "../../Services/PetService";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -56,28 +56,50 @@ export default function PetProfiles() {
     };
 
     const deletePet = async (petId) => {
-        Alert.alert(
-            "Confirm Delete",
-            "Are you sure you want to delete this pet?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            await PetService.softDeletePet(petId);
-                            Alert.alert("Success", "Pet deleted successfully.");
-                            fetchPets(); // Refresh the pet list
-                        } catch (error) {
-                            console.error("Error deleting pet:", error);
-                            Alert.alert("Error", "Failed to delete the pet.");
-                        }
+        console.log(`Delete button clicked for pet ID: ${petId}`); // Debug log
+        if (Platform.OS === 'web') {
+            const confirm = window.confirm("Are you sure you want to delete this pet?");
+            if (!confirm) {
+                console.log("User canceled deletion.");
+                return;
+            }
+
+            try {
+                console.log(`Deleting pet with ID: ${petId}`); // Debug log
+                await PetService.softDeletePet(petId);
+                Alert.alert("Success", "Pet deleted successfully."); // Optional for native platforms
+                fetchPets(); // Refresh the pet list
+            } catch (error) {
+                console.error("Error deleting pet:", error);
+                Alert.alert("Error", "Failed to delete the pet.");
+            }
+        } else {
+            // Native platforms
+            Alert.alert(
+                "Confirm Delete",
+                "Are you sure you want to delete this pet?",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: async () => {
+                            try {
+                                console.log(`Deleting pet with ID: ${petId}`); // Debug log
+                                await PetService.softDeletePet(petId);
+                                Alert.alert("Success", "Pet deleted successfully.");
+                                fetchPets(); // Refresh the pet list
+                            } catch (error) {
+                                console.error("Error deleting pet:", error);
+                                Alert.alert("Error", "Failed to delete the pet.");
+                            }
+                        },
                     },
-                },
-            ]
-        );
+                ]
+            );
+        }
     };
+
 
     const calculateAge = (birthDate) => {
         const today = new Date();
@@ -122,6 +144,7 @@ export default function PetProfiles() {
                             <TouchableOpacity
                                 style={[styles.iconButton, styles.deleteButton]}
                                 onPress={() => deletePet(item.id)}
+                                // onClick={() => deletePet(item.id)}
                             >
                                 <FontAwesome name="trash" size={24} color="white" />
                             </TouchableOpacity>
@@ -190,6 +213,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginHorizontal: 5,
+        cursor: 'pointer',
     },
     updateButton: {
         backgroundColor: '#4CAF50',
