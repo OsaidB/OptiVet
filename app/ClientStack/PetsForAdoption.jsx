@@ -14,47 +14,23 @@ import { createFilter } from "react-native-search-filter";
 import ProductService from "../../Services/ProductService";
 import baseURL from '../../Services/config'; // Adjust the path as necessary
 import PetForAdoptionService from "../../Services/PetForAdoptionService";
-//import { useRouter, useLocalSearchParams, Link } from 'expo-router'; // Import useLocalSearchParams
-//import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
-
-
 
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/products`;
 const BASE_URL_IMAGES = `${baseURL.USED_BASE_URL}/api/pets`;
-
 const imagess = [];
-
-// import { createStackNavigator } from '@react-navigation/stack';
-// import ManagerScheduleScreen from '../../app/ManagerStack/ManagerScheduleScreen';
-// import ManagerNotesScreen from '../../app/ManagerStack/ManagerNotesScreen';
-// import ManagerUserManagementScreen from '../../app/ManagerStack/ManagerUserManagementScreen';
-// import ManagerReportsScreen from '../../app/ManagerStack/ManagerReportsScreen';
-
-
-// const Stack = createStackNavigator();
-
 const PetsForAdoption = () => {
     const navigation = useNavigation();
-    //const router = useRouter();
-
-
-
-    //const [pets, setPets] = useState([{id:0,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2222.png'},{id:1,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2225.png'},{id:2,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 222814.png'},{id:3,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 207.png'},{id:4,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 223128.png'}]);
     const [pets, setPets] = useState([]);
     const [viewModal, setViewModal] = useState(false);
     const [petId, setpPetId] = useState();
     const [selectedPet, setSelectedPet] = useState('');
     const [petForEdit, setPetForEdit] = useState();
-   // const [petToView,setPetToView] = useState();
-
-
-
+   
     useEffect(() => {
         const fetchPetForAdoption = async () => {
             try {
                 const fetchPetsForAdoption = await PetForAdoptionService.getpetsForAdoption();
                 setPets(fetchPetsForAdoption);
-                //setSearchedProducts(fetchProducts);
             } catch (error) {
                 console.error("Error fetching pets for adoption:", error);
                 Alert.alert('Error', 'Failed to load pets for adoption.');
@@ -81,7 +57,6 @@ const PetsForAdoption = () => {
                 transparent={true}
                 visible={viewModal}
                 onRequestClose={() => {
-                    //Alert.alert('Modal has been closed.');
                     setViewModal(!viewModal);
                 }}>
 
@@ -125,45 +100,21 @@ const PetsForAdoption = () => {
 
             <Text style={{ fontSize: 40 }}>Pets for adoption</Text>
 
-
-
-
-            {/* ////////////////////////////////////////////////////////////////////////////////////////////////////////// */}
-
-
             <ScrollView
                 contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }} style={{ alignSelf: 'center', width: '90%', marginVertical: 10 }}>
-
-
 
 
                 {pets.map((item) => {
 
                     return (
 
-                        <View key={item.id} style={{ flexShrink: 1, width: (Platform.OS == 'web' ? '20%' : '40%'), backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent: 'flex-start', alignItems: 'center' }} >
-
-
+                        <View key={item.id} style={{ flexShrink: 1, width: (Platform.OS == 'web' ? '20%' : '40%'), backgroundColor: '#133945', height: 300, margin: 20, borderRadius: 15, justifyContent:'flex-start', alignItems: 'center' }} >
                             <View style={{ borderRadius: '100%', width: '90%', height: '40%', maxHeight: 120, maxWidth: 120, marginTop: 5, marginBottom: 4 }}>
                                 <Image source={{ uri: `${BASE_URL_IMAGES}${item.petForAdoptionImageUrl}` }} style={{ borderRadius: '100%', width: '100%', height: '100%' }} resizeMode="cover"></Image>
                             </View>
-
-
-                            <Text style={{ height: '20%', fontSize: 20, color: 'white', marginBottom: 4 }} numberOfLines={1} >{item.name}</Text>
-
-
-
-
-                            <Text numberOfLines={1} style={{ height: '20%', fontSize: 20, color: '#97989c', marginBottom: 20 }}>{item.type} - {item.breed}</Text>
-
-
-
-
-
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '12%' }}>
-
-
+                            <Text style={{ height: '12%', fontSize: 20, color: 'white', marginBottom: 4}} numberOfLines={1} >{item.name}</Text>
+                            <Text numberOfLines={1} style={{ height: '12%', fontSize: 20, color: '#97989c', marginBottom: 20}}>{item.type} - {item.breed}</Text>
+                            {/* <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%', height: '12%'}}>
                                 <Link style={{ flexShrink: 1, justifyContent: 'center', alignItems: 'center', height: 44, width: 44, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }} href={{ pathname: '../SecretaryStack/EditPetForAdoption', params: {petId}}} onPress={() => {setpPetId(item.id)}} asChild>
                                     <TouchableOpacity>
 
@@ -172,113 +123,31 @@ const PetsForAdoption = () => {
                                     </TouchableOpacity>
                                 </Link>
 
-
-
                                 <TouchableOpacity style={{ flexShrink: 1, alignItems: 'center', justifyContent: 'center', height: 40, width: 40, backgroundColor: 'white', borderRadius: '100%', marginHorizontal: 10 }}  onPress={() => deletePetForAdoptionHandle(item.id)}>
 
                                     <Image source={require('../../assets/images/trash.png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
 
                                 </TouchableOpacity>
 
-
-
-                            </View>
-
-
-
+                            </View> */}
                             <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', borderRadius: 18, height: 24, width: '90%', marginVertical: 10 }} onPress={() => { setViewModal(!viewModal); setSelectedPet(item); }}>
                                 <Text style={{ fontSize: 12, fontWeight: 'bold' }} numberOfLines={1}>View Details</Text>
                             </TouchableOpacity>
+
                         </View>
 
                     )
 
-
                 })}
-
-
-
 
 
             </ScrollView>
 
 
 
-
-
-
-
-
-            <Link href={{ pathname: "/SecretaryStack/AddPetForAdoption" }} asChild>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, width: '50%', marginVertical: 10 }}>
-                    <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Add New Pet</Text>
-                </TouchableOpacity>
-            </Link>
-
         </View>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // <Stack.Navigator>
-        //     <Stack.Screen
-        //         name="Schedule"
-        //         component={ManagerScheduleScreen}
-        //         options={{ title: 'Appointment Schedule' }}
-        //     />
-        //     <Stack.Screen
-        //         name="Notes"
-        //         component={ManagerNotesScreen}
-        //         options={{ title: 'Staff Notes' }}
-        //     />
-        //     <Stack.Screen
-        //         name="UserManagement"
-        //         component={ManagerUserManagementScreen}
-        //         options={{ title: 'User Management' }}
-        //     />
-        //     <Stack.Screen
-        //         name="Reports"
-        //         component={ManagerReportsScreen}
-        //         options={{ title: 'Clinic Reports' }}
-        //     />
-        // </Stack.Navigator>
     );
 };
 

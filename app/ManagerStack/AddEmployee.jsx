@@ -7,12 +7,13 @@ import {
     StyleSheet,
     Alert,
     ScrollView,
-    Modal,
+    Modal, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import CustomToast from '../Toast.config';
 import AuthService from '../../Services/authService';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const AddEmployee = () => {
     const [firstName, setFirstName] = useState('');
@@ -74,6 +75,45 @@ const AddEmployee = () => {
         }
     };
 
+    const renderDatePicker = () => {
+        if (Platform.OS === 'web') {
+            return (
+                <Modal transparent animationType="slide" visible={isPickerVisible}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.pickerContainer}>
+                            <Text style={styles.pickerTitle}>Select Date of Birth</Text>
+                            <input
+                                type="date"
+                                value={dateOfBirth.toISOString().split('T')[0]}
+                                onChange={(e) => setDateOfBirth(new Date(e.target.value))}
+                                style={styles.dateInput}
+                            />
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setIsPickerVisible(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            );
+        }
+
+        return (
+            <DateTimePickerModal
+                isVisible={isPickerVisible}
+                mode="date"
+                date={dateOfBirth}
+                onConfirm={(selectedDate) => {
+                    setIsPickerVisible(false);
+                    setDateOfBirth(selectedDate);
+                }}
+                onCancel={() => setIsPickerVisible(false)}
+            />
+        );
+    };
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Create Employee Account</Text>
@@ -114,6 +154,54 @@ const AddEmployee = () => {
             />
 
             {/* Date of Birth Picker */}
+            {/*<TouchableOpacity*/}
+            {/*    style={styles.dateButton}*/}
+            {/*    onPress={() => setIsPickerVisible(true)}*/}
+            {/*>*/}
+            {/*    <Text style={styles.dateButtonText}>*/}
+            {/*        {dateOfBirth ? dateOfBirth.toISOString().split('T')[0] : 'Select Date of Birth'}*/}
+            {/*    </Text>*/}
+            {/*</TouchableOpacity>*/}
+
+            {/*{isPickerVisible && (*/}
+            {/*    <Modal transparent animationType="slide">*/}
+            {/*        <View style={styles.modalContainer}>*/}
+            {/*            <View style={styles.pickerContainer}>*/}
+            {/*                <Text style={styles.pickerTitle}>Select Date of Birth</Text>*/}
+            {/*                <input*/}
+            {/*                    type="date"*/}
+            {/*                    value={*/}
+            {/*                        dateOfBirth*/}
+            {/*                            ? dateOfBirth.toISOString().split('T')[0]*/}
+            {/*                            : "" // Fallback if dateOfBirth is not valid*/}
+            {/*                    }*/}
+            {/*                    onChange={(e) => {*/}
+            {/*                        const selectedDate = new Date(e.target.value);*/}
+            {/*                        if (selectedDate.toString() !== "Invalid Date") {*/}
+            {/*                            setDateOfBirth(selectedDate); // Update state with valid date*/}
+            {/*                        } else {*/}
+            {/*                            Alert.alert(*/}
+            {/*                                "Invalid Date",*/}
+            {/*                                "Please select a valid date.",*/}
+            {/*                                [{ text: "OK" }]*/}
+            {/*                            );*/}
+            {/*                        }*/}
+            {/*                    }}*/}
+            {/*                    max={new Date().toISOString().split('T')[0]} // Restrict to today or earlier*/}
+            {/*                    style={styles.dateInput}*/}
+            {/*                />*/}
+            {/*                <TouchableOpacity*/}
+            {/*                    style={styles.closeButton}*/}
+            {/*                    onPress={() => setIsPickerVisible(false)}*/}
+            {/*                >*/}
+            {/*                    <Text style={styles.closeButtonText}>Done</Text>*/}
+            {/*                </TouchableOpacity>*/}
+            {/*            </View>*/}
+            {/*        </View>*/}
+            {/*    </Modal>*/}
+            {/*)}*/}
+
+
             <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => setIsPickerVisible(true)}
@@ -123,46 +211,7 @@ const AddEmployee = () => {
                 </Text>
             </TouchableOpacity>
 
-            {isPickerVisible && (
-                <Modal transparent animationType="slide">
-                    <View style={styles.modalContainer}>
-                        <View style={styles.pickerContainer}>
-                            <Text style={styles.pickerTitle}>Select Date of Birth</Text>
-                            <input
-                                type="date"
-                                value={
-                                    dateOfBirth
-                                        ? dateOfBirth.toISOString().split('T')[0]
-                                        : "" // Fallback if dateOfBirth is not valid
-                                }
-                                onChange={(e) => {
-                                    const selectedDate = new Date(e.target.value);
-                                    if (selectedDate.toString() !== "Invalid Date") {
-                                        setDateOfBirth(selectedDate); // Update state with valid date
-                                    } else {
-                                        Alert.alert(
-                                            "Invalid Date",
-                                            "Please select a valid date.",
-                                            [{ text: "OK" }]
-                                        );
-                                    }
-                                }}
-                                max={new Date().toISOString().split('T')[0]} // Restrict to today or earlier
-                                style={styles.dateInput}
-                            />
-                            <TouchableOpacity
-                                style={styles.closeButton}
-                                onPress={() => setIsPickerVisible(false)}
-                            >
-                                <Text style={styles.closeButtonText}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </Modal>
-            )}
-
-
-
+            {renderDatePicker()}
 
             {/* Role Selection */}
             <Text style={styles.label}>Select Role</Text>
@@ -257,7 +306,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     dateInput: {
-        width: '100%',
+        width: '96%',
         padding: 10,
         borderRadius: 5,
         borderWidth: 1,
