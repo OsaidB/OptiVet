@@ -9,7 +9,7 @@ import {
     Alert,
     Modal,
     Image,
-    ScrollView,
+    ScrollView, Platform,
 } from "react-native";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
@@ -122,7 +122,7 @@ export default function ManagerStackLayout() {
             <Modal
                 visible={isModalVisible}
                 transparent={true}
-                animationType="slide"
+                animationType={Platform.OS === 'web' ? 'none' : 'slide'}
                 onRequestClose={toggleModal}
             >
                 <View style={styles.modalOverlay}>
