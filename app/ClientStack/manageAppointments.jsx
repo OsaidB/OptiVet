@@ -21,7 +21,7 @@ export default function ManageAppointments() {
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState({});
     const [refreshing, setRefreshing] = useState(false);
-    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(true);
     const { clientId } = useLocalSearchParams();
 
     useEffect(() => {
@@ -35,7 +35,7 @@ export default function ManageAppointments() {
 
     const fetchAppointments = async () => {
         try {
-            setLoading(true);
+            //setLoading(true);
 
             // Fetch scheduled appointments
             const appointmentData = await AppointmentService.getScheduledAppointmentsByClient(clientId);
@@ -50,7 +50,7 @@ export default function ManageAppointments() {
                 petMap[pet.id] = {
                     name: pet.name,
                     type: pet.type,
-                    imageUrl: pet.imageUrl || ' ', // Use imageUrl if available
+                    imageUrl: PetService.serveImage(pet.imageUrl || pet.imageFileName || ' '), // Generate correct image URL
                 };
             });
             setPets(petMap);
@@ -60,7 +60,7 @@ export default function ManageAppointments() {
         } catch (error) {
             console.error("Failed to fetch data:", error);
         } finally {
-            setLoading(false);
+            //setLoading(false);
         }
     };
 
@@ -107,13 +107,13 @@ export default function ManageAppointments() {
         }).format(date);
     };
 
-    if (loading) {
-        return (
-            <SafeAreaView style={styles.safeArea}>
-                <ActivityIndicator size="large" color="#1D3D47" style={{ marginTop: 20 }} />
-            </SafeAreaView>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <SafeAreaView style={styles.safeArea}>
+    //             <ActivityIndicator size="large" color="#1D3D47" style={{ marginTop: 20 }} />
+    //         </SafeAreaView>
+    //     );
+    // }
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -125,7 +125,7 @@ export default function ManageAppointments() {
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.appointmentCard}>
-                            {/*Pet Image */}
+                            {/* Pet Image */}
                             {pets[item.petId]?.imageUrl ? (
                                 <Image
                                     source={{ uri: pets[item.petId].imageUrl }}
@@ -177,7 +177,7 @@ export default function ManageAppointments() {
     );
 }
 
-    const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#fff',
