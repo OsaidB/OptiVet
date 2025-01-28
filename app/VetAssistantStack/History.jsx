@@ -2,17 +2,39 @@ import React, {useEffect, useState} from "react";
 import {View, Text, SectionList, StyleSheet, Alert, TouchableOpacity, FlatList} from "react-native";
 import {useRouter} from "expo-router";
 import DailyChecklistService from "../../Services/DailyChecklistService";
+import PetService from "../../Services/PetService";
 
 const DailyChecklistHistory = () => {
-    const [groupedHistory, setGroupedHistory] = useState([]);
+    // const [groupedHistory, setGroupedHistory] = useState([]);
     // const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0); // Current page
-    const [hasMore, setHasMore] = useState(true); // Whether there are more records
+    // const [hasMore, setHasMore] = useState(true); // Whether there are more records
     const pageSize = 10; // Number of records per page
+
+    const [allPets, setAllPets] = useState([]); // Store all pets
+    const [currentPetIndex, setCurrentPetIndex] = useState(0); // Track current pet
+    const [displayedChecklists, setDisplayedChecklists] = useState([]); // Track displayed checklists
+    const [groupedHistory, setGroupedHistory] = useState([]); // Group checklists by pet
+    const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true); // Pagination control
+
+    useEffect(() => {
+        const fetchPets = async () => {
+            try {
+                const pets = await PetService.getAllPets();
+                setAllPets(pets); // Store all pets
+            } catch (error) {
+                console.error("Error fetching pets:", error);
+                Alert.alert("Error", "Failed to fetch pets.");
+            }
+        };
+
+        fetchPets();
+    }, []);
 
     useEffect(() => {
         fetchHistory(true); // Fetch the first page
@@ -27,19 +49,43 @@ const DailyChecklistHistory = () => {
         setLoading(true);
 
         try {
-            const nextPage = reset ? 0 : page;
-            const data = await DailyChecklistService.getPaginatedDailyChecklists(nextPage, pageSize);
-
-            if (data.content.length < pageSize) {
-                setHasMore(false); // No more data available
+            if (reset) {
+                setCurrentPetIndex(0); // Reset to the first pet
+                setDisplayedChecklists([]); // Clear displayed checklists
+                setHasMore(true);
             }
 
-            const updatedHistory = reset ? data.content : [...history, ...data.content];
-            setHistory(updatedHistory); // Reset or append data
-            setGroupedHistory(groupHistoryByPet(updatedHistory)); // Group by pet after appending
-            setPage(reset ? 1 : nextPage + 1); // Update page count
+            let totalDisplayed = reset ? 0 : displayedChecklists.length; // Track total displayed checklists
+            const updatedChecklists = reset ? [] : [...displayedChecklists]; // Start with existing data
+
+            for (let i = currentPetIndex; i < allPets.length; i++) {
+                const pet = allPets[i];
+                const petChecklists = await DailyChecklistService.getDailyChecklists_ByPetId(pet.id);
+
+                updatedChecklists.push({
+                    title: `Pet: ${pet.name} (${pet.type})`,
+                    data: petChecklists,
+                });
+
+                totalDisplayed += petChecklists.length;
+
+                // Stop if total exceeds 30 but include the current pet fully
+                if (totalDisplayed >= 30) {
+                    setCurrentPetIndex(i + 1); // Save progress for next fetch
+                    break;
+                }
+            }
+
+            // Update state
+            setDisplayedChecklists(updatedChecklists);
+            setGroupedHistory(updatedChecklists);
+
+            // Check if we have more pets to process
+            if (currentPetIndex >= allPets.length) {
+                setHasMore(false); // No more data to load
+            }
         } catch (error) {
-            console.error("Error fetching checklist history:", error);
+            console.error("Error fetching pets or checklists:", error);
             Alert.alert("Error", "Failed to fetch checklist history.");
         } finally {
             setLoading(false);
@@ -52,10 +98,7 @@ const DailyChecklistHistory = () => {
         const grouped = history.reduce((acc, checklist) => {
             const petId = checklist.petId;
             if (!acc[petId]) {
-                acc[petId] = {
-                    petId,
-                    data: [],
-                };
+                acc[petId] = { petId, data: [] };
             }
             acc[petId].data.push(checklist);
             return acc;
@@ -66,6 +109,7 @@ const DailyChecklistHistory = () => {
             data: group.data,
         }));
     };
+
 
     const handleViewChecklist = (checklist) => {
         router.push({
@@ -135,10 +179,10 @@ const DailyChecklistHistory = () => {
                         </TouchableOpacity>
                     )
                 }
-                onEndReachedThreshold={0.1} // Trigger `onEndReached` close to the end of the list
             />
         </View>
     );
+
 
 };
 
