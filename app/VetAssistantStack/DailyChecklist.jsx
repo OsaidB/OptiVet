@@ -3,6 +3,8 @@ import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, 
 import { useRouter, useLocalSearchParams } from "expo-router";
 import DailyChecklistService from '../../Services/DailyChecklistService';
 import platform from "react-native-web/src/exports/Platform";
+import ChatGPTService from '../../Services/ChatGPTService'; // Import the new service
+import _ from 'lodash';
 
 const DailyChecklist = () => {
     const router = useRouter();
@@ -26,6 +28,8 @@ const DailyChecklist = () => {
     const today = new Date();
     const [checklistDate, setChecklistDate] = useState(today); // Default to today for non-view mode
 
+    const [advice, setAdvice] = useState(''); // Store ChatGPT's insights
+    const [loadingAdvice, setLoadingAdvice] = useState(false); // Show loading while fetching advice
 
     const formattedDate = today.toLocaleDateString(undefined, {
         weekday: 'long',
@@ -193,6 +197,45 @@ const DailyChecklist = () => {
             Alert.alert("Error", "Failed to handle the checklist.");
         }
     };
+
+    const fetchInsights = _.debounce(async () => {
+        try {
+            setLoadingAdvice(true);
+            const checklistData = {
+                eatingWell,
+                drinkingWater,
+                activeBehavior,
+                normalVitalSigns,
+                healthObservations,
+                weightChange,
+                injuriesOrWounds,
+                feedingCompleted,
+                cleanedLivingSpace,
+                poopNormal,
+                poopNotes,
+                criticalIssueFlag,
+                criticalNotes,
+            };
+
+            const insights = await ChatGPTService.getInsights(checklistData);
+            setAdvice(insights); // Update advice only if mounted
+        } catch (error) {
+
+            console.error("Error handling checklist:", error);
+            if (error.response?.status === 429) {
+                Alert.alert(
+                    "Rate Limit Reached",
+                    "Too many requests. Please wait a moment and try again."
+                );
+            } else {
+                Alert.alert("Error", "Failed to fetch insights. Please try again.");
+            }
+
+
+        } finally {
+            setLoadingAdvice(false); // Hide loading indicator
+        }
+    }, 2000); // Wait 2 seconds before calling
 
     if (loading) {
         return (
@@ -379,6 +422,28 @@ const DailyChecklist = () => {
                     </Text>
                 </TouchableOpacity>
             )}
+
+
+            {/* Checklist Form */}
+
+            {/* Insights Button */}
+            <TouchableOpacity
+                style={styles.adviceButton}
+                onPress={fetchInsights}
+                disabled={loadingAdvice}
+            >
+                <Text style={styles.adviceButtonText}>
+                    {loadingAdvice ? "Analyzing Checklist Data..." : "Get Advice from AI"}
+                </Text>
+            </TouchableOpacity>
+
+            {/* Display Advice */}
+            {advice && (
+                <View style={styles.adviceContainer}>
+                    <Text style={styles.adviceTitle}>Insights & Advice:</Text>
+                    <Text style={styles.adviceText}>{advice}</Text>
+                </View>
+            )}
         </ScrollView>
     );
 
@@ -387,6 +452,36 @@ const DailyChecklist = () => {
 
 const styles = StyleSheet.create({
 
+    adviceButton: {
+        backgroundColor: '#2ECC71',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    adviceButtonText: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    adviceContainer: {
+        backgroundColor: '#F8F9FA',
+        padding: 15,
+        borderRadius: 8,
+        marginTop: 20,
+        borderColor: '#CED6E0',
+        borderWidth: 1,
+    },
+    adviceTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#34495E',
+        marginBottom: 10,
+    },
+    adviceText: {
+        fontSize: 16,
+        color: '#34495E',
+    },
 
     value: {
         fontSize: 16,
