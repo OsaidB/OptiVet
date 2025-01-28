@@ -6,7 +6,7 @@ import platform from "react-native-web/src/exports/Platform";
 
 const DailyChecklist = () => {
     const router = useRouter();
-    const { petId, petName, clientId, mode } = useLocalSearchParams();
+    const { petId, petName, clientId, checklistId, mode } = useLocalSearchParams();
 
     const [eatingWell, setEatingWell] = useState(false);
     const [drinkingWater, setDrinkingWater] = useState(false);
@@ -22,24 +22,73 @@ const DailyChecklist = () => {
     const [criticalIssueFlag, setCriticalIssueFlag] = useState(false);
     const [criticalNotes, setCriticalNotes] = useState('');
     const [currentChecklist_ID, setCurrentChecklist_ID] = useState('');
-
+    const [loading, setLoading] = useState(true);
     const today = new Date();
+    const [checklistDate, setChecklistDate] = useState(today); // Default to today for non-view mode
+
+
     const formattedDate = today.toLocaleDateString(undefined, {
         weekday: 'long',
         // year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
+
     useEffect(() => {
-        if (petId) {
-            fetchDailyChecklist();
+        console.log("mode: ",mode)
+        // Fetch checklist based on mode
+        if (mode === "view" && checklistId) {
+            fetchChecklistById(); // Fetch checklist details by ID for view mode
+        } else if ((mode === "update" || mode === "create") && petId) {
+            fetchDailyChecklist(); // Fetch today's checklist based on pet ID for update or create mode
         }
-    }, [petId]);
+    }, [mode, checklistId, petId]);
+
+
+    const fetchChecklistById = async () => {
+        try {
+            setLoading(true);
+            console.log("fetching Checklist ById:",checklistId)
+            const checklist = await DailyChecklistService.getDailyChecklist_ByRecordId(checklistId);
+            setFormData(checklist);
+        } catch (error) {
+            console.error("Error fetching checklist:", error);
+            Alert.alert("Error", "Failed to load checklist.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const setFormData = (checklist) => {
+        if (!checklist) return;
+        console.log("fetched Checklist:",checklist)
+        setChecklistDate(new Date(checklist.date)); // Set the checklist date
+        setEatingWell(checklist.eatingWell);
+        setDrinkingWater(checklist.drinkingWater);
+        setActiveBehavior(checklist.activeBehavior);
+        setNormalVitalSigns(checklist.normalVitalSigns);
+        setHealthObservations(checklist.healthObservations || '');
+        setWeightChange(checklist.weightChange || '');
+        setInjuriesOrWounds(checklist.injuriesOrWounds || '');
+        setFeedingCompleted(checklist.feedingCompleted);
+        setCleanedLivingSpace(checklist.cleanedLivingSpace);
+        setPoopNormal(checklist.poopNormal);
+        setPoopNotes(checklist.poopNotes || '');
+        setCriticalIssueFlag(checklist.criticalIssueFlag);
+        setCriticalNotes(checklist.criticalNotes || '');
+    };
+
+
+
+
 
     const fetchDailyChecklist = async () => {
         try {
+            setLoading(true);
+
             const today = new Date().toISOString().split("T")[0];
             const dailyChecklists = await DailyChecklistService.getDailyChecklists_ByPetId(petId); // Fetch all checklists
+            console.log("fetching Checklist of today. for PetId:",petId)
 
             if (Array.isArray(dailyChecklists)) {
                 const todayChecklist = dailyChecklists.find((checklist) => checklist.date === today);
@@ -61,6 +110,7 @@ const DailyChecklist = () => {
                     setPoopNotes(todayChecklist.poopNotes || '');
                     setCriticalIssueFlag(todayChecklist.criticalIssueFlag);
                     setCriticalNotes(todayChecklist.criticalNotes || '');
+
                 } else {
                     console.log("No checklist found for today.");
                 }
@@ -68,6 +118,8 @@ const DailyChecklist = () => {
         } catch (error) {
             console.error("Error fetching daily checklist:", error);
             Alert.alert("Error", "Failed to fetch today's checklist.");
+        }finally {
+            setLoading(false);
         }
     };
 
@@ -138,122 +190,191 @@ const DailyChecklist = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>Loading Checklist...</Text>
+            </View>
+        );
+    }
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Checklist for {petName} - {formattedDate}</Text>
+            <Text style={styles.title}>
+                {mode === "view"
+                    ? `Checklist for ${petName} - ${checklistDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}`
+                    : `Checklist for ${petName} - ${formattedDate}`}
+            </Text>
+
 
             {/* Health Observations */}
             <View style={styles.gridContainer}>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Is {petName} eating well?</Text>
-                    <Switch value={eatingWell} onValueChange={setEatingWell} />
+                    <Switch value={eatingWell} onValueChange={setEatingWell} disabled={mode === "view"} />
                 </View>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Is {petName} drinking enough water?</Text>
-                    <Switch value={drinkingWater} onValueChange={setDrinkingWater} />
+                    <Switch value={drinkingWater} onValueChange={setDrinkingWater} disabled={mode === "view"} />
                 </View>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Is {petName} showing active behavior?</Text>
-                    <Switch value={activeBehavior} onValueChange={setActiveBehavior} />
+                    <Switch value={activeBehavior} onValueChange={setActiveBehavior} disabled={mode === "view"} />
                 </View>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Are {petName}'s vital signs normal?</Text>
-                    <Switch value={normalVitalSigns} onValueChange={setNormalVitalSigns} />
+                    <Switch value={normalVitalSigns} onValueChange={setNormalVitalSigns} disabled={mode === "view"} />
                 </View>
             </View>
-
 
             <View style={styles.section}>
                 <Text style={styles.label}>Health Observations</Text>
-                <TextInput
-                    value={healthObservations}
-                    onChangeText={setHealthObservations}
-                    placeholder="Enter health observations..."
-                    style={styles.input}
-                />
+                {mode === "view" ? (
+                    <Text style={styles.value}>{healthObservations || "None"}</Text>
+                ) : (
+                    <TextInput
+                        value={healthObservations}
+                        onChangeText={setHealthObservations}
+                        placeholder="Enter health observations..."
+                        style={styles.input}
+                    />
+                )}
             </View>
 
-            {/* Feeding and Living Space in a Row */}
+            {/* Feeding and Living Space */}
             <View style={styles.rowContainer}>
                 <View style={styles.halfWidthSection}>
                     <Text style={styles.label2}>Is feeding completed?</Text>
-                    <Switch value={feedingCompleted} onValueChange={setFeedingCompleted} />
+                    <Switch value={feedingCompleted} onValueChange={setFeedingCompleted} disabled={mode === "view"} />
                 </View>
                 <View style={styles.halfWidthSection}>
                     <Text style={styles.label2}>Is living space cleaned?</Text>
-                    <Switch value={cleanedLivingSpace} onValueChange={setCleanedLivingSpace} />
+                    <Switch value={cleanedLivingSpace} onValueChange={setCleanedLivingSpace} disabled={mode === "view"} />
                 </View>
             </View>
 
             {/* Poop Observations */}
             <View style={styles.section}>
                 <Text style={styles.label2}>Is poop normal?</Text>
-                <Switch value={poopNormal} onValueChange={setPoopNormal} />
+                <Switch value={poopNormal} onValueChange={setPoopNormal} disabled={mode === "view"} />
                 {!poopNormal && (
                     <>
                         <Text style={styles.label2}>Poop Notes</Text>
-                        <TextInput
-                            value={poopNotes}
-                            onChangeText={setPoopNotes}
-                            placeholder="Enter any notes on poop..."
-                            style={styles.input}
-                        />
+                        {mode === "view" ? (
+                            <Text style={styles.value}>{poopNotes || "None"}</Text>
+                        ) : (
+                            <TextInput
+                                value={poopNotes}
+                                onChangeText={setPoopNotes}
+                                placeholder="Enter any notes on poop..."
+                                style={styles.input}
+                            />
+                        )}
                     </>
                 )}
             </View>
 
-
             {/* Weight and Injuries */}
             <View style={styles.section}>
                 <Text style={styles.label2}>Weight Change</Text>
-                <TextInput
-                    value={weightChange}
-                    onChangeText={setWeightChange}
-                    placeholder="Enter any weight changes..."
-                    style={styles.input}
-                />
+                {mode === "view" ? (
+                    <Text style={styles.value}>{weightChange || "None"}</Text>
+                ) : (
+                    <TextInput
+                        value={weightChange}
+                        onChangeText={setWeightChange}
+                        placeholder="Enter any weight changes..."
+                        style={styles.input}
+                    />
+                )}
             </View>
 
             <View style={styles.section}>
                 <Text style={styles.label2}>Injuries or Wounds</Text>
-                <TextInput
-                    value={injuriesOrWounds}
-                    onChangeText={setInjuriesOrWounds}
-                    placeholder="Describe any injuries or wounds..."
-                    style={styles.input}
-                />
+                {mode === "view" ? (
+                    <Text style={styles.value}>{injuriesOrWounds || "None"}</Text>
+                ) : (
+                    <TextInput
+                        value={injuriesOrWounds}
+                        onChangeText={setInjuriesOrWounds}
+                        placeholder="Describe any injuries or wounds..."
+                        style={styles.input}
+                    />
+                )}
             </View>
 
             {/* Critical Issue Flag */}
             <View style={styles.section}>
                 <Text style={styles.label2}>Mark as Critical Issue</Text>
-                <Switch value={criticalIssueFlag} onValueChange={setCriticalIssueFlag} />
+                <Switch value={criticalIssueFlag} onValueChange={setCriticalIssueFlag} disabled={mode === "view"} />
+                {criticalIssueFlag && (
+                    <View>
+                        <Text style={styles.label2}>Critical Notes</Text>
+                        {mode === "view" ? (
+                            <Text style={styles.value}>{criticalNotes || "None"}</Text>
+                        ) : (
+                            <TextInput
+                                value={criticalNotes}
+                                onChangeText={setCriticalNotes}
+                                placeholder="Enter critical notes..."
+                                style={styles.input}
+                            />
+                        )}
+                    </View>
+                )}
             </View>
 
-            {criticalIssueFlag && (
-                <View style={styles.section}>
-                    <Text style={styles.label2}>Critical Notes</Text>
-                    <TextInput
-                        value={criticalNotes}
-                        onChangeText={setCriticalNotes}
-                        placeholder="Enter critical notes..."
-                        style={styles.input}
-                    />
-                </View>
-            )}
-
             {/* Submit Button */}
-            <TouchableOpacity style={styles.submitButton} onPress={handleChecklist}>
-                <Text style={styles.submitButtonText}>
-                    {mode === "update" ? "Update Checklist" : "Submit Checklist"}
-                </Text>
-            </TouchableOpacity>
-
+            {mode !== "view" && (
+                <TouchableOpacity style={styles.submitButton} onPress={handleChecklist}>
+                    <Text style={styles.submitButtonText}>
+                        {mode === "update" ? "Update Checklist" : "Submit Checklist"}
+                    </Text>
+                </TouchableOpacity>
+            )}
         </ScrollView>
     );
+
 };
 
 const styles = StyleSheet.create({
+
+    // Add this for text display in view mode
+    value: {
+        fontSize: 16,
+        color: '#34495E', // Dark gray for text
+        backgroundColor: '#F8F9FA', // Light gray for read-only
+        padding: 10,
+        borderRadius: 8,
+        borderColor: '#CED6E0', // Light border for clarity
+        borderWidth: 1,
+        marginTop: 10,
+    },
+
+    // Add this for loading screen container
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F9F9F9',
+    },
+
+    // Add this for loading text style
+    loadingText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#34495E',
+        textAlign: 'center',
+    },
+
+    // Optional: Add differentiation for view-only rows
+    viewModeContainer: {
+        backgroundColor: '#F0F4F8', // Subtle background for better readability
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+
 
     rowContainer: {
         flexDirection: 'row',

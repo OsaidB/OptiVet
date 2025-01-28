@@ -166,7 +166,7 @@ const VetAssistantStack = () => {
             {/* Header Section */}
             {vetAssistantInfo ? (
                 <Text style={styles.infoText}>
-                    Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!
+                    {/*Welcome, {vetAssistantInfo.firstName} {vetAssistantInfo.lastName}!*/}
                 </Text>
             ) : (
                 <Text style={styles.loadingText}>Loading vet assistant information...</Text>

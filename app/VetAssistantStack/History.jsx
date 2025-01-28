@@ -37,8 +37,11 @@ const DailyChecklistHistory = () => {
     }, []);
 
     useEffect(() => {
-        fetchHistory(true); // Fetch the first page
-    }, []);
+        if (allPets.length > 0) {
+            fetchHistory(true); // Fetch the first page only when pets are loaded
+        }
+    }, [allPets]);
+
 
     useEffect(() => {
         setGroupedHistory(groupHistoryByPet(history));
@@ -62,12 +65,17 @@ const DailyChecklistHistory = () => {
                 const pet = allPets[i];
                 const petChecklists = await DailyChecklistService.getDailyChecklists_ByPetId(pet.id);
 
-                updatedChecklists.push({
-                    title: `Pet: ${pet.name} (${pet.type})`,
-                    data: petChecklists,
-                });
+                // Only add pets that have checklists
+                if (petChecklists.length > 0) {
+                    updatedChecklists.push({
+                        title: `Pet: ${pet.name} (${pet.type})`,
+                        data: petChecklists,
+                    });
 
-                totalDisplayed += petChecklists.length;
+                    totalDisplayed += petChecklists.length;
+                }else{
+                    setCurrentPetIndex(i + 1);
+                }
 
                 // Stop if total exceeds 30 but include the current pet fully
                 if (totalDisplayed >= 30) {
@@ -112,16 +120,21 @@ const DailyChecklistHistory = () => {
 
 
     const handleViewChecklist = (checklist) => {
+        // Find the pet by petId in the allPets array
+        const pet = allPets.find((pet) => pet.id === checklist.petId);
+        const petName = pet ? pet.name : `Pet ${checklist.petId}`; // Use pet name if available, otherwise fallback
+
         router.push({
             pathname: "/VetAssistantStack/DailyChecklist",
             params: {
-                petId: checklist.petId,
-                petName: `Pet ${checklist.petId}`, // Replace with pet name if available
+                // petId: checklist.petId,
+                petName, // Pass the correct pet name
                 checklistId: checklist.id, // Pass the checklist ID for detailed view
                 mode: "view", // Indicate that it's view mode
             },
         });
     };
+
 
     const renderChecklistItem = ({item}) => (
         <View style={styles.historyCard}>
@@ -149,13 +162,13 @@ const DailyChecklistHistory = () => {
         </View>
     );
 
-    if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading Checklist History...</Text>
-            </View>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <View style={styles.loadingContainer}>
+    //             <Text style={styles.loadingText}>Loading Checklist History...</Text>
+    //         </View>
+    //     );
+    // }
 
     return (
         <View style={styles.container}>
@@ -180,6 +193,13 @@ const DailyChecklistHistory = () => {
                     )
                 }
             />
+
+            {/* Overlay Loading Indicator */}
+            {loading && (
+                <View style={styles.loadingOverlay}>
+                    <Text style={styles.loadingText}>Loading Checklist History...</Text>
+                </View>
+            )}
         </View>
     );
 
@@ -187,6 +207,20 @@ const DailyChecklistHistory = () => {
 };
 
 const styles = StyleSheet.create({
+
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent overlay
+        zIndex: 10, // Ensure it appears on top
+    },
+
+
     loadMoreButton: {
         backgroundColor: "#5DADE2",
         paddingVertical: 12,
@@ -289,7 +323,7 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         fontSize: 16,
-        color: "#7F8C8D",
+        color: "#FFF",
     },
     emptyText: {
         fontSize: 16,
