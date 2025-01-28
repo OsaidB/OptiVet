@@ -299,7 +299,7 @@ const VetAssistantStack = () => {
                                     });
                                 }}
                             >
-                                <Text style={styles.secondaryButtonText}>View Daily Checklist</Text>
+                                <Text style={styles.secondaryButtonText}>Fill Checklist of Today</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

@@ -167,6 +167,23 @@ const DailyChecklistService = {
     },
 
 
+// Fetch paginated daily checklists
+    async getPaginatedDailyChecklists(page, size, sort = "date,desc") {
+        try {
+            const token = await this.getToken(); // Retrieve the token
+            const response = await axios.get(`${BASE_URL}/paginated`, {
+                params: { page, size, sort }, // Pass pagination and sorting parameters
+                headers: {
+                    'X-Auth-Token': token, // Include the token in the headers
+                },
+            });
+            return response.data; // Return the paginated response
+        } catch (error) {
+            console.error("Error fetching paginated daily checklists:", error);
+            throw error; // Re-throw the error for further handling
+        }
+    },
+
 };
 
 export default DailyChecklistService;

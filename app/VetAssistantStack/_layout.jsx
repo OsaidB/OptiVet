@@ -172,6 +172,10 @@ export default function VetAssistantStackLayout() {
                         <Ionicons name="checkmark-done-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>Checked Pets</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/VetAssistantStack/History')}>
+                        <Ionicons name="time-outline" size={24} color="#1D3D47" />
+                        <Text style={styles.footerButtonText}>History</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Settings')}>
                         <Ionicons name="settings-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>Settings</Text>
