@@ -10,6 +10,7 @@ import {
     Image,
     Alert,
     StatusBar, Platform,
+    Picker,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PetService from "../../Services/PetService";
@@ -34,6 +35,7 @@ const VetAssistantStack = () => {
     const [selectedCategory, setSelectedCategory] = useState("ALL");
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [newResidencyType, setNewResidencyType] = useState("");
 
     useEffect(() => {
         const fetchEmail = async () => {
@@ -116,8 +118,36 @@ const VetAssistantStack = () => {
 
     const handlePetPress = (pet) => {
         setSelectedPet(pet);
+        setNewResidencyType(pet.residencyType); // Set initial value
         setModalVisible(true);
     };
+
+    const handleResidencyTypeChange = async () => {
+        try {
+            // Fetch the current pet data to avoid overwriting other fields
+            const petData = await PetService.getPetById(selectedPet.id);
+
+            // Update the residency type
+            const updatedPetData = {
+                ...petData,
+                residencyType: newResidencyType, // Update only the residencyType
+            };
+
+            // Send the updated data to the backend
+            await PetService.updatePet(selectedPet.id, updatedPetData);
+
+            // Show success message and close modal
+            Alert.alert("Success", `Residency Type updated to ${newResidencyType}`);
+            setModalVisible(false);
+
+            // Refresh the pets list
+            fetchUncheckedPets();
+        } catch (error) {
+            console.error("Error updating residency type:", error);
+            Alert.alert("Error", "Failed to update residency type.");
+        }
+    };
+
 
     const renderPet = ({ item }) => (
         <TouchableOpacity style={styles.petCard} onPress={() => handlePetPress(item)}>
@@ -146,10 +176,10 @@ const VetAssistantStack = () => {
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search pets or owners..."
-                placeholderTextColor="#7F8C8D" // Gray for placeholder text
+                placeholderTextColor="#7F8C8D"
                 value={searchQuery}
                 onChangeText={handleSearch}
-                multiline={false} // Prevent dynamic height adjustment
+                multiline={false}
             />
 
             {/* Categories Section */}
@@ -190,23 +220,72 @@ const VetAssistantStack = () => {
                 <Modal
                     visible={modalVisible}
                     transparent
-                    animationType={Platform.OS === 'web' ? 'none' : 'slide'}
+                    animationType={Platform.OS === "web" ? "none" : "slide"}
                     onRequestClose={() => setModalVisible(false)}
                 >
-                    <TouchableOpacity
-                        style={styles.modalContainer}
-                        onPressOut={() => setModalVisible(false)}
-                    >
-                        <View style={styles.modalContent}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalCard}>
+                            {/* Pet Details Section */}
                             <Text style={styles.modalTitle}>Pet Details</Text>
-                            <Text style={styles.modalText}>Name: {selectedPet.name}</Text>
-                            <Text style={styles.modalText}>Type: {selectedPet.type}</Text>
-                            <Text style={styles.modalText}>Breed: {selectedPet.breed}</Text>
-                            <Text style={styles.modalText}>
-                                Birth Date: {selectedPet.birthDate}
-                            </Text>
+                            <View style={styles.petDetailsCard}>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>🐾 Name:</Text>
+                                    <Text style={styles.detailValue}>{selectedPet.name}</Text>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>📅 Birth Date:</Text>
+                                    <Text style={styles.detailValue}>
+                                        {selectedPet.birthDate || "Unknown"}
+                                    </Text>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>🦴 Type:</Text>
+                                    <Text style={styles.detailValue}>{selectedPet.type}</Text>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>🐕 Breed:</Text>
+                                    <Text style={styles.detailValue}>{selectedPet.breed}</Text>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>🏠 Residency:</Text>
+                                    <Text style={styles.detailValue}>{selectedPet.residencyType}</Text>
+                                </View>
+                            </View>
+
+
+                            {/* Residency Type Picker Section */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Update Residency Type</Text>
+                                <View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={newResidencyType}
+                                        onValueChange={(itemValue) => setNewResidencyType(itemValue)}
+                                        style={styles.picker}
+                                    >
+                                        <Picker.Item label="Select Residency Type..." value="nothing chosen" /> {/* Placeholder */}
+                                        {categories
+                                            .filter((category) => category.value !== "ALL")
+                                            .map((category) => (
+                                                <Picker.Item
+                                                    key={category.value}
+                                                    label={category.label}
+                                                    value={category.value}
+                                                />
+                                            ))}
+                                    </Picker>
+                                </View>
+                                <TouchableOpacity
+                                    style={styles.updateButton}
+                                    onPress={handleResidencyTypeChange}
+                                >
+                                    <Text style={styles.updateButtonText}>Update Residency Type</Text>
+                                </TouchableOpacity>
+                            </View>
+
+
+                            {/* View Daily Checklist Button */}
                             <TouchableOpacity
-                                style={styles.button}
+                                style={styles.secondaryButton}
                                 onPress={() => {
                                     setModalVisible(false);
                                     router.push({
@@ -215,22 +294,139 @@ const VetAssistantStack = () => {
                                             petId: selectedPet.id,
                                             clientId: selectedPet.ownerId,
                                             petName: selectedPet.name,
-                                            mode: "create", // Pass update mode
+                                            mode: "create", // Pass mode for checklist creation
                                         },
                                     });
                                 }}
                             >
-                                <Text style={styles.buttonText}>View Daily Checklist</Text>
+                                <Text style={styles.secondaryButtonText}>View Daily Checklist</Text>
                             </TouchableOpacity>
                         </View>
-                    </TouchableOpacity>
+                    </View>
                 </Modal>
             )}
+
+
+
+
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+
+    petDetailsCard: {
+        backgroundColor: "#FFFFFF",
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 20,
+        width: "40%",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    detailRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 10,
+    },
+    detailLabel: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#34495E",
+    },
+    detailValue: {
+        fontSize: 16,
+        color: "#2C3E50",
+    },
+
+
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay for focus
+    },
+    modalCard: {
+        backgroundColor: "#FFF",
+        padding: 20,
+        borderRadius: 15,
+        width: "85%",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#2C3E50",
+        marginBottom: 15,
+        // marginBottom: 10,
+
+    },
+    petDetailsContainer: {
+        marginBottom: 20,
+        alignItems: "center",
+    },
+    petDetail: {
+        fontSize: 16,
+        color: "#34495E",
+        marginVertical: 5,
+    },
+    section: {
+        marginBottom: 20,
+        width: "100%",
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#2ECC71",
+        marginBottom: 10,
+    },
+    pickerContainer: {
+        borderWidth: 1,
+        borderColor: "#CED6E0",
+        borderRadius: 10,
+        backgroundColor: "#F8F9FA",
+        marginBottom: 15,
+    },
+    picker: {
+        height: 50,
+        color: "#34495E",
+    },
+    updateButton: {
+        backgroundColor: "#2ECC71",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: "center",
+        width: "100%",
+    },
+    updateButtonText: {
+        fontSize: 16,
+        color: "#FFF",
+        fontWeight: "bold",
+    },
+    secondaryButton: {
+        backgroundColor: "#5DADE2",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: "center",
+        width: "100%",
+    },
+    secondaryButtonText: {
+        fontSize: 16,
+        color: "#FFF",
+        fontWeight: "bold",
+    },
+
     container: {
         flex: 1,
         backgroundColor: "#F0F4F8",
@@ -320,23 +516,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 20,
     },
-    modalContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
     modalContent: {
         backgroundColor: "#FFF",
         padding: 20,
         borderRadius: 10,
         width: "80%",
         alignItems: "center",
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginBottom: 10,
     },
     modalText: {
         fontSize: 16,
