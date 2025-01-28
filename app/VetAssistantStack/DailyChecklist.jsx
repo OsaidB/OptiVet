@@ -35,13 +35,17 @@ const DailyChecklist = () => {
     });
 
     useEffect(() => {
-        console.log("mode: ",mode)
-        // Fetch checklist based on mode
-        if (mode === "view" && checklistId) {
-            fetchChecklistById(); // Fetch checklist details by ID for view mode
-        } else if ((mode === "update" || mode === "create") && petId) {
-            fetchDailyChecklist(); // Fetch today's checklist based on pet ID for update or create mode
-        }
+        const fetchData = async () => {
+            console.log("mode: ",mode)
+            // Fetch checklist based on mode
+            if (mode === "view" && checklistId) {
+                await fetchChecklistById(); // Fetch checklist details by ID for view mode
+            } else if ((mode === "update" || mode === "create") && petId) {
+                await fetchDailyChecklist(); // Fetch today's checklist based on pet ID for update or create mode
+            }
+        };
+
+        fetchData();
     }, [mode, checklistId, petId]);
 
 
@@ -202,35 +206,58 @@ const DailyChecklist = () => {
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>
                 {mode === "view"
-                    ? `Checklist for ${petName} - ${checklistDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}`
+                    ? `Checklist for ${petName} - ${checklistDate.toLocaleDateString(undefined, {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                    })}`
                     : `Checklist for ${petName} - ${formattedDate}`}
             </Text>
-
 
             {/* Health Observations */}
             <View style={styles.gridContainer}>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Is {petName} eating well?</Text>
-                    <Switch value={eatingWell} onValueChange={setEatingWell} disabled={mode === "view"} />
+                    <Switch
+                        value={eatingWell}
+                        onValueChange={setEatingWell}
+                        disabled={mode === "view"}
+                        style={mode === "view" ? styles.readOnlySwitch : {}}
+                    />
                 </View>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Is {petName} drinking enough water?</Text>
-                    <Switch value={drinkingWater} onValueChange={setDrinkingWater} disabled={mode === "view"} />
+                    <Switch
+                        value={drinkingWater}
+                        onValueChange={setDrinkingWater}
+                        disabled={mode === "view"}
+                        style={mode === "view" ? styles.readOnlySwitch : {}}
+                    />
                 </View>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Is {petName} showing active behavior?</Text>
-                    <Switch value={activeBehavior} onValueChange={setActiveBehavior} disabled={mode === "view"} />
+                    <Switch
+                        value={activeBehavior}
+                        onValueChange={setActiveBehavior}
+                        disabled={mode === "view"}
+                        style={mode === "view" ? styles.readOnlySwitch : {}}
+                    />
                 </View>
                 <View style={styles.gridItem}>
                     <Text style={styles.label}>Are {petName}'s vital signs normal?</Text>
-                    <Switch value={normalVitalSigns} onValueChange={setNormalVitalSigns} disabled={mode === "view"} />
+                    <Switch
+                        value={normalVitalSigns}
+                        onValueChange={setNormalVitalSigns}
+                        disabled={mode === "view"}
+                        style={mode === "view" ? styles.readOnlySwitch : {}}
+                    />
                 </View>
             </View>
 
             <View style={styles.section}>
                 <Text style={styles.label}>Health Observations</Text>
                 {mode === "view" ? (
-                    <Text style={styles.value}>{healthObservations || "None"}</Text>
+                    <Text style={styles.readOnlyValue}>{healthObservations || "None"}</Text>
                 ) : (
                     <TextInput
                         value={healthObservations}
@@ -245,23 +272,38 @@ const DailyChecklist = () => {
             <View style={styles.rowContainer}>
                 <View style={styles.halfWidthSection}>
                     <Text style={styles.label2}>Is feeding completed?</Text>
-                    <Switch value={feedingCompleted} onValueChange={setFeedingCompleted} disabled={mode === "view"} />
+                    <Switch
+                        value={feedingCompleted}
+                        onValueChange={setFeedingCompleted}
+                        disabled={mode === "view"}
+                        style={mode === "view" ? styles.readOnlySwitch : {}}
+                    />
                 </View>
                 <View style={styles.halfWidthSection}>
                     <Text style={styles.label2}>Is living space cleaned?</Text>
-                    <Switch value={cleanedLivingSpace} onValueChange={setCleanedLivingSpace} disabled={mode === "view"} />
+                    <Switch
+                        value={cleanedLivingSpace}
+                        onValueChange={setCleanedLivingSpace}
+                        disabled={mode === "view"}
+                        style={mode === "view" ? styles.readOnlySwitch : {}}
+                    />
                 </View>
             </View>
 
             {/* Poop Observations */}
             <View style={styles.section}>
                 <Text style={styles.label2}>Is poop normal?</Text>
-                <Switch value={poopNormal} onValueChange={setPoopNormal} disabled={mode === "view"} />
+                <Switch
+                    value={poopNormal}
+                    onValueChange={setPoopNormal}
+                    disabled={mode === "view"}
+                    style={mode === "view" ? styles.readOnlySwitch : {}}
+                />
                 {!poopNormal && (
                     <>
                         <Text style={styles.label2}>Poop Notes</Text>
                         {mode === "view" ? (
-                            <Text style={styles.value}>{poopNotes || "None"}</Text>
+                            <Text style={styles.readOnlyValue}>{poopNotes || "None"}</Text>
                         ) : (
                             <TextInput
                                 value={poopNotes}
@@ -278,7 +320,7 @@ const DailyChecklist = () => {
             <View style={styles.section}>
                 <Text style={styles.label2}>Weight Change</Text>
                 {mode === "view" ? (
-                    <Text style={styles.value}>{weightChange || "None"}</Text>
+                    <Text style={styles.readOnlyValue}>{weightChange || "None"}</Text>
                 ) : (
                     <TextInput
                         value={weightChange}
@@ -292,7 +334,7 @@ const DailyChecklist = () => {
             <View style={styles.section}>
                 <Text style={styles.label2}>Injuries or Wounds</Text>
                 {mode === "view" ? (
-                    <Text style={styles.value}>{injuriesOrWounds || "None"}</Text>
+                    <Text style={styles.readOnlyValue}>{injuriesOrWounds || "None"}</Text>
                 ) : (
                     <TextInput
                         value={injuriesOrWounds}
@@ -306,12 +348,17 @@ const DailyChecklist = () => {
             {/* Critical Issue Flag */}
             <View style={styles.section}>
                 <Text style={styles.label2}>Mark as Critical Issue</Text>
-                <Switch value={criticalIssueFlag} onValueChange={setCriticalIssueFlag} disabled={mode === "view"} />
+                <Switch
+                    value={criticalIssueFlag}
+                    onValueChange={setCriticalIssueFlag}
+                    disabled={mode === "view"}
+                    style={mode === "view" ? styles.readOnlySwitch : {}}
+                />
                 {criticalIssueFlag && (
                     <View>
                         <Text style={styles.label2}>Critical Notes</Text>
                         {mode === "view" ? (
-                            <Text style={styles.value}>{criticalNotes || "None"}</Text>
+                            <Text style={styles.readOnlyValue}>{criticalNotes || "None"}</Text>
                         ) : (
                             <TextInput
                                 value={criticalNotes}
@@ -335,21 +382,46 @@ const DailyChecklist = () => {
         </ScrollView>
     );
 
+
 };
 
 const styles = StyleSheet.create({
 
-    // Add this for text display in view mode
+
     value: {
         fontSize: 16,
-        color: '#34495E', // Dark gray for text
-        backgroundColor: '#F8F9FA', // Light gray for read-only
+        color: '#34495E', // Keep the same text color as editable fields
+        backgroundColor: '#FFFFFF', // Match the original background color
         padding: 10,
         borderRadius: 8,
-        borderColor: '#CED6E0', // Light border for clarity
+        borderColor: '#E8E8E8', // Lighter border to indicate non-editable
         borderWidth: 1,
         marginTop: 10,
+        shadowColor: '#000', // Optional: subtle shadow for depth
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
     },
+
+    readOnlyValue: {
+        opacity: 0.6, // Dim the switch to indicate it's disabled
+    },
+    readOnlySwitch: {
+        opacity: 0.8, // Subtle opacity to indicate it's non-interactive
+        color: '#009587',
+    },
+    // Add this for text display in view mode
+    // value: {
+    //     fontSize: 16,
+    //     color: '#34495E', // Dark gray for text
+    //     backgroundColor: '#F8F9FA', // Light gray for read-only
+    //     padding: 10,
+    //     borderRadius: 8,
+    //     borderColor: '#CED6E0', // Light border for clarity
+    //     borderWidth: 1,
+    //     marginTop: 10,
+    // },
 
     // Add this for loading screen container
     loadingContainer: {
