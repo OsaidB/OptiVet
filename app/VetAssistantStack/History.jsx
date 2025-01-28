@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {View, Text, SectionList, StyleSheet, Alert, TouchableOpacity, FlatList} from "react-native";
+import {View, Text, SectionList, StyleSheet, Alert, TouchableOpacity, FlatList, TextInput} from "react-native";
 import {useRouter} from "expo-router";
 import DailyChecklistService from "../../Services/DailyChecklistService";
 import PetService from "../../Services/PetService";
@@ -21,6 +21,8 @@ const DailyChecklistHistory = () => {
     const [groupedHistory, setGroupedHistory] = useState([]); // Group checklists by pet
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true); // Pagination control
+    const [searchQuery, setSearchQuery] = useState(""); // Search query state
+    const [filteredGroupedHistory, setFilteredGroupedHistory] = useState([]); // Filtered grouped history
 
     useEffect(() => {
         const fetchPets = async () => {
@@ -46,6 +48,20 @@ const DailyChecklistHistory = () => {
     useEffect(() => {
         setGroupedHistory(groupHistoryByPet(history));
     }, [history]);
+
+    useEffect(() => {
+        // Filter grouped history when search query changes
+        const filtered = groupedHistory.filter((group) =>
+            group.title.toLowerCase().includes(searchQuery.toLowerCase()) || // Match pet name
+            group.data.some((checklist) => checklist.healthObservations?.toLowerCase().includes(searchQuery.toLowerCase())) // Match checklist observation
+        );
+        setFilteredGroupedHistory(filtered);
+    }, [searchQuery, groupedHistory]);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query); // Update search query
+    };
+
 
     const fetchHistory = async (reset = false) => {
         if (loading) return; // Prevent multiple requests
@@ -173,8 +189,18 @@ const DailyChecklistHistory = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Daily Checklist History</Text>
+
+            {/* Search Bar */}
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search by pet name or observations..."
+                placeholderTextColor="#7F8C8D"
+                value={searchQuery}
+                onChangeText={handleSearch}
+            />
+
             <SectionList
-                sections={groupedHistory}
+                sections={filteredGroupedHistory} // Use filtered data
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderChecklistItem}
                 renderSectionHeader={renderSectionHeader}
@@ -207,6 +233,20 @@ const DailyChecklistHistory = () => {
 };
 
 const styles = StyleSheet.create({
+
+    searchInput: {
+        borderColor: "#CED6E0", // Light border color
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        backgroundColor: "#FFFFFF", // White background
+        color: "#34495E", // Text color
+        fontSize: 16,
+        marginBottom: 10, // Space below the search bar
+    },
+
+
 
     loadingOverlay: {
         position: 'absolute',
