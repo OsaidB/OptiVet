@@ -19,7 +19,8 @@ import { Link, useRouter } from "expo-router";
 import AuthService from "../../Services/authService";
 import Toast from "react-native-toast-message";
 
-import AuthGuard from '../AuthGuard'; // Import the AuthGuard component
+import AuthGuard from '../AuthGuard';
+import FontAwesome from "react-native-vector-icons/FontAwesome"; // Import the AuthGuard component
 
 export default function ManagerStackLayout() {
     const colorScheme = useColorScheme();
@@ -127,6 +128,11 @@ export default function ManagerStackLayout() {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
+                        {/* Close Icon */}
+                        <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
+                            <FontAwesome name="close" size={24} color="black" />
+                        </TouchableOpacity>
+
                         <Text style={styles.modalTitle}>Profile Information</Text>
                         {/* Static Image */}
                         <Image
@@ -154,12 +160,13 @@ export default function ManagerStackLayout() {
                         <View>
 
                             <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
+                                <FontAwesome name="sign-out" size={20} color="#FFFFFF" />
                                 <Text style={styles.logOutButtonText}>Logout</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-                                <Text style={styles.closeButtonText}>Close</Text>
-                            </TouchableOpacity>
+                            {/*<TouchableOpacity onPress={toggleModal} style={styles.closeButton}>*/}
+                            {/*    <Text style={styles.closeButtonText}>Close</Text>*/}
+                            {/*</TouchableOpacity>*/}
                         </View>
 
 
@@ -201,7 +208,7 @@ export default function ManagerStackLayout() {
                 <Link
                     href={{
                         pathname: "/ManagerStack/WalkInClientsScreen",
-                        params: { vetId: managerInfo?.userId },
+                        params: { userId: managerInfo?.userId },
                     }}
                     asChild
                 >
@@ -298,11 +305,10 @@ const styles = StyleSheet.create({
         color: "#7F8C8D",
     },
     closeButton: {
-        marginTop: 15,
-        backgroundColor: "#E74C3C",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 10,
     },
     closeButtonText: {
         color: "#FFFFFF",

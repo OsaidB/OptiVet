@@ -86,8 +86,11 @@ const ManagerAppointmentsScreen = () => {
                     <View style={styles.detailsContainer}>
                         <Text style={styles.appointmentText}>Pet Owner: {item.firstName} {item.lastName}</Text>
                         <Text style={styles.appointmentText}>Pet: {item.petName}</Text>
-                        <Text style={styles.appointmentText}>Date: {new Date(item.appointmentDate).toLocaleDateString()}</Text>
+                        <Text style={styles.appointmentText}>
+                            Date: {`${new Date(item.appointmentDate).getDate()}/${new Date(item.appointmentDate).getMonth() + 1}/${new Date(item.appointmentDate).getFullYear()}`}
+                        </Text>
                         <Text style={styles.appointmentText}>Time: {new Date(item.appointmentDate).toLocaleTimeString()}</Text>
+                        {/*<Text style={styles.appointmentText}>Duration: {selectedAppointment.duration} Minuets</Text>*/}
                     </View>
                 </View>
             </View>
@@ -122,7 +125,9 @@ const ManagerAppointmentsScreen = () => {
                                 <>
                                     <Text style={styles.modalTitle}>Appointment Details</Text>
                                     <Text style={styles.modalText}>Pet: {selectedAppointment.petName}</Text>
-                                    <Text style={styles.modalText}>Date: {new Date(selectedAppointment.appointmentDate).toLocaleDateString()}</Text>
+                                    <Text style={styles.modalText}>
+                                        Date: {`${new Date(selectedAppointment.appointmentDate).getDate()}/${new Date(selectedAppointment.appointmentDate).getMonth() + 1}/${new Date(selectedAppointment.appointmentDate).getFullYear()}`}
+                                    </Text>
                                     <Text style={styles.modalText}>Time: {new Date(selectedAppointment.appointmentDate).toLocaleTimeString()}</Text>
                                     {/*<Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>*/}
                                     {/*<Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>*/}
@@ -152,7 +157,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F5F5F5',
-        padding: 20,
+        padding: 10,
     },
     title: {
         fontSize: 26,

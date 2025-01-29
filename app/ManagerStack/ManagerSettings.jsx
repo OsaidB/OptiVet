@@ -4,13 +4,14 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "../../hooks/useColorScheme";
+import AuthService from "../../Services/authService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ClientService from "../../Services/ClientService";
+import UserService from "../../Services/UserService";
 
-const settings = () => {
+const ManagerSettings = () => {
     const router = useRouter();
     const colorScheme = useColorScheme();
-    const [clientInfo, setClientInfo] = useState({
+    const [managerInfo, setManagerInfo] = useState({
         firstName: "",
         lastName: "",
         email: "",
@@ -20,13 +21,12 @@ const settings = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const fetchClientInfo = async () => {
+        const fetchManagerInfo = async () => {
             try {
                 const storedEmail = await AsyncStorage.getItem("email");
                 if (storedEmail) {
-                    const data = await ClientService.getClientByEmail(storedEmail);
-                    setClientInfo({
-                        id: data.id,
+                    const data = await UserService.getUserByEmail(storedEmail);
+                    setManagerInfo({
                         firstName: data.firstName,
                         lastName: data.lastName,
                         email: data.email,
@@ -35,16 +35,16 @@ const settings = () => {
                     });
                 }
             } catch (error) {
-                console.error("Error fetching client info:", error);
+                console.error("Error fetching manager info:", error);
                 Alert.alert("Error", "Failed to load manager information.");
             }
         };
 
-        fetchClientInfo();
+        fetchManagerInfo();
     }, []);
 
     const handleUpdateProfile = async () => {
-        if (!clientInfo.firstName || !clientInfo.lastName || !clientInfo.email || !clientInfo.phoneNumber) {
+        if (!managerInfo.firstName || !managerInfo.lastName || !managerInfo.email) {
             Alert.alert("Error", "Please fill in all required fields.");
             return;
         }
@@ -52,22 +52,14 @@ const settings = () => {
         setLoading(true);
 
         try {
-            const previousEmail = await AsyncStorage.getItem('email');
             const updatedData = {
-                firstName: clientInfo.firstName,
-                lastName: clientInfo.lastName,
-                email: clientInfo.email,
-                phoneNumber: clientInfo.phoneNumber,
-                ...(clientInfo.password ? { password: clientInfo.password } : {}), // Include password only if changed
+                firstName: managerInfo.firstName,
+                lastName: managerInfo.lastName,
+                email: managerInfo.email,
+                ...(managerInfo.password ? { password: managerInfo.password } : {}), // Include password only if changed
             };
 
-            await ClientService.updateClient(clientInfo.id, updatedData);
-
-            // If email was changed, update AsyncStorage
-            if (clientInfo.email !== previousEmail) {
-                await AsyncStorage.setItem('email', clientInfo.email);
-            }
-
+            await UserService.updateUserProfile(updatedData);
             Alert.alert("Success", "Your profile has been updated successfully.");
         } catch (error) {
             console.error("Error updating profile:", error);
@@ -88,8 +80,8 @@ const settings = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="First Name"
-                        value={clientInfo.firstName}
-                        onChangeText={(text) => setClientInfo({ ...clientInfo, firstName: text })}
+                        value={managerInfo.firstName}
+                        onChangeText={(text) => setManagerInfo({ ...managerInfo, firstName: text })}
                     />
                 </View>
 
@@ -99,8 +91,8 @@ const settings = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="Last Name"
-                        value={clientInfo.lastName}
-                        onChangeText={(text) => setClientInfo({ ...clientInfo, lastName: text })}
+                        value={managerInfo.lastName}
+                        onChangeText={(text) => setManagerInfo({ ...managerInfo, lastName: text })}
                     />
                 </View>
 
@@ -111,8 +103,8 @@ const settings = () => {
                 {/*        style={styles.input}*/}
                 {/*        placeholder="Email"*/}
                 {/*        keyboardType="email-address"*/}
-                {/*        value={clientInfo.email}*/}
-                {/*        onChangeText={(text) => setClientInfo({ ...clientInfo, email: text })}*/}
+                {/*        value={managerInfo.email}*/}
+                {/*        onChangeText={(text) => setManagerInfo({ ...managerInfo, email: text })}*/}
                 {/*    />*/}
                 {/*</View>*/}
 
@@ -123,8 +115,8 @@ const settings = () => {
                         style={styles.input}
                         placeholder="Phone"
                         keyboardType="phone-pad"
-                        value={clientInfo.phoneNumber}
-                        onChangeText={(text) => setClientInfo({ ...clientInfo, phoneNumber: text })}
+                        value={managerInfo.phoneNumber}
+                        onChangeText={(text) => setManagerInfo({ ...managerInfo, phoneNumber: text })}
                     />
                 </View>
 
@@ -135,9 +127,9 @@ const settings = () => {
                 {/*        style={styles.input}*/}
                 {/*        placeholder="New Password (optional)"*/}
                 {/*        secureTextEntry*/}
-                {/*        value={clientInfo.password}*/}
+                {/*        value={managerInfo.password}*/}
                 {/*        placeholderTextColor={'#a19f9f'}*/}
-                {/*        onChangeText={(text) => setClientInfo({ ...clientInfo, password: text })}*/}
+                {/*        onChangeText={(text) => setManagerInfo({ ...managerInfo, password: text })}*/}
                 {/*    />*/}
                 {/*</View>*/}
 
@@ -237,4 +229,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default settings;
+export default ManagerSettings;

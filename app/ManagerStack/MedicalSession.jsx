@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Alert, TouchableOpacity, Platform,Image } from 'react-native';
+import {ScrollView, View, Text, StyleSheet, Alert, TouchableOpacity, Platform, Image, Switch} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MedicalSessionService from '../../Services/MedicalSessionService';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -7,6 +7,8 @@ import { TextInput as PaperTextInput, Button } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import PetService from "../../Services/PetService";
 import AppointmentService from '../../Services/AppointmentService';
+import {format, parseISO} from "date-fns";
+import {Picker} from "@react-native-picker/picker";
 
 
 const MedicalSession = () => {
@@ -17,6 +19,7 @@ const MedicalSession = () => {
 
     const [sessionDate, setSessionDate] = useState(new Date());
     const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date());
+    const [nextAppointmentTime, setNextAppointmentTime] = useState(new Date());
 
     const [petId, setPetId] = useState(initialPetId || ''); // Initialize with petId from params
     const [ownerId, setOwnerId] = useState(initialOwnerId || ''); // Initialize with ownerId from params
@@ -43,11 +46,24 @@ const MedicalSession = () => {
 
     const [isSessionDatePickerVisible, setSessionDatePickerVisibility] = useState(false);
     const [isNextAppointmentDatePickerVisible, setNextAppointmentDatePickerVisibility] = useState(false);
+    const [isNextAppointmentTimePickerVisible, setNextAppointmentTimePickerVisibility] = useState(false);
 
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const GAP_BETWEEN_APPOINTMENTS = 5;
+    const [duration, setDuration] = useState(30); // Default duration
+    const [isNextAppointmentEnabled, setNextAppointmentEnabled] = useState(false);
     // useEffect(() => {
     //     setLoggedInVetId(userId); // Temporary static ID
     //     setVeterinarianId(loggedInVetId);
     // }, [loggedInVetId]);
+
+    // Handlers for Date and Time Pickers
+    const showSessionDatePicker = () => setSessionDatePickerVisibility(true);
+    const hideSessionDatePicker = () => setSessionDatePickerVisibility(false);
+    const handleConfirmSessionDate = (selectedDate) => {
+        setSessionDate(selectedDate);
+        hideSessionDatePicker();
+    };
 
     const showNextAppointmentDatePicker = () => setNextAppointmentDatePickerVisibility(true);
     const hideNextAppointmentDatePicker = () => setNextAppointmentDatePickerVisibility(false);
@@ -56,17 +72,101 @@ const MedicalSession = () => {
         hideNextAppointmentDatePicker();
     };
 
-    const showSessionDatePicker = () => setSessionDatePickerVisibility(true);
-    const hideSessionDatePicker = () => setSessionDatePickerVisibility(false);
-    const handleConfirmSessionDate = (selectedDate) => {
-        setSessionDate(selectedDate);
-        hideSessionDatePicker();
+    const showNextAppointmentTimePicker = () => setNextAppointmentTimePickerVisibility(true);
+    const hideNextAppointmentTimePicker = () => setNextAppointmentTimePickerVisibility(false);
+    const handleConfirmNextAppointmentTime = (selectedTime) => {
+        setNextAppointmentTime(selectedTime);
+        hideNextAppointmentTimePicker();
     };
+
+
+    // const handleWebTimeChange = (event, setter) => {
+    //     const [hours, minutes] = event.target.value.split(":");
+    //     const updatedTime = new Date();
+    //     updatedTime.setHours(hours);
+    //     updatedTime.setMinutes(minutes);
+    //     setter(updatedTime);
+    // };
 
     const handleWebDateChange = (event, setter) => {
         // setSessionDate(new Date(event.target.value));
         setter(new Date(event.target.value));
     };
+
+    useEffect(() => {
+        const fetchSlots = async () => {
+            try {
+                const slots = await AppointmentService.getAppointmentsByVetId(userId);
+                setAvailableSlots(slots);
+            } catch (error) {
+                console.error('Error fetching available slots:', error);
+            }
+        };
+        fetchSlots();
+    }, [userId]);
+
+    // useEffect(() => {
+    //     const slotsForSelectedDate = availableSlots.filter(slot =>
+    //         format(parseISO(slot.appointmentDate), 'yyyy-MM-dd') === nextAppointmentDate
+    //     );
+    //     setFilteredSlots(slotsForSelectedDate);
+    // }, [availableSlots, nextAppointmentDate]);
+
+    const isOverlapping = (startTime, endTime) => {
+        if (!availableSlots.length) return false; // ✅ No slots = No overlap
+
+        return availableSlots.some((slot) => {
+            const existingStart = parseISO(slot.appointmentDate);
+            const existingEnd = new Date(existingStart);
+            existingEnd.setMinutes(existingEnd.getMinutes() + (slot.duration || duration) + GAP_BETWEEN_APPOINTMENTS);
+
+            return (
+                (startTime >= existingStart && startTime < existingEnd) ||  // ❌ New start falls inside existing slot
+                (endTime > existingStart && endTime <= existingEnd) ||  // ❌ New end falls inside existing slot
+                (startTime <= existingStart && endTime >= existingEnd)   // ❌ New slot completely overlaps existing
+            );
+        });
+    };
+
+
+
+
+    const handleAddNextAppointment = async () => {
+        const formattedTime = format(nextAppointmentTime, 'HH:mm');
+        const appointmentDateTime = `${format(nextAppointmentDate, 'yyyy-MM-dd')}T${formattedTime}:00`;
+
+        const newStart = new Date(appointmentDateTime);
+        const newEnd = new Date(newStart);
+        newEnd.setMinutes(newEnd.getMinutes() + duration);
+
+        // Check for overlapping slots
+        if (isOverlapping(newStart, newEnd)) {
+            if (Platform.OS === 'web'){
+                window.alert('Error, This time slot overlaps with an existing appointment.');
+            } else {
+                Alert.alert('Error', 'This time slot overlaps with an existing appointment.');
+            }
+            return;
+        }
+
+        const appointmentData = {
+            appointmentDate: appointmentDateTime,
+            vetId: userId,
+            clientId: ownerId,
+            petId: petId,
+            duration: duration,
+            status: 'SCHEDULED',
+        };
+
+        try {
+            const newSlot = await AppointmentService.createAppointment(appointmentData);
+            setAvailableSlots([...availableSlots, newSlot]);
+            Alert.alert('Success', 'Follow-up appointment created successfully!');
+        } catch (error) {
+            console.error('Error saving appointment slot:', error);
+            Alert.alert('Error', 'Failed to save the appointment slot. Please try again.');
+        }
+    }
 
     const pickImages = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -138,7 +238,41 @@ const MedicalSession = () => {
 
     const handleCreateSession = async () => {
         const formattedSessionDate = sessionDate.toISOString();
-        const formattedNextAppointmentDate = nextAppointmentDate.toISOString();
+        const formattedNextAppointmentDate = nextAppointmentDate;
+
+        // const newStart = new Date(formattedSessionDate);
+        // const newEnd = new Date(newStart);
+        // newEnd.setMinutes(newEnd.getMinutes() + duration);
+        //
+        // // 🔴 Check for overlap before creating the session
+        // if (isOverlapping(newStart, newEnd)) {
+        //     let latestEndTime = new Date(0);
+        //
+        //     availableSlots.forEach((slot) => {
+        //         const slotStart = parseISO(slot.appointmentDate);
+        //         const slotEnd = new Date(slotStart);
+        //         slotEnd.setMinutes(slotEnd.getMinutes() + (slot.duration || duration) + GAP_BETWEEN_APPOINTMENTS);
+        //
+        //         if (slotEnd > latestEndTime) {
+        //             latestEndTime = slotEnd;
+        //         }
+        //     });
+        //
+        //     // ✅ Dynamically find the next available slot
+        //     const suggestedTime = new Date(latestEndTime);
+        //     suggestedTime.setMinutes(suggestedTime.getMinutes() + GAP_BETWEEN_APPOINTMENTS);
+        //     const suggestedTimeFormatted = format(suggestedTime, "yyyy-MM-dd HH:mm");
+        //
+        //     const errorMessage = `Error: This session overlaps with an existing appointment.\n\n💡 Try scheduling after ${suggestedTimeFormatted}.`;
+        //
+        //     if (Platform.OS === "web") {
+        //         window.alert(errorMessage);
+        //     } else {
+        //         Alert.alert("Time Slot Conflict", errorMessage);
+        //     }
+        //     return;
+        // }
+
 
         const uploadedImageUrls = [];
         for (const imageUri of testResultsImages) {
@@ -173,16 +307,25 @@ const MedicalSession = () => {
             veterinarianNotes,
             testsOrdered,
             testResultsImageUrls: uploadedImageUrls, // Save all uploaded image URLs
-            nextAppointmentDate: formattedNextAppointmentDate,
+            nextAppointmentDate: isNextAppointmentEnabled ? nextAppointmentDate : null,
             postTreatmentInstructions,
         };
 
         try {
-            await MedicalSessionService.createSession(newMedicalSession, vetId);
 
-            await updateAppointmentStatus(appointmentId);
+            await MedicalSessionService.createSession(newMedicalSession, userId);
 
-// Handle success message and navigation based on the platform
+            if(appointmentId){
+                await updateAppointmentStatus(appointmentId);
+            }
+            // await updateAppointmentStatus(appointmentId);
+
+            if(isNextAppointmentEnabled){
+                await handleAddNextAppointment();
+            }
+
+
+        // Handle success message and navigation based on the platform
             if (Platform.OS === "web") {
                 window.alert("Medical session created successfully!");
                 if (returnTo === "WalkInClientsScreen") {
@@ -230,6 +373,76 @@ const MedicalSession = () => {
         }
     };
 
+    const renderPicker = () => {
+        if (Platform.OS === 'ios') {
+            return (
+                <View>
+                    {/*Duration Selection */}
+                    <View style={styles.iosPickerContainer}>
+                        <Text style={styles.sectionTitle}>Select Duration</Text>
+                        <Picker
+                            selectedValue={duration}
+                            onValueChange={(itemValue) => setDuration(itemValue)}
+                            style={{ color: 'black', height: 50, width: '100%', justifyContent:'flex-start', alignItems: 'center', marginBottom: 10 }}
+                            itemStyle={{ color: 'black', height: 50, width: '100%' }}
+                        >
+                            <Picker.Item label="30 minutes" value={30} />
+                            <Picker.Item label="1 hour" value={60} />
+                            <Picker.Item label="1.5 hours" value={90} />
+                            <Picker.Item label="2 hours" value={120} />
+                            <Picker.Item label="2.5 hours" value={150} />
+                            <Picker.Item label="3 hours" value={180} />
+                        </Picker>
+                    </View>
+                </View>
+            );
+        }
+
+        if (Platform.OS === 'android') {
+            return (
+                <View>
+                    {/*Duration Selection */}
+                    <View style={styles.iosPickerContainer}>
+                        <Text style={styles.sectionTitle}>Select Duration</Text>
+                        <Picker
+                            selectedValue={duration}
+                            onValueChange={(itemValue) => setDuration(itemValue)}
+                            style={{ color: 'black', height: 70, width: '100%', justifyContent:'flex-start', backgroundColor:'#f0f0f0', marginBottom:10}}
+                            itemStyle={{ color: 'black', height: 50, width: '100%' }}
+                        >
+                            <Picker.Item label="30 minutes" value={30} />
+                            <Picker.Item label="1 hour" value={60} />
+                            <Picker.Item label="1.5 hours" value={90} />
+                            <Picker.Item label="2 hours" value={120} />
+                            <Picker.Item label="2.5 hours" value={150} />
+                            <Picker.Item label="3 hours" value={180} />
+                        </Picker>
+                    </View>
+                </View>
+            );
+        }
+
+        // Web Platform
+        return (
+            <View>
+                <Text style={styles.sectionTitle}>Select Duration</Text>
+                <select
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value))}
+                    style={styles.picker}
+
+                >
+                    <option value={30}>30 minutes Appointment</option>
+                    <option value={60}>1 hour Appointment</option>
+                    <option value={90}>1.5 hours Appointment</option>
+                    <option value={120}>2 hours Appointment</option>
+                    <option value={150}>2.5 hours Appointment</option>
+                    <option value={180}>3 hours Appointment</option>
+                </select>
+            </View>
+        );
+    };
+
 
     return (
         <ScrollView style={styles.scrollContainer}>
@@ -245,11 +458,12 @@ const MedicalSession = () => {
                             value={sessionDate.toISOString().substring(0, 16)}
                             onChange={(e) => handleWebDateChange(e, setSessionDate)}
                             style={styles.webDatePicker}
+
                         />
                     ) : (
                         <TouchableOpacity onPress={showSessionDatePicker} style={styles.datePickerButton}>
                             <Text style={styles.datePickerText}>
-                                {sessionDate ? sessionDate.toLocaleDateString() : 'Select Session Date'}
+                                {sessionDate ? format(sessionDate, 'yyyy-MM-dd HH:mm') : 'Select Session Date'}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -351,81 +565,107 @@ const MedicalSession = () => {
                 </View>
 
 
-
-                {/* Follow-Up Actions */}
+                {/* Toggle for Follow-Up Appointment */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Follow-Up Actions</Text>
-
-                    {/* Next Appointment Date Picker */}
-                    <View style={styles.datePickerContainer}>
-                        <Text style={styles.inputLabel}>Next Appointment Date</Text>
-                        {Platform.OS === 'web' ? (
-                            <input
-                                type="date"
-                                value={nextAppointmentDate ? nextAppointmentDate.toISOString().substring(0, 10) : ""}
-                                onChange={(e) => handleWebDateChange(e, setNextAppointmentDate)}
-                                style={styles.webDatePicker}
-                            />
-                        ) : (
-                            <TouchableOpacity onPress={showNextAppointmentDatePicker} style={styles.datePickerButton}>
-                                <Text style={styles.datePickerText}>
-                                    {nextAppointmentDate ? nextAppointmentDate.toLocaleDateString() : 'Select Next Appointment Date'}
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                        {Platform.OS !== 'web' && (
-                            <DateTimePickerModal
-                                isVisible={isNextAppointmentDatePickerVisible}
-                                mode="date"
-                                onConfirm={handleConfirmNextAppointmentDate}
-                                onCancel={hideNextAppointmentDatePicker}
-                                date={nextAppointmentDate || new Date()}
-                            />
-                        )}
+                    <View style={styles.toggleContainer}>
+                        <Text style={styles.sectionTitle}>Schedule Follow-Up Appointment?</Text>
+                        <Switch
+                            value={isNextAppointmentEnabled}
+                            onValueChange={setNextAppointmentEnabled}
+                        />
                     </View>
+                    {isNextAppointmentEnabled && (
+                        <>
+                            {/* Next Appointment Date */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Next Appointment Date</Text>
+                                {Platform.OS === 'web' ? (
+                                    <input
+                                        type="date"
+                                        value={format(nextAppointmentDate, 'yyyy-MM-dd')}
+                                        onChange={(e) => setNextAppointmentDate(new Date(e.target.value))}
+                                        style={styles.webDatePicker}
+                                    />
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={showNextAppointmentDatePicker}
+                                        style={styles.datePickerButton}
+                                    >
+                                        <Text style={styles.datePickerText}>
+                                            {nextAppointmentDate
+                                                ? format(nextAppointmentDate, 'yyyy-MM-dd')
+                                                : 'Select Date'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                {Platform.OS !== 'web' && (
+                                    <DateTimePickerModal
+                                        isVisible={isNextAppointmentDatePickerVisible}
+                                        mode="date"
+                                        onConfirm={handleConfirmNextAppointmentDate}
+                                        onCancel={hideNextAppointmentDatePicker}
+                                        date={nextAppointmentDate}
+                                    />
+                                )}
+                            </View>
 
-                    <View style={styles.datePickerContainer}>
-                        <Text style={styles.inputLabel}>Next Appointment Time</Text>
-                        {Platform.OS === 'web' ? (
-                            <input
-                                type="time"
-                                value={nextAppointmentDate ? nextAppointmentDate.toISOString().substring(0, 10) : ""}
-                                onChange={(e) => handleWebDateChange(e, setNextAppointmentDate)}
-                                style={styles.webDatePicker}
-                            />
-                        ) : (
-                            <TouchableOpacity onPress={showNextAppointmentDatePicker} style={styles.datePickerButton}>
-                                <Text style={styles.datePickerText}>
-                                    {nextAppointmentDate ? nextAppointmentDate.toLocaleDateString() : 'Select Next Appointment Date'}
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                        {Platform.OS !== 'web' && (
-                            <DateTimePickerModal
-                                isVisible={isNextAppointmentDatePickerVisible}
-                                mode="date"
-                                onConfirm={handleConfirmNextAppointmentDate}
-                                onCancel={hideNextAppointmentDatePicker}
-                                date={nextAppointmentDate || new Date()}
-                            />
-                        )}
-                    </View>
+                            {/* Next Appointment Time */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Next Appointment Time</Text>
+                                {Platform.OS === 'web' ? (
+                                    <input
+                                        type="time"
+                                        value={`${nextAppointmentTime
+                                            .getHours()
+                                            .toString()
+                                            .padStart(2, '0')}:${nextAppointmentTime
+                                            .getMinutes()
+                                            .toString()
+                                            .padStart(2, '0')}`}
+                                        onChange={(e) => {
+                                            const [hours, minutes] = e.target.value.split(':');
+                                            const updatedTime = new Date();
+                                            updatedTime.setHours(hours);
+                                            updatedTime.setMinutes(minutes);
+                                            setNextAppointmentTime(updatedTime);
+                                        }}
+                                        style={styles.webDatePicker}
+                                    />
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={showNextAppointmentTimePicker}
+                                        style={styles.datePickerButton}
+                                    >
+                                        <Text style={styles.datePickerText}>
+                                            {nextAppointmentTime ? format(nextAppointmentTime, 'HH:mm') : 'Select Time'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                {Platform.OS !== 'web' && (
+                                    <DateTimePickerModal
+                                        isVisible={isNextAppointmentTimePickerVisible}
+                                        mode="time"
+                                        onConfirm={handleConfirmNextAppointmentTime}
+                                        onCancel={hideNextAppointmentTimePicker}
+                                        date={nextAppointmentTime}
+                                    />
+                                )}
+                            </View>
 
-                    {/* Post Treatment Instructions */}
-                    <PaperTextInput
-                        label="Post Treatment Instructions"
-                        value={postTreatmentInstructions}
-                        onChangeText={setPostTreatmentInstructions}
-                        mode="outlined"
-                        style={styles.input}
-                    />
-
-
-
-
+                            {/* Duration Picker */}
+                            {renderPicker()}
+                        </>
+                    )}
                 </View>
 
-
+                {/* Post Treatment Instructions */}
+                <PaperTextInput
+                    label="Post Treatment Instructions"
+                    value={postTreatmentInstructions}
+                    onChangeText={setPostTreatmentInstructions}
+                    mode="outlined"
+                    style={styles.input}
+                />
                 {/* Button to create the session */}
                 <Button mode="contained" onPress={handleCreateSession} style={styles.createButton}>
                     Create Session
@@ -433,8 +673,6 @@ const MedicalSession = () => {
             </View>
         </ScrollView>
     );
-
-
 };
 
 const styles = StyleSheet.create({
@@ -442,7 +680,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f9f9f9',
     },
-
     datePickerContainer: {
         marginBottom: 10,
     },
@@ -451,10 +688,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5,
     },
-
-
-
-
     container: {
         flex: 1,
         padding: 20,
@@ -525,7 +758,6 @@ const styles = StyleSheet.create({
     //     fontSize: 16,
     //     backgroundColor: '#f0f8ff',
     // },
-
     webDatePicker: {
         height: 40,
         borderColor: '#ccc',
@@ -540,14 +772,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#e0e0e0',
         borderRadius: 5,
         alignItems: 'center',
+        marginBottom: 10,
     },
     datePickerText: {
         fontSize: 16,
         color: '#333',
     },
-
-
-
     photoButton: {
         backgroundColor: 'rgba(29,61,71,0.55)',
         paddingVertical: 10,
@@ -555,6 +785,10 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
         // marginVertical: 10,
+    },
+    pickerItem: {
+        fontSize: 16,
+        color: 'black'
     },
     rowContainer: {
         flexDirection: "row",
@@ -591,7 +825,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
     },
-
     createButton: {
         marginTop: 20,
         paddingVertical: 12,
@@ -605,6 +838,12 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#ffffff',
     },
+    picker: {
+        height: 50,
+        backgroundColor: '#f0f0f0',
+        marginBottom: 10
+    },
+    toggleContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });
 
 

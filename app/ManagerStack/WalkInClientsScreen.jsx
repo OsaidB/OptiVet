@@ -5,7 +5,7 @@ import { Link, useRouter, useLocalSearchParams } from "expo-router"; // Import u
 
 const WalkInClientsScreen = () => {
     const router = useRouter();
-    const { vetId } = useLocalSearchParams(); // Retrieve vetId from the navigation params
+    const { userId } = useLocalSearchParams(); // Retrieve userId from the navigation params
     const [searchQuery, setSearchQuery] = useState('');
     const [clients, setClients] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
@@ -46,7 +46,7 @@ const WalkInClientsScreen = () => {
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, clientId, vetId, returnTo: "WalkInClientsScreen" },
+                params: { petId, clientId, userId, returnTo: "WalkInClientsScreen" },
             });
         }
     };

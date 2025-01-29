@@ -115,7 +115,11 @@ const ManagerScheduleScreen = () => {
         newEnd.setMinutes(newEnd.getMinutes() + selectedDuration);
 
         if (isOverlapping(newStart, newEnd)) {
-            Alert.alert('Error', 'This time slot overlaps with an existing appointment.');
+            if (Platform.OS === 'web') {
+                window.alert("Error: This session overlaps with an existing appointment.");
+            } else {
+                Alert.alert('Error', 'This time slot overlaps with an existing appointment.');
+            }
             return;
         }
 

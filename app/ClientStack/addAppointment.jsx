@@ -125,6 +125,9 @@ export default function AddAppointment() {
                 appointmentDate: selectedSlot.appointmentDate,
                 duration: selectedSlot.duration,
             });
+            if (Platform.OS === 'web') {
+                window.alert('Success: Appointment successfully scheduled!');
+            }
             Alert.alert('Success', 'Appointment successfully scheduled!');
             resetForm();
         } catch (error) {

@@ -9,7 +9,6 @@ import {
     RefreshControl,
     SafeAreaView,
     Image,
-    ActivityIndicator,
 } from 'react-native';
 import { Link } from 'expo-router';
 import AppointmentService from '../../Services/AppointmentService';
@@ -21,7 +20,6 @@ export default function ManageAppointments() {
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState({});
     const [refreshing, setRefreshing] = useState(false);
-    // const [loading, setLoading] = useState(true);
     const { clientId } = useLocalSearchParams();
 
     useEffect(() => {
@@ -106,14 +104,6 @@ export default function ManageAppointments() {
             hour12: true,
         }).format(date);
     };
-
-    // if (loading) {
-    //     return (
-    //         <SafeAreaView style={styles.safeArea}>
-    //             <ActivityIndicator size="large" color="#1D3D47" style={{ marginTop: 20 }} />
-    //         </SafeAreaView>
-    //     );
-    // }
 
     return (
         <SafeAreaView style={styles.safeArea}>
