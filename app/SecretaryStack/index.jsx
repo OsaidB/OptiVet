@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     imageStyle: {
-        borderRadius: '100%',
+        borderRadius: 100,
         borderWidth: 4,
         borderColor: 'white',
         marginTop: 20,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     imageStyling: {
-        borderRadius: '100%',
+        borderRadius: 100,
         width: '100%',
         height: '100%'
     },
