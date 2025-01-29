@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import {
     View, Text, Image, TouchableOpacity,
-    StyleSheet, Alert, ImageBackground, TextInput, ScrollView, Platform
+    StyleSheet, Alert, ImageBackground, TextInput, ScrollView, Platform, SafeAreaView
 } from "react-native";
 import { useRouter, Link, useLocalSearchParams, usePathname } from 'expo-router';
 import * as ImagePicker from "expo-image-picker";
@@ -45,216 +45,146 @@ const SecretaryStack = () => {
     return (
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <View style={{ justifyContent: 'space-evenly', alignItems: 'center' }}>
-            <View style={{ backgroundColor: '#2e3f51', width: '100%', alignItems: 'center' }}>
-
-                <View style={{ backgroundColor: '#2e3f51', borderRadius: '100%', marginTop: 20, height: 200, width: 200, justifyContent: 'center', alignItems: 'center' }}>
-                    <Image source={require('../../assets/images/Screenshot 2025-01-14 045424.png')} style={{ borderRadius: '100%', width: '100%', height: '100%' }} resizeMode='cover'></Image>
+        <SafeAreaView style={styles.main}>
+            <View
+                style={styles.firstPart}>
+                <View
+                    style={styles.imageStyle}>
+                    <Image
+                        source={require('../../assets/images/default_user.png')}
+                        style={styles.imageStyling}
+                        resizeMode="contain"></Image>
                 </View>
 
-                <View style={{ backgroundColor: '#2e3f51', height: 120, width: '100%', marginTop: 20,justifyContent:'space-around'}}>
-                    <View style={{ flexDirection:'row',justifyContent:'center', alignItems: 'center' }}>
-                    <Text style={{ color: 'white',margin:4,fontWeight:'bold' }}>Dr. Khaled Mustafa</Text>
+                <View
+                    style={styles.user}>
+                    <View
+                        style={styles.textElement}>
+                        <Ionicons name="person-outline" size={24} color={'white'} />
+                        <Text style={styles.textStyle} numberOfLines={1}>
+                            Dr Khaled Mustafa
+                        </Text>
                     </View>
-
-
-                    <View style={{ flexDirection:'row',justifyContent:'center', alignItems: 'center' }}>
-                <Ionicons name="location-outline" size={24} color={'white'} />
-                    <Text style={{ color: 'white',margin:4,fontWeight:'bold' }}>Birzeit</Text>
+                    <View
+                        style={styles.textElement}>
+                        <Ionicons name="location-outline" size={24} color={'white'} />
+                        <Text style={styles.textStyle} numberOfLines={1}>
+                            Birzeit
+                        </Text>
                     </View>
-
-
-                    <View style={{ flexDirection:'row',justifyContent:'center', alignItems: 'center' }}>
-                <Ionicons name="mail-outline" size={24} color={'white'} />
-                    <Text style={{ color: 'white',margin:4,fontWeight:'bold' }}>KhaledMustafa@gmail.com</Text>
+                    <View
+                        style={styles.textElement}>
+                        <Ionicons name="mail-outline" size={24} color={'white'} />
+                        <Text style={styles.textStyle} numberOfLines={1}>
+                            KhaledMustafa@gmail.com
+                        </Text>
                     </View>
                 </View>
-                
+            </View>
 
-
-                <View style={{ backgroundColor: '#a0cedd', width: '100%', height: 240, justifyContent: 'space-evenly', alignItems: 'center' }}>
-                    <Link href={{ pathname: "/SecretaryStack/PetsForAdoption" }} asChild>
-                        <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', width: '40%', borderRadius: 18, height: 50, padding: 12, marginVertical: 10 }}>
-                            <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Pets for adoption</Text>
+            <View
+                style={styles.secondPart}>
+                <View
+                    style={styles.secondPartComponents}>
+                    <Link href={{ pathname: '/SecretaryStack/PetsForAdoption' }} asChild>
+                        <TouchableOpacity
+                            style={styles.button}>
+                            <Text
+                                style={styles.buttonText} numberOfLines={1}>
+                                Pets for adoption
+                            </Text>
                         </TouchableOpacity>
                     </Link>
 
-
-                    <Link href={{ pathname: "/SecretaryStack/Products" }} asChild>
-                        <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, width: '40%', height: 50, padding: 12, marginVertical: 10 }}>
-                            <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Store</Text>
+                    <Link href={{ pathname: '/SecretaryStack/Products' }} asChild>
+                        <TouchableOpacity
+                            style={styles.button}>
+                            <Text
+                                style={styles.buttonText} numberOfLines={1}>
+                                Store
+                            </Text>
                         </TouchableOpacity>
                     </Link>
                 </View>
             </View>
-
-
-        </View>
-
-
-
-
-        // <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center' }}>
-        //     <View style={{ alignSelf: 'center' }}><Text style={{ fontSize: 40 }}>Pets for adoption</Text></View>
-
-
-
-        //     <ScrollView
-        //         contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }} style={{ alignSelf: 'center', width: '90%', marginVertical: 10 }}>
-
-
-
-        //         {pets.map((item) => {
-        //             return (
-
-        //                 <View key={item.id} style={{ width: widthRatio, backgroundColor: '#133945', height: 300, margin: 20, justifyContent: 'space-between', alignItems: 'center', borderRadius: 15 }} SearchProduct={SearchProduct} setSearchText={setSearchText}>
-
-        //                     <View style={{ width: '90%', height: '50%', marginTop: 5 }}>
-        //                         <Image source={{ uri: `${BASE_URL_IMAGES}${item.productImageUrl}` }} style={{ width: '100%', height: '100%' }} resizeMode="contain"></Image>
-        //                     </View>
-
-
-        //                     <Text style={{ fontSize: 20, color: 'white' }}>{item.name}</Text>
-
-
-
-
-        //                     <Text style={{ fontSize: 20, color: 'white' }}>{item.price + '₪'}</Text>
-
-
-
-
-        //                     <Text style={{ fontSize: 20, color: '#dddd', fontFamily: 'bold' }}>{item.productCategory}</Text>
-
-
-        //                     <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '30%', height: '30%' }}>
-
-
-        //                         <Link href={{ pathname: '../ManagerStack/UpdateProduct', params: { productId } }} onPress={() => { setProductId(item.id) }} asChild>
-        //                             <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }}>
-
-        //                                 <Image source={require('../../assets/images/pencil (2).png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
-
-        //                             </TouchableOpacity>
-        //                         </Link>
-
-
-
-        //                         <TouchableOpacity style={{ alignItems: 'center', height: '60%', width: '100%', backgroundColor: 'white', borderRadius: '100%', marginBottom: 20, marginHorizontal: 10 }} onPress={() => deleteProductHandle(item.id)}>
-
-        //                             <Image source={require('../../assets/images/trash.png')} style={{ flex: 1, width: 30, height: 30 }} resizeMode='contain'></Image>
-
-        //                         </TouchableOpacity>
-
-
-
-        //                     </View>
-        //                 </View>
-
-
-        //             )
-        //         })}
-
-
-
-        //     </ScrollView>
-
-
-
-
-
-
-
-
-        //     <Link href={{ pathname: "/SecretaryStack/PetsForAdoption" }} asChild>
-        //         <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: 50, width: '50%', marginVertical: 10 }}>
-        //             <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Add New Pet</Text>
-        //         </TouchableOpacity>
-        //     </Link>
-
-        // </View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // <Stack.Navigator>
-        //     <Stack.Screen
-        //         name="Schedule"
-        //         component={ManagerScheduleScreen}
-        //         options={{ title: 'Appointment Schedule' }}
-        //     />
-        //     <Stack.Screen
-        //         name="Notes"
-        //         component={ManagerNotesScreen}
-        //         options={{ title: 'Staff Notes' }}
-        //     />
-        //     <Stack.Screen
-        //         name="UserManagement"
-        //         component={ManagerUserManagementScreen}
-        //         options={{ title: 'User Management' }}
-        //     />
-        //     <Stack.Screen
-        //         name="Reports"
-        //         component={ManagerReportsScreen}
-        //         options={{ title: 'Clinic Reports' }}
-        //     />
-        // </Stack.Navigator>
+        </SafeAreaView>
     );
 };
+
+
+const styles = StyleSheet.create({
+
+    main: {
+        flex: 1
+    },
+
+    firstPart: {
+        flex: 2,
+        backgroundColor: '#2e3f51',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+    },
+
+    secondPart: {
+        flex: 1,
+        backgroundColor: '#a0cedd',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageStyle: {
+        borderRadius: '100%',
+        borderWidth: 4,
+        borderColor: 'white',
+        marginTop: 20,
+        height: 200,
+        width: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageStyling: {
+        borderRadius: '100%',
+        width: '100%',
+        height: '100%'
+    },
+    user: {
+        height: 120,
+        width: '100%',
+        marginTop: 20,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+    },
+    textElement: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    textStyle: {
+        color: 'white',
+        margin: 4,
+        fontWeight: 'bold'
+    },
+    secondPartComponents: {
+        width: '80%',
+        height: '80%',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+
+    },
+    button: {
+        backgroundColor: '#133945',
+        borderRadius: 18,
+        height: 50,
+        padding: 12,
+        minWidth: 120,
+    },
+    buttonText: {
+        fontSize: 20,
+        color: 'white',
+        fontWeight: 'bold',
+        alignSelf: 'center',
+    }
+});
+
+
 
 export default SecretaryStack;
