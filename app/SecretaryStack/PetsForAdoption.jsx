@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
     },
     petElement: {
         flexShrink: 1,
+        paddingTop:12,
         width: Platform.OS == 'web' ? '20%' : '40%',
         backgroundColor: '#133945',
         height: 300,
@@ -356,6 +357,8 @@ const styles = StyleSheet.create({
         borderRadius: '100%',
         width: '100%',
         height: '100%',
+        borderWidth:2,
+        borderColor:'white'
     },
     nameText: {
         height: '12%',
