@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
+import {useLocalSearchParams, useRouter} from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ClientService from "../../Services/ClientService";
+import UserService from "../../Services/UserService";
 
-const settings = () => {
+const Settings = () => {
     const router = useRouter();
     const colorScheme = useColorScheme();
-    const [clientInfo, setClientInfo] = useState({
+    const { secId } = useLocalSearchParams();
+    const [secInfo, setSecInfo] = useState({ // Secretary
         firstName: "",
         lastName: "",
         email: "",
@@ -20,16 +21,17 @@ const settings = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const fetchClientInfo = async () => {
+        const fetchSecretaryInfo = async () => {
             try {
                 const storedEmail = await AsyncStorage.getItem("email");
                 if (storedEmail) {
-                    const data = await ClientService.getClientByEmail(storedEmail);
-                    setClientInfo({
+                    const data = await UserService.getUserByEmail(storedEmail);
+                    setSecInfo({
                         id: data.id,
                         firstName: data.firstName,
                         lastName: data.lastName,
                         email: data.email,
+                        role: data.role,
                         phoneNumber: data.phoneNumber,
                         password: ""
                     });
@@ -40,11 +42,13 @@ const settings = () => {
             }
         };
 
-        fetchClientInfo();
+        fetchSecretaryInfo();
     }, []);
 
+    console.log(secId);
+
     const handleUpdateProfile = async () => {
-        if (!clientInfo.firstName || !clientInfo.lastName || !clientInfo.email || !clientInfo.phoneNumber) {
+        if (!secInfo.firstName || !secInfo.lastName || !secInfo.email || !secInfo.phoneNumber) {
             Alert.alert("Error", "Please fill in all required fields.");
             return;
         }
@@ -54,18 +58,19 @@ const settings = () => {
         try {
             const previousEmail = await AsyncStorage.getItem('email');
             const updatedData = {
-                firstName: clientInfo.firstName,
-                lastName: clientInfo.lastName,
-                email: clientInfo.email,
-                phoneNumber: clientInfo.phoneNumber,
-                ...(clientInfo.password ? { password: clientInfo.password } : {}), // Include password only if changed
+                firstName: secInfo.firstName,
+                lastName: secInfo.lastName,
+                email: secInfo.email,
+                role: secInfo.role,
+                phoneNumber: secInfo.phoneNumber,
+                ...(secInfo.password ? { password: secInfo.password } : {}), // Include password only if changed
             };
 
-            await ClientService.updateClient(clientInfo.id, updatedData);
+            await UserService.updateUser(secId, updatedData);
 
             // If email was changed, update AsyncStorage
-            if (clientInfo.email !== previousEmail) {
-                await AsyncStorage.setItem('email', clientInfo.email);
+            if (secInfo.email !== previousEmail) {
+                await AsyncStorage.setItem('email', secInfo.email);
             }
 
             Alert.alert("Success", "Your profile has been updated successfully.");
@@ -89,8 +94,8 @@ const settings = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="First Name"
-                        value={clientInfo.firstName}
-                        onChangeText={(text) => setClientInfo({ ...clientInfo, firstName: text })}
+                        value={secInfo.firstName}
+                        onChangeText={(text) => setSecInfo({ ...secInfo, firstName: text })}
                     />
                 </View>
 
@@ -100,8 +105,8 @@ const settings = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="Last Name"
-                        value={clientInfo.lastName}
-                        onChangeText={(text) => setClientInfo({ ...clientInfo, lastName: text })}
+                        value={secInfo.lastName}
+                        onChangeText={(text) => setSecInfo({ ...secInfo, lastName: text })}
                     />
                 </View>
 
@@ -124,8 +129,8 @@ const settings = () => {
                         style={styles.input}
                         placeholder="Phone"
                         keyboardType="phone-pad"
-                        value={clientInfo.phoneNumber}
-                        onChangeText={(text) => setClientInfo({ ...clientInfo, phoneNumber: text })}
+                        value={secInfo.phoneNumber}
+                        onChangeText={(text) => setSecInfo({ ...secInfo, phoneNumber: text })}
                     />
                 </View>
 
@@ -238,4 +243,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default settings;
+export default Settings;

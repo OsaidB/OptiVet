@@ -135,7 +135,7 @@ export default function VetAssistantStackLayout() {
                                 <TouchableOpacity
                                     onPress={() => {
                                         toggleModal();
-                                        router.push('/VetAssistantStack/Settings');
+                                        router.push({pathname: '/VetAssistantStack/Settings', params: {vetAsId: vetAssistantInfo?.userId}});
                                     }}
                                     style={styles.settingsButton}
                                 >
@@ -176,7 +176,12 @@ export default function VetAssistantStackLayout() {
                         <Ionicons name="time-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>History</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Settings')}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            router.push({pathname: '/VetAssistantStack/Settings', params: { vetAsId: vetAssistantInfo?.userId}});
+                        }}
+                        style={styles.footerButton}
+                    >
                         <Ionicons name="settings-outline" size={24} color="#1D3D47" />
                         <Text style={styles.footerButtonText}>Settings</Text>
                     </TouchableOpacity>
@@ -201,7 +206,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         padding: 20,
         borderRadius: 16,
-        width: Platform.OS === "web" ? "30%" : "85%",
+        width: Platform.OS === "web" ? "50%" : "85%",
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -262,6 +267,13 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 10,
+    },
+    buttonRow: {
+        flexDirection: 'row', // Align buttons horizontally
+        justifyContent: 'center', // Center buttons
+        alignItems: 'center', // Vertical alignment
+        marginTop: 20,
+        gap: 15, // Space between buttons (React Native >= 0.71+)
     },
     logOutButtonText: {
         fontSize: 16,

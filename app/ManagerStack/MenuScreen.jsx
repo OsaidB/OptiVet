@@ -14,6 +14,8 @@ const MenuScreen = () => {
     const colorScheme = useColorScheme();
     const [managerInfo, setManagerInfo] = useState(null);
 
+    console.log(managerInfo);
+
     useEffect(() => {
         const fetchManagerInfo = async () => {
             try {
@@ -67,7 +69,10 @@ const MenuScreen = () => {
                     </View>
 
                     {/* Settings Options */}
-                    <TouchableOpacity style={styles.optionCard} onPress={() => router.push("/ManagerStack/ManagerSettings")}>
+                    <TouchableOpacity
+                        style={styles.optionCard}
+                        onPress={() => router.push({ pathname: "/ManagerStack/ManagerSettings", params: { managerId: managerInfo?.userId } })}
+                    >
                         <Ionicons name="person-outline" size={24} color="#1D3D47" />
                         <Text style={styles.optionText}>Edit Profile</Text>
                         <Ionicons name="chevron-forward" size={24} color="#A1CEDC" />

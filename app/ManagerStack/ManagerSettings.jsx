@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
+import {useLocalSearchParams, useRouter} from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "../../hooks/useColorScheme";
@@ -10,7 +10,9 @@ import UserService from "../../Services/UserService";
 
 const ManagerSettings = () => {
     const router = useRouter();
+    const { userId } = useLocalSearchParams();
     const colorScheme = useColorScheme();
+    const { managerId } = useLocalSearchParams();
     const [managerInfo, setManagerInfo] = useState({
         firstName: "",
         lastName: "",
@@ -20,6 +22,8 @@ const ManagerSettings = () => {
     });
     const [loading, setLoading] = useState(false);
 
+    console.log(managerId);
+
     useEffect(() => {
         const fetchManagerInfo = async () => {
             try {
@@ -27,9 +31,11 @@ const ManagerSettings = () => {
                 if (storedEmail) {
                     const data = await UserService.getUserByEmail(storedEmail);
                     setManagerInfo({
+                        id: data.id,
                         firstName: data.firstName,
                         lastName: data.lastName,
                         email: data.email,
+                        role: data.role,
                         phoneNumber: data.phoneNumber,
                         password: ""
                     });
@@ -56,11 +62,14 @@ const ManagerSettings = () => {
                 firstName: managerInfo.firstName,
                 lastName: managerInfo.lastName,
                 email: managerInfo.email,
+                role: managerInfo.role,
+                phoneNumber: managerInfo.phoneNumber,
                 ...(managerInfo.password ? { password: managerInfo.password } : {}), // Include password only if changed
             };
 
-            await UserService.updateUserProfile(updatedData);
+            await UserService.updateUser(managerId, updatedData);
             Alert.alert("Success", "Your profile has been updated successfully.");
+            window.alert("Success, Your profile has been updated successfully.");
         } catch (error) {
             console.error("Error updating profile:", error);
             Alert.alert("Error", "Failed to update profile. Please try again.");
