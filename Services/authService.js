@@ -78,11 +78,11 @@ class AuthService {
     // Function to register a new employee
     async registerEmployee(employeeData) {
         try {
-            const token = localStorage.getItem("token"); // Retrieve the token for authentication
+            const token = await AsyncStorage.getItem("authToken"); // Use AsyncStorage instead of localStorage
             const response = await axios.post(`${BASE_URL}/register-employee`, employeeData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Auth-Token': token, // Include token in the request headers
+                    'X-Auth-Token': token || '', // Ensure token is not null
                 }
             });
             return response.data;
