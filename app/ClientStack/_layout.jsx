@@ -211,12 +211,7 @@ export default function ClientStackLayout() {
                         <Ionicons name="calendar-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
                         <Text style={styles.footerButtonText}>Appointments</Text>
                     </TouchableOpacity>
-                    <Link href="/ClientStack/PetsForAdoption" asChild>
-                        <TouchableOpacity style={styles.footerButton}>
-                            <Image source={require('../../assets/images/cat (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
-                            <Text style={styles.footerButtonText}>Pets For Adoption</Text>
-                        </TouchableOpacity>
-                    </Link>
+
                     <TouchableOpacity
                         style={styles.footerButton}
                         onPress={() => router.push('/ClientStack/Products')}

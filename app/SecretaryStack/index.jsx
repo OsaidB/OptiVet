@@ -15,6 +15,8 @@ import { createFilter } from "react-native-search-filter";
 import ProductService from "../../Services/ProductService";
 import { useNavigation } from "expo-router";
 import baseURL from '../../Services/config'; // Adjust the path as necessary
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import UserService from "../../Services/UserService";
 
 //import { useRouter, useLocalSearchParams, Link } from 'expo-router'; // Import useLocalSearchParams
 //import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
@@ -41,6 +43,47 @@ const SecretaryStack = () => {
 
 
     const [pets, setPets] = useState([]);
+    const [secretaryInfo, setSecretaryInfo] = useState(null);
+    const [email, setEmail] = useState(null);
+
+    useEffect(() => {
+
+        const fetchEmail = async () => {
+            try {
+                const storedEmail = await AsyncStorage.getItem('email');
+                if (storedEmail) {
+                    setEmail(storedEmail);
+
+                }
+                else {
+                    console.error('No email found in AsynchStorage');
+                    Alert.alert('Error', 'No email found. Please log in again.');
+                }
+
+            } catch (error) {
+                console.error('Error fetching emil from AsynchStorage:', error);
+                Alert.alert('Error', 'Failed to retrieve email.');
+            }
+
+        };
+
+        const fetchSecretaryInfo = async () => {
+            if (!email) return;
+            try {
+                const data = await UserService.getUserByEmail(email);
+                setSecretaryInfo(data);
+            } catch (error) {
+                console.error('Error fetching secretary info:', error);
+                Alert.alert('Error', 'Failed to load secretary information.');
+            }
+
+
+        };
+
+        fetchEmail();
+        fetchSecretaryInfo();
+
+    }, [email]);
 
     return (
 
@@ -51,35 +94,40 @@ const SecretaryStack = () => {
                 <View
                     style={styles.imageStyle}>
                     <Image
-                        source={require('../../assets/images/default_user.png')}
+                        source={secretaryInfo?.profileImageUrl ? { uri: secretaryInfo.profileImageUrl } : require('../../assets/images/default_user.png')}
                         style={styles.imageStyling}
                         resizeMode="contain"></Image>
                 </View>
+                {secretaryInfo ? (
 
-                <View
-                    style={styles.user}>
-                    <View
-                        style={styles.textElement}>
-                        <Ionicons name="person-outline" size={24} color={'white'} />
-                        <Text style={styles.textStyle} numberOfLines={1}>
-                            Dr Khaled Mustafa
-                        </Text>
-                    </View>
-                    <View
-                        style={styles.textElement}>
-                        <Ionicons name="location-outline" size={24} color={'white'} />
-                        <Text style={styles.textStyle} numberOfLines={1}>
-                            Birzeit
-                        </Text>
-                    </View>
-                    <View
-                        style={styles.textElement}>
-                        <Ionicons name="mail-outline" size={24} color={'white'} />
-                        <Text style={styles.textStyle} numberOfLines={1}>
-                            KhaledMustafa@gmail.com
-                        </Text>
-                    </View>
-                </View>
+                    <>
+
+                        <View
+                            style={styles.user}>
+                            <View
+                                style={styles.textElement}>
+                                <Ionicons name="person-outline" size={24} color={'white'} />
+                                <Text style={styles.textStyle} numberOfLines={1}>
+                                    {secretaryInfo.firstName} {secretaryInfo.lastName}
+                                </Text>
+                            </View>
+
+                            <View
+                                style={styles.textElement}>
+                                <Ionicons name="mail-outline" size={24} color={'white'} />
+                                <Text style={styles.textStyle} numberOfLines={1}>
+                                    {secretaryInfo.email}
+                                </Text>
+                            </View>
+                        </View>
+
+
+                    </>
+
+                ) : (
+                    <Text style={styles.loadingText}>Loading secretary info......</Text>
+                )}
+
             </View>
 
             <View
@@ -182,6 +230,10 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         alignSelf: 'center',
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#7F8C8D'
     }
 });
 

@@ -1,8 +1,8 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import {router, Stack} from 'expo-router';
+import {Stack, useRouter} from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Modal, Platform } from 'react-native';
 import { useColorScheme } from '../../hooks/useColorScheme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import CustomToast from '../Toast.config';
 import { Link } from 'expo-router';
@@ -12,11 +12,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserService from '../../Services/UserService';
 import AuthService from '../../Services/authService';
 import DefaultFemaleImage from "../../assets/images/default_female.jpg";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 export default function SecretaryStackLayout() {
     const colorScheme = useColorScheme();
-
+    const router = useRouter();
     const [secretaryInfo, setSecretaryInfo] = useState(null);
     const [email, setEmail] = useState(null);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -90,7 +89,7 @@ export default function SecretaryStackLayout() {
         <AuthGuard allowedRoles={['SECRETARY']}>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 {/* Header */}
-                <View style={[styles.header, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC' }]}>
+                <View style={[styles.header, { backgroundColor: '#A1CEDC' }]}>
                     <TouchableOpacity onPress={() => router.push('/SecretaryStack')} style={styles.iconButton}>
                         <Ionicons name="arrow-back" size={24} color="#FFF" />
                     </TouchableOpacity>
@@ -109,7 +108,7 @@ export default function SecretaryStackLayout() {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContent}>
                             <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-                                <FontAwesome name="close" size={24} color="black" />
+                                <FontAwesome name='close' size={24} color='black' />
                             </TouchableOpacity>
                             <Text style={styles.modalTitle}>Profile Information</Text>
                             <Image
@@ -129,20 +128,13 @@ export default function SecretaryStackLayout() {
                             ) : (
                                 <Text style={styles.loadingText}>Loading profile...</Text>
                             )}
-                            <View style={styles.buttonRow}>
-                                <TouchableOpacity
-
-                                    onPress={() => {
-                                        toggleModal();
-                                        router.push({pathname: '/SecretaryStack/Settings', params: { secId: secretaryInfo?.userId}});
-                                    }}
-                                    style={styles.settingsButton}
-                                >
-                                    <FontAwesome name="cogs" size={20} color="#FFFFFF" />
+                            <View>
+                                <TouchableOpacity onPress={() => {toggleModal();router.push('/SecretaryStack/Settings')}} style={styles.settingsButton}>
+                                    <FontAwesome name='cogs' size={20} color='#FFFFFF' />
                                     <Text style={styles.settingsButtonText}>Settings</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
-                                    <FontAwesome name="sign-out" size={20} color="#FFFFFF" />
+                                    <FontAwesome name='sign-out' size={20} color='#FFFFFF' />
                                     <Text style={styles.logOutButtonText}>Logout</Text>
                                 </TouchableOpacity>
                             </View>
@@ -164,34 +156,29 @@ export default function SecretaryStackLayout() {
                 </Stack>
 
                 {/* Footer */}
-                <View style={[styles.footer, { backgroundColor: colorScheme === 'dark' ? '#1D3D47' : '#FFFFFF' }]}>
-                    <TouchableOpacity
-                        style={styles.footerButton}
-                        onPress={() => router.push('/SecretaryStack')}
-                    >
-                        <Ionicons name="home-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                <View style={[styles.footer, { backgroundColor: '#1D3D47'}]}>
+                    <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/SecretaryStack')}>
+                        <Ionicons name="home-outline" size={24} color='#FFF' />
                         <Text style={styles.footerButtonText}>Home</Text>
                     </TouchableOpacity>
                     <Link href="/SecretaryStack/Products" asChild>
                         <TouchableOpacity style={styles.footerButton} onPress={() => console.log('Products')}>
-                            <Ionicons name="cart-outline" size={24} color={colorScheme === 'dark' ? '#FFF' : '#1D3D47'} />
+                            <Ionicons name="cart-outline" size={24} color='#FFF' />
                             <Text style={styles.footerButtonText}>Products</Text>
                         </TouchableOpacity>
                     </Link>
                     <Link href="/SecretaryStack/PetsForAdoption" asChild>
                         <TouchableOpacity style={styles.footerButton}>
-                            <Image source={require('../../assets/images/cat (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image>
+                          
+                            {/* <Image source={require('../../assets/images/cat (2).png')} style={{ width: '80%', height: 30 }} resizeMode='contain'></Image> */}
+                            <Ionicons name="logo-octocat" size={24} color='#FFF' />
+                           
                             <Text style={styles.footerButtonText}>Pets For Adoption</Text>
                         </TouchableOpacity>
                     </Link>
 
-                    <TouchableOpacity
-                        onPress={() => {
-                            router.push({pathname: '/SecretaryStack/Settings', params: { secId: secretaryInfo?.userId}});
-                        }}
-                        style={styles.footerButton}
-                    >
-                        <Ionicons name="settings-outline" size={24} color="#1D3D47" />
+                    <TouchableOpacity style={styles.footerButton} onPress={() => {toggleModal();router.push('/SecretaryStack/Settings')}}>
+                        <Ionicons name="settings-outline" size={24} color='#FFF' />
                         <Text style={styles.footerButtonText}>Settings</Text>
                     </TouchableOpacity>
                 </View>
@@ -236,6 +223,7 @@ const styles = StyleSheet.create({
     footerButtonText: {
         fontSize: 12,
         marginTop: 5,
+        color:'#FFF'
     },
 
     // Modal overlay
@@ -313,14 +301,6 @@ const styles = StyleSheet.create({
         color: "#FFFFFF", // White text
         fontWeight: "bold",
         textAlign: "center",
-    },
-
-    buttonRow: {
-        flexDirection: 'row', // Align buttons horizontally
-        justifyContent: 'center', // Center buttons
-        alignItems: 'center', // Vertical alignment
-        marginTop: 20,
-        gap: 15, // Space between buttons (React Native >= 0.71+)
     },
 
     // Close button (top-right of the modal)

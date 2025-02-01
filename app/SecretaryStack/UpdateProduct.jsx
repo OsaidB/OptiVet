@@ -1049,7 +1049,7 @@ import {
     View, Text, Image, TouchableOpacity,
     StyleSheet, Alert, ImageBackground, TextInput,
     Modal, ScrollView,
-    Platform
+    Platform, SafeAreaView
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import * as ImagePicker from "expo-image-picker";
@@ -1105,7 +1105,7 @@ export default function UpdateProduct() {
                 setProductCategory(fetchProduct.productCategory);
                 setProductImageUrl(fetchProduct.productImageUrl);
                 setApplyImage(true);
-                
+
             } catch (error) {
                 console.error("Error fetching product:", error);
                 Alert.alert('Error', 'Failed to load product.');
@@ -1279,16 +1279,17 @@ export default function UpdateProduct() {
 
 
     return (
-
-        <ScrollView>
-
-            <View style={{ justifyContent: 'space-evenly' }}>
-            <Text style={styles.title}>Update Product</Text>
+        <SafeAreaView
+            style={styles.container}>
+            <ScrollView style={styles.scroll}>
 
 
-                <View style={{}}>
+                <Text style={styles.title}>Update Product</Text>
 
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25 }}>Product Name:</Text>
+
+                <View>
+
+                    <Text style={styles.elementText}>Product Name:</Text>
                     <TextInput
                         editable
                         placeholder="Product Name"
@@ -1298,15 +1299,15 @@ export default function UpdateProduct() {
                         onChangeText={setProductName}
                         maxLength={100}
                         // onBlur={}
-                        style={{ borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 24, height: 40, paddingLeft: 20, backgroundColor: 'white' }}
+                        style={styles.textInputStyle}
                     />
                 </View>
 
 
 
-                <View style={{}}>
+                <View>
 
-                    <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25 }}>Product Price:</Text>
+                    <Text style={styles.elementText}>Product Price:</Text>
                     <TextInput
                         editable
                         placeholder="Product Price"
@@ -1317,18 +1318,23 @@ export default function UpdateProduct() {
                         keyboardType="numeric"
                         maxLength={100}
                         // onBlur={}
-                        style={{ borderWidth: 2, marginLeft: 10, marginRight: 10, marginBottom: 24, height: 40, paddingLeft: 20, backgroundColor: 'white' }}
+                        style={styles.textInputStyle}
+
                     />
                 </View>
 
 
 
-                <View style={{}}>
-                    <Text style={{ marginLeft: 10, fontSize: 25 }}>Product Category:</Text>
+                <View>
+                    <Text style={styles.elementText}>Product Category:</Text>
 
                     <Picker
+                        style={
+                            Platform.OS == ('web' || 'android')
+                                ? styles.picker
+                                : styles.pickerIos
+                        }
                         selectedValue={productCategory}
-                        style={styles.picker}
                         onValueChange={(itemValue) => {
                             setProductCategory(itemValue);
                             //setSelectedCategoryId(itemValue);
@@ -1357,17 +1363,17 @@ export default function UpdateProduct() {
 
 
 
-                <Text style={{ marginLeft: 10, marginBottom: 10, fontSize: 25 }}>Edit Product Image:</Text>
-                <View style={{ backgroundColor: '#c7bcbc', justifyContent: 'center', alignItems: 'center', paddingBottom: 20, paddingTop: 20 }}>
+                <Text style={styles.elementText}>Edit Product Image:</Text>
+                <View style={styles.imagePart}>
 
 
 
                     {(!(productImage) && !(productImageUrl)) && (
-                        <View style={{ justifyContent: 'flex-start', alignItems: 'center', borderRadius: 8, marginRight: 20, marginLeft: 20, backgroundColor: 'white' }}>
+                        <View style={styles.imageStyle}>
 
-                            <Image source={require('../../assets/images/upload (3).png')} style={{ width: 100, height: 100, marginTop: 10 }} resizeMode='contain'></Image>
+                            <Image source={require('../../assets/images/upload (3).png')} style={styles.uploadImageStyling} resizeMode='contain'></Image>
 
-                            <TouchableOpacity style={{ backgroundColor: "#133945", borderRadius: 8, padding: 10, margin: 10, justifyContent: 'center', alignItems: 'center' }} onPress={pickImage}>
+                            <TouchableOpacity style={styles.button} onPress={pickImage}>
                                 <Text style={styles.buttonText} adjustsFontSizeToFit>Upload Image</Text>
                             </TouchableOpacity>
 
@@ -1378,13 +1384,13 @@ export default function UpdateProduct() {
                     {(applyImage && productImageUrl) && (
 
 
-                        <View style={{ justifyContent: 'flex-start', alignItems: 'center', borderRadius: 8, marginRight: 20, marginLeft: 20, backgroundColor: 'white' }} deleteProductImageUrl={deleteProductImageUrl}>
+                        <View style={styles.imageStyle} deleteProductImageUrl={deleteProductImageUrl}>
 
 
-                            <Image source={{ uri: `${BASE_URL_IMAGES}${productImageUrl}` }} style={{ width: 100, height: 100, borderRadius: 8 }} resizeMode='contain'></Image>
+                            <Image source={{ uri: `${BASE_URL_IMAGES}${productImageUrl}` }} style={styles.petImageStyling} resizeMode='contain'></Image>
 
-                            <TouchableOpacity style={{ borderRadius: '100%', backgroundColor: 'brown', width: 30, height: 30, justifyContent: 'center', position: 'absolute', left: -10, top: -10 }} onPress={deleteProductImageUrl}>
-                                <Text style={{ alignSelf: 'center', fontSize: '100%' }}>X</Text>
+                            <TouchableOpacity style={styles.deleteImageButton} onPress={deleteProductImageUrl}>
+                                <Text style={styles.deleteImageButtonStyling}>X</Text>
 
                             </TouchableOpacity>
 
@@ -1396,13 +1402,13 @@ export default function UpdateProduct() {
 
                     {(applyImage && productImage) && (
 
-                        <View style={{ justifyContent: 'flex-start', alignItems: 'center', borderRadius: 8, marginRight: 20, marginLeft: 20, backgroundColor: 'white' }} deleteProductImage={deleteProductImage}>
+                        <View style={styles.imageStyle} deleteProductImage={deleteProductImage}>
 
 
-                            <Image source={productImage} style={{ width: 100, height: 100, borderRadius: 8 }} resizeMode='contain'></Image>
+                            <Image source={productImage} style={styles.petImageStyling} resizeMode='contain'></Image>
 
-                            <TouchableOpacity style={{ borderRadius: '100%', backgroundColor: 'brown', width: 30, height: 30, justifyContent: 'center', position: 'absolute', left: -10, top: -10 }} onPress={deleteProductImage}>
-                                <Text style={{ alignSelf: 'center', fontSize: '100%' }}>X</Text>
+                            <TouchableOpacity style={styles.deleteImageButtonStyling} onPress={deleteProductImage}>
+                                <Text style={styles.deleteImageButtonStyling}>X</Text>
 
                             </TouchableOpacity>
 
@@ -1413,18 +1419,19 @@ export default function UpdateProduct() {
 
                 </View>
 
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={updateProductHandle}>
+                    <Text
+                        style={styles.addButtonText}>
+                        Update Product
+                    </Text>
+                </TouchableOpacity>
 
-                    <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', backgroundColor: '#133945', borderRadius: 18, height: '70%', width: '80%' }} onPress={updateProductHandle}>
-                        <Text style={{ alignSelf: 'center', color: 'white', fontWeight: 'bold', fontSize: 20, padding: 17 }}>Update Product</Text>
-                    </TouchableOpacity>
 
-                </View>
 
-            </View>
-
-        </ScrollView>
-
+            </ScrollView>
+        </SafeAreaView>
 
 
     );
@@ -1432,23 +1439,123 @@ export default function UpdateProduct() {
 
 
 const styles = StyleSheet.create({
-    buttonText: {
-        color: "#FFFFFF",
-        fontSize: 16,
-        fontWeight: "bold",
+
+
+    container: {
+
+        flex: 1,
+        alignItems: 'center',
+        backgroundColor: 'white',
+        marginVertical: Platform.OS == 'web' ? 0 : 30
+    },
+
+    scroll: {
+        width: '100%'
     },
 
 
+    elementText: {
+        marginLeft: 10,
+        marginBottom: 12,
+        fontSize: 25
+    },
+
+    textInputStyle: {
+
+        borderWidth: 2,
+        marginLeft: 10,
+        marginRight: 10,
+        marginBottom: 20,
+        height: 40,
+        paddingLeft: 20,
+        borderRadius: 4,
+        backgroundColor: 'white',
+    },
+
+
+    textDescriptionInput: {
+        padding: 12,
+        borderWidth: 2,
+        marginHorizontal: 10,
+        marginBottom: 20,
+        borderRadius: 12,
+        justifyContent: 'center',
+    },
+
+    sliderText: {
+        marginLeft: 10,
+        fontSize: 25
+    },
+
+    pickerIos: {
+        borderWidth: 4,
+        borderColor: '#f5f5f5',
+        marginBottom: 20,
+
+    },
+
+    imagePart: {
+        backgroundColor: '#c7bcbc',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingBottom: 20,
+        paddingTop: 20,
+        marginBottom: 20,
+    },
+
+    imageStyle: {
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        borderRadius: 8,
+        marginRight: 20,
+        marginLeft: 20,
+        backgroundColor: 'white',
+    },
+
+    uploadImageStyling: {
+        width: 100,
+        height: 100,
+        marginTop: 10
+    },
+
+    button: {
+        backgroundColor: '#133945',
+        borderRadius: 8,
+        padding: 10,
+        margin: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    deleteImageButton: {
+        borderRadius: 100,
+        backgroundColor: 'brown',
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        position: 'absolute',
+        left: -10,
+        top: -10,
+    },
+
+    deleteImageButtonStyling: {
+        alignSelf: 'center',
+        fontSize: 20
+    },
+
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 
     picker: {
         height: 40,
-        marginTop: 10,
-        marginHorizontal: 10,
+        marginTop: 12,
         marginBottom: 20,
+        marginHorizontal: 12,
         borderColor: 'black',
         borderWidth: 2,
         borderRadius: 5,
-        padding: 10,
         color: '#1D3D47',
     },
 
@@ -1456,13 +1563,32 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         margin: 10,
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
 
     slider: {
         height: 40,
         marginHorizontal: 10,
-        marginBottom: 12
+        marginBottom: 12,
+    },
+    addButtonText: {
+        fontSize: 20,
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    petImageStyling: {
+        width: 120,
+        height: 120,
+        borderRadius: 8
+    },
+    addButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        backgroundColor: '#133945',
+        borderRadius: 18,
+        padding: 12,
+        marginVertical: 10,
     }
 });
 

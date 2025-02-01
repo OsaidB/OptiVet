@@ -47,7 +47,14 @@ export default function AddPetForAdoption() {
     const remainingMonths = petAge % 12;
 
 
-
+    const reset = () => {
+        setPetName('');
+        setPetAge(0);
+        setTypeOfPet('');
+        setBreedOfPet('');
+        setPetDescription('');
+        setPetImage(null);
+    };
 
     const calcBirthDate = (petage) => {
         const thisDay = new Date();
@@ -197,15 +204,35 @@ export default function AddPetForAdoption() {
                 if (!petImage) {
 
 
-                    const getFile = {
-                        uri: '../../assets/images/box.png',
-                        name: 'box.png',
-                        type: 'image/png',
+                    // const getFile = {
+                    //     uri: '../../assets/images/box.png',
+                    //     name: 'box.png',
+                    //     type: 'image/png',
 
-                    };
-                    setPetImage(getFile);
+                    // };
+                    // setPetImage(getFile);
 
 
+
+
+                    //const image = await PetForAdoptionService.uploadPetForAdoptionImages('../../assets/images/box.png');
+
+                    const dateOfBirth = calcBirthDate(petAge);
+
+                    const petForAdoption = await PetForAdoptionService.createPetForAdoption({
+
+                        name: petName,
+                        birthDate: dateOfBirth,
+                        type: typeOfPet,
+                        breed: breedOfPet,
+                        petForAdoptionImageUrl: '',
+                        petForAdoptionDescription: petDescription
+                    });
+                    reset();
+                    router.push({
+                        pathname: '/SecretaryStack/PetsForAdoption',
+
+                    });
                 }
 
 
@@ -226,12 +253,15 @@ export default function AddPetForAdoption() {
                         petForAdoptionDescription: petDescription
                     });
 
+                    reset();
+                    router.push({
+                        pathname: '/SecretaryStack/PetsForAdoption',
+
+                    });
+
                 }
 
-                router.push({
-                    pathname: '/SecretaryStack/PetsForAdoption',
 
-                });
             } catch (error) {
                 Alert.alert('error creating pet for adoption', error);
             }
@@ -407,7 +437,7 @@ export default function AddPetForAdoption() {
                             deleteImage={deleteImage}>
                             <Image
                                 source={petImage}
-                                style={{ width: 120, height: 120, borderRadius: 8 }}
+                                style={styles.petImageStyling}
                                 resizeMode="contain"></Image>
 
                             <TouchableOpacity
@@ -420,18 +450,10 @@ export default function AddPetForAdoption() {
                 </View>
 
                 <TouchableOpacity
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        alignSelf: 'center',
-                        backgroundColor: '#133945',
-                        borderRadius: 18,
-                        padding: 12,
-                        marginVertical: 10,
-                    }}
+                    style={styles.addButton}
                     onPress={addPetForAdoptionHandle}>
                     <Text
-                        style={styles.addButton}>
+                        style={styles.addButtonText}>
                         Add Pet for adoption
                     </Text>
                 </TouchableOpacity>
@@ -445,7 +467,6 @@ export default function AddPetForAdoption() {
 
 const styles = StyleSheet.create({
 
-
     container: {
 
         flex: 1,
@@ -455,7 +476,9 @@ const styles = StyleSheet.create({
     },
 
     scroll: {
-        width: '100%'
+        width: '100%',
+        marginVertical: Platform.OS == 'web' ? 0 : 30
+
     },
 
 
@@ -577,10 +600,24 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
 
-    addButton: {
+    addButtonText: {
         fontSize: 20,
         color: 'white',
         fontWeight: 'bold',
+    },
+    petImageStyling: {
+        width: 120,
+        height: 120,
+        borderRadius: 8
+    },
+    addButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        backgroundColor: '#133945',
+        borderRadius: 18,
+        padding: 12,
+        marginVertical: 10,
     }
 });
 

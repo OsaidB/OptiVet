@@ -91,7 +91,7 @@ const PetsForAdoption = () => {
                         style={styles.modalStyle}>
                         <View style={styles.modalImageStyle}>
                             <Image
-                                source={require('../../assets/images/trash.png')}
+                                source={ selectedPet.petForAdoptionImageUrl ? { uri: `${BASE_URL_IMAGES}${selectedPet.petForAdoptionImageUrl}` } : require('../../assets/images/cat (1).png')}
                                 style={styles.modalImageStyling}
                                 resizeMode="cover"></Image>
                         </View>
@@ -174,14 +174,14 @@ const PetsForAdoption = () => {
                             <View
                                 style={styles.petImageStyle}>
                                 <Image
-                                    source={{ uri: `${BASE_URL_IMAGES}${item.petForAdoptionImageUrl}` }}
+                                    source={ item.petForAdoptionImageUrl ? { uri: `${BASE_URL_IMAGES}${item.petForAdoptionImageUrl}` } : require('../../assets/images/cat (1).png')}
                                     style={styles.petImageStyling}
                                     resizeMode="cover"></Image>
                             </View>
 
                             <Text
                                 style={styles.nameText}
-                                numberOfLines={1}>
+                                numberOfLines = {Platform.OS == 'web' ? 1 : 2}>
                                 {item.name}
                             </Text>
 
@@ -338,14 +338,14 @@ const styles = StyleSheet.create({
         paddingTop:12,
         width: Platform.OS == 'web' ? '20%' : '40%',
         backgroundColor: '#133945',
-        height: 300,
+        height: 320,
         margin: 12,
         borderRadius: 15,
         justifyContent: 'flex-start',
         alignItems: 'center',
     },
     petImageStyle: {
-        borderRadius: '100%',
+        borderRadius: 100,
         width: '90%',
         height: '40%',
         maxHeight: 120,
@@ -354,21 +354,22 @@ const styles = StyleSheet.create({
     },
 
     petImageStyling: {
-        borderRadius: '100%',
+        borderRadius: 100,
         width: '100%',
         height: '100%',
         borderWidth:2,
         borderColor:'white'
     },
     nameText: {
-        height: '12%',
+    
         fontSize: 20,
         color: 'white',
         marginBottom: 4,
+    
     },
 
     typeBreedText: {
-        height: '12%',
+    
         fontSize: 20,
         color: '#97989c',
         marginBottom: 20,
@@ -388,7 +389,7 @@ const styles = StyleSheet.create({
         height: 44,
         width: 44,
         backgroundColor: 'white',
-        borderRadius: '100%',
+        borderRadius: 100,
         marginHorizontal: 10,
     },
 
@@ -399,7 +400,7 @@ const styles = StyleSheet.create({
         height: 40,
         width: 40,
         backgroundColor: 'white',
-        borderRadius: '100%',
+        borderRadius: 100,
         marginHorizontal: 10,
     },
 
@@ -426,6 +427,7 @@ const styles = StyleSheet.create({
         height: 50,
         width: '50%',
         marginVertical: 10,
+        padding:12
     },
     linkButtonText: {
         fontSize: 20,
