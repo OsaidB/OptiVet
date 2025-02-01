@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SignUpScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -27,11 +28,20 @@ const SignUpScreen = () => {
     const router = useRouter(); // Expo Router's navigation hook
 
     const handleSignUp = async () => {
-        if (!email || !password || !firstName || !lastName || !phoneNumber || !dateOfBirth) {
+        if (!email || !password || !confirmPassword || !firstName || !lastName || !phoneNumber || !dateOfBirth) {
             Toast.show({
                 type: 'error',
                 text1: 'Error',
                 text2: 'Please fill out all fields.',
+            });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Passwords do not match!',
             });
             return;
         }
@@ -119,6 +129,14 @@ const SignUpScreen = () => {
                 placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
+                secureTextEntry
+                placeholderTextColor={'gray'}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
                 secureTextEntry
                 placeholderTextColor={'gray'}
             />
