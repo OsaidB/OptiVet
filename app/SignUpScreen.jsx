@@ -10,7 +10,7 @@ import {
     Platform,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { useRouter } from 'expo-router'; // Updated for navigation
+import { useRouter } from 'expo-router'; // Expo Router's navigation hook
 import Toast from 'react-native-toast-message';
 import CustomToast from './Toast.config';
 import AuthService from '../Services/authService';
@@ -26,6 +26,12 @@ const SignUpScreen = () => {
     const [dateOfBirth, setDateOfBirth] = useState(new Date());
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const router = useRouter(); // Expo Router's navigation hook
+
+    // Function to validate password strength
+    const isPasswordStrong = (pwd) => {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!]).{8,}$/;
+        return passwordRegex.test(pwd);
+    };
 
     const handleSignUp = async () => {
         if (!email || !password || !confirmPassword || !firstName || !lastName || !phoneNumber || !dateOfBirth) {
@@ -46,6 +52,15 @@ const SignUpScreen = () => {
             return;
         }
 
+        if (!isPasswordStrong(password)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Weak Password',
+                text2: 'Password must be at least 8 characters, include an uppercase, lowercase, number, and special character.',
+            });
+            return;
+        }
+
         try {
             const userData = {
                 email,
@@ -53,16 +68,24 @@ const SignUpScreen = () => {
                 firstName,
                 lastName,
                 phoneNumber,
-                dateOfBirth: dateOfBirth.toISOString().split('T')[0], // Format for API
+                dateOfBirth: dateOfBirth.toISOString().split('T')[0],
             };
+
             await AuthService.register(userData);
-            await AsyncStorage.setItem('email', email);
+
+            // Store email & password in AsyncStorage for autofill
+            await AsyncStorage.setItem('autoFillEmail', email);
+            await AsyncStorage.setItem('autoFillPassword', password);
+
             Toast.show({
                 type: 'success',
                 text1: 'Success',
-                text2: 'Your account has been created!',
+                text2: 'Account created! Redirecting to login...',
             });
-            router.push('../ClientStack');
+
+            // Navigate to LoginScreen
+            router.push('./');
+
         } catch (error) {
             console.error('Error during sign up:', error);
             Toast.show({
@@ -72,6 +95,7 @@ const SignUpScreen = () => {
             });
         }
     };
+
 
     const renderDatePicker = () => {
         if (Platform.OS === 'web') {

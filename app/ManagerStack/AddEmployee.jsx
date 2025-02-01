@@ -20,6 +20,7 @@ const AddEmployee = () => {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState(new Date());
     const [role, setRole] = useState('VET_ASSISTANT'); // Default role
@@ -27,12 +28,36 @@ const AddEmployee = () => {
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const router = useRouter();
 
+    // Function to validate password strength
+    const isPasswordStrong = (pwd) => {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!]).{8,}$/;
+        return passwordRegex.test(pwd);
+    };
+
     const handleAddEmployee = async () => {
-        if (!firstName || !lastName || !email || !password || !phoneNumber || !dateOfBirth) {
+        if (!firstName || !lastName || !email || !password || !confirmPassword || !phoneNumber || !dateOfBirth) {
             Toast.show({
                 type: 'error',
                 text1: 'Error',
                 text2: 'All fields are required.',
+            });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Passwords do not match!',
+            });
+            return;
+        }
+
+        if (!isPasswordStrong(password)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Weak Password',
+                text2: 'Password must be at least 8 characters, include 1 uppercase, 1 lowercase, 1 number, and 1 special character.',
             });
             return;
         }
@@ -63,7 +88,6 @@ const AddEmployee = () => {
         } catch (error) {
             setLoading(false);
 
-            // Log and display error
             console.error('Error creating employee:', error);
             const errorMessage =
                 error.response?.data?.message || 'Failed to create employee account. Please try again.';
@@ -145,6 +169,14 @@ const AddEmployee = () => {
                 onChangeText={setPassword}
                 secureTextEntry
             />
+
+            <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword} secureTextEntry
+            />
+
             <TextInput
                 style={styles.input}
                 placeholder="Phone Number"
