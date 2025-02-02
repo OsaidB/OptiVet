@@ -10,12 +10,11 @@ import * as ImagePicker from "expo-image-picker";
 import { Picker } from '@react-native-picker/picker';
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/medicalHistories`;
 const BASE_URL_IMAGES = `${baseURL.USED_BASE_URL}/api/pets`;
-//import { useRouter } from 'expo-router';
-//import { useRoute } from '@react-navigation/native';
+
 import MedicalSessionService from '../../Services/MedicalSessionService';
 import { id } from 'date-fns/locale';
 import { WINDOWS } from 'nativewind/dist/utils/selector';
-//import { newDate } from 'react-datepicker/dist/date_utils';
+
 
 
 
@@ -32,7 +31,7 @@ export default function MedicalHistory() {
     const [allergies, setAllergies] = useState([]);
     const [vaccinations, setVaccinations] = useState([]);
     const [surgeories, setSurgeories] = useState([]);
-    //const [imageUrls, setImageUrls] = useState([{ id: 1, name: '1735573696079-petImage.jpg' }, { id: 2, name: '1735573696079-petImage.jpg' }, { id: 3, name: '1735573696079-petImage.jpg' }, { id: 4, name: '1735573696079-petImage.jpg' }, { id: 5, name: '1735573696079-petImage.jpg' }, { id: 6, name: '1735573696079-petImage.jpg' }, { id: 7, name: '1735573696079-petImage.jpg' }, { id: 8, name: '1735573696079-petImage.jpg' }, { id: 9, name: '1735573696079-petImage.jpg' }, { id: 10, name: '1735573696079-petImage.jpg' }, { id: 11, name: '1735573696079-petImage.jpg' }, { id: 12, name: '1735573696079-petImage.jpg' }, { id: 13, name: '1735573696079-petImage.jpg' }, { id: 14, name: '1735573696079-petImage.jpg' }, { id: 15, name: '1735573696079-petImage.jpg' }, { id: 16, name: '1735573696079-petImage.jpg' }, { id: 17, name: '1735573696079-petImage.jpg' }, { id: 18, name: '1735573696079-petImage.jpg' }, { id: 19, name: '1735573696079-petImage.jpg' }]);
+
     const { petId } = useLocalSearchParams();
     // Stores any error message
     const [counter, setCounter] = useState(0);
@@ -40,10 +39,10 @@ export default function MedicalHistory() {
     const [imageUrls, setImageUrls] = useState([]);
     const [images, setImages] = useState([]);
 
-    //const [addedImages, setAddedImages] = useState([]);
+    
     const [pickedImage, setPickedImage] = useState(null);
 
-    //const route = useRoute();
+    
 
     const getSessionDate = (sessionDate) => {
         const date = new Date(sessionDate);
@@ -57,12 +56,12 @@ export default function MedicalHistory() {
 
 
 
-    //const [medicalSessions, setMedicalSessions] = useState([{ id: 1, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }, { id: 2, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }, { id: 3, diagnosis: 'this is a pet', treatment: 'antibiotics', sessiondate: getDate(), veterinarian: 'Waleed', symptoms: 'high temperature', treatmentplan: 'come back after one week' }]);
+
     const [medicalSessions, setMedicalSessions] = useState([]);
     const [dietaryPreferencesText, setDietaryPreferencesText] = useState('');
     const [notesText, setNotesText] = useState('');
 
-    //const { clientId } = useLocalSearchParams();
+    
 
 
 
@@ -74,19 +73,18 @@ export default function MedicalHistory() {
                 const fetchedMedicalHistory = await MedicalHistoryService.getMedicalHistory(petId);
 
 
-                //setImageUrls(fetchedMedicalHistory.medicalHistoryImageUrls);
+
 
 
                 const fetchedImages = fetchedMedicalHistory.medicalHistoryImageUrls;
                 setImages(fetchedImages);
-                //console.log(images.length);
-                //console.log(fetchedImages);
+
                 const newImages = [];
                 for (let i = 0; i < fetchedImages.length; i++) {
-                    //console.log(fetchedImages[i]);
+                    
 
                     newImages[i] = { id: i, url: fetchedImages[i] };
-                    //setImageUrls([...imageUrls, { id: i, url: fetchedImages[i] }]);
+                    
                 }
                 setImageUrls(newImages);
                 const counterValue = imageUrls.length + 1;
@@ -96,13 +94,7 @@ export default function MedicalHistory() {
 
 
 
-                //console.log(counterValue);
-                //setCounter(imageUrls);
-                //setCounter(counter);
-                //console.log(counter);
-                //const fetchedMedicalHistoryy = await MedicalHistoryService.updateMedicalHistory({medicalHistoryImageUrls:[],notes:'heyyy'}, petId);
-                // console.log(fetchedMedicalHistoryy);
-                //console.log(fetchedMedicalHistoryy.medicalHistoryImageUrls);
+
 
             } catch (error) {
                 console.error('Error fetching medical history', error);
@@ -216,8 +208,7 @@ export default function MedicalHistory() {
     }, []);
 
 
-    //  console.log(imageUrls);
-    //  console.log(images);
+
 
     const pickImage = async () => {
         const { status } = await ImagePicker.
@@ -366,38 +357,6 @@ export default function MedicalHistory() {
         const newImageUrls = imageUrls.filter(imageUrl => imageUrl.id !== id);
         setImageUrls(newImageUrls);
     };
-
-
-
-
-
-
-
-
-    // const deleteAddedImage = (id) => {
-    //     MedicalHistoryService.deleteSurgeoryById(id);
-    //     const newSurgeories = surgeories.filter(surgeory => surgeory.id !== id);
-    //     setSurgeories(newSurgeories);
-    // };
-
-    // const addAddedImage = async () => {
-    //     if (conditionText === '') {
-    //         Alert.alert('Please enter a chronic condition text before you add it')
-    //     }
-    //     else {
-    //         const newChronicCondition = await MedicalHistoryService.createChronicConditionByPetId({ chronicCondition: conditionText }, petId);
-
-    //         setConditions([...conditions, newChronicCondition]);
-    //         setConditionText('');
-    //     }
-    // };
-
-
-
-
-
-
-
 
 
 
