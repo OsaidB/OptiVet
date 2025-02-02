@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "export:web": "rimraf dist && npx expo export && rimraf dist/_expo/static/js/android dist/_expo/static/js/ios",
     "start": "expo start",
     "build": "expo build",
     "export": "expo export",
