@@ -1,5 +1,4 @@
-//login screen
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   StyleSheet,
@@ -15,15 +14,37 @@ import CustomToast from './Toast.config';
 import AuthService from '../Services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import UserService from '../Services/UserService'; // Import UserService for fetching user data
+import Checkbox from 'expo-checkbox'; // For Remember Me checkbox
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false); // New state for Remember Me
   const [loading, setLoading] = useState(false);
   const router = useRouter(); // Expo Router's navigation hook
 
+  useEffect(() => {
+    // Load stored credentials
+    const loadSavedCredentials = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem('savedEmail');
+        const savedPassword = await AsyncStorage.getItem('savedPassword');
+        const rememberMeStatus = await AsyncStorage.getItem('rememberMe');
+
+        if (savedEmail && savedPassword && rememberMeStatus === 'true') {
+          setEmail(savedEmail);
+          setPassword(savedPassword);
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.error('Error loading saved credentials:', error);
+      }
+    };
+
+    loadSavedCredentials();
+  }, []);
+
   const handleLogin = async () => {
-    // Basic validation
     if (!email.trim() || !password.trim()) {
       Toast.show({
         type: 'error',
@@ -42,21 +63,26 @@ const LoginScreen = () => {
       if (newToken?.token) {
         console.log('Login successful, token:', newToken.token);
 
-        // Manually decode the token to extract the email
-        const base64Payload = newToken.token.split('.')[1]; // Extract the payload
-        const payload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
+
+        // Decode JWT to extract email
+        const base64Payload = newToken.token.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload));
         console.log('Decoded payload:', payload);
 
-        // Save the token and email in AsyncStorage
+        // Save the token and role
         await AsyncStorage.setItem('authToken', newToken.token);
-        if (payload?.role) {
-          await AsyncStorage.setItem('role', payload.role);
-        }
+        if (payload?.role) await AsyncStorage.setItem('role', payload.role);
+        if (payload?.sub) await AsyncStorage.setItem('email', payload.sub);
 
-        if (payload?.sub) {
-          const email = payload.sub;
-          await AsyncStorage.setItem('email', email); // Store the email
-          console.log('Email saved:', email);
+        // Handle "Remember Me" functionality
+        if (rememberMe) {
+          await AsyncStorage.setItem('savedEmail', email);
+          await AsyncStorage.setItem('savedPassword', password);
+          await AsyncStorage.setItem('rememberMe', 'true');
+        } else {
+          await AsyncStorage.removeItem('savedEmail');
+          await AsyncStorage.removeItem('savedPassword');
+          await AsyncStorage.setItem('rememberMe', 'false');
         }
 
         Toast.show({
@@ -80,14 +106,12 @@ const LoginScreen = () => {
       // Handle API errors gracefully
       const responseData = error.response?.data;
       const errorMessage = responseData?.message || 'An error occurred during login.';
-      const errorDescription = responseData?.description || 'Please try again later.';
-
-      console.error('Login Error:', errorMessage, errorDescription);
+      console.error('Login Error:', errorMessage);
 
       Toast.show({
         type: 'error',
         text1: 'Login Failed',
-        text2: `${errorMessage}\n${errorDescription}`,
+        text2: errorMessage,
       });
     }
   };
@@ -140,12 +164,21 @@ const LoginScreen = () => {
                 onChangeText={setPassword}
                 secureTextEntry
                 placeholderTextColor={'gray'}
-                onSubmitEditing={handleLogin} // Trigger login on "Enter" key press
-                returnKeyType="done" // Changes the keyboard "Enter" button to "Done"
+                returnKeyType="done"
             />
           </View>
 
-          {/* Buttons */}
+          {/* Remember Me Checkbox */}
+          <View style={styles.rememberMeContainer}>
+            <Checkbox
+                value={rememberMe}
+                onValueChange={setRememberMe}
+                color={rememberMe ? '#FFD700' : undefined}
+            />
+            <Text style={styles.rememberMeText}>Remember Me</Text>
+          </View>
+
+          {/* Login Button */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
                 style={[styles.button, loading && styles.buttonDisabled]}
@@ -154,12 +187,6 @@ const LoginScreen = () => {
             >
               <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
             </TouchableOpacity>
-            {/*<TouchableOpacity*/}
-            {/*    style={styles.button}*/}
-            {/*    onPress={() => router.push('/(tabs)/home')} // Navigate directly to Home*/}
-            {/*>*/}
-            {/*  <Text style={styles.buttonText}>Home Screen (Skip login)</Text>*/}
-            {/*</TouchableOpacity>*/}
           </View>
 
           {/* Footer */}
@@ -193,7 +220,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-
   container: {
     flexGrow: 1,
     backgroundColor: '#134B70',
@@ -237,6 +263,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#508C9B',
   },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  rememberMeText: {
+    color: 'white',
+    marginLeft: 10,
+  },
   buttonContainer: {
     width: '100%',
     marginBottom: 20,
@@ -247,11 +282,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 10,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   buttonDisabled: {
     backgroundColor: '#999',
@@ -295,8 +325,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFD700',
   },
-
-
 });
 
 export default LoginScreen;
