@@ -9,8 +9,6 @@ import Slider from "@react-native-community/slider";
 import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-
-// import { ImageBackground } from "react-native-web";
 import { Ionicons } from '@expo/vector-icons';
 import baseURL from '../../Services/config'; // Adjust the path as necessary
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/petsForAdoption`;
@@ -20,7 +18,7 @@ import CategoryService from '../../Services/CategoryService';
 import { WINDOWS } from "nativewind/dist/utils/selector";
 import axios from "axios";
 import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
-//import ProductService from "../../Services/ProductService";
+
 
 
 
@@ -33,17 +31,11 @@ export default function UpdateProduct() {
     const [productCategory, setProductCategory] = useState('');
     const [productImage, setProductImage] = useState(null);
     const [applyImage, setApplyImage] = useState(false);
-    //const [image, setImage] = useState(null);
     const [categories, setCategories] = useState([]);
     const [productImageUrl, setProductImageUrl] = useState(null);
     const [error, setError] = useState(null);
-    //const [typeOfPet, setTypeOfPet] = useState('');
-    //const [breedOfPet, setBreedOfPet] = useState('');
-    //const [petDescription, setPetDescription] = useState('');
-    //const [imageOfPet, setImageOfPet] = useState(null);
     const [product, setProduct] = useState(null);
-    //const ageYears = Math.floor(petAge / 12);
-    //const remainingMonths = petAge % 12;
+
 
     const { productId } = useLocalSearchParams();
 
@@ -153,14 +145,7 @@ export default function UpdateProduct() {
         else {
 
             try {
-                // const getFile = {
-                //     uri: '../../assets/images/box.png',
-                //     name: 'box.png',
-                //     type: 'image/png',
-                // };
-                // setPetImage(getFile);
 
-                //const imageOfPet = null;
 
                 if (productImage) {
                     const imageOfProduct = await ProductService.uploadProductImages(productImage);
@@ -188,20 +173,7 @@ export default function UpdateProduct() {
 
 
 
-                // const petForAdoption = await PetForAdoptionService.updatePetForAdoptionById({
 
-                //     name: petName,
-                //     birthDate: dateOfBirth,
-                //     type: typeOfPet,
-                //     breed: breedOfPet,
-                //     petForAdoptionImageUrl: imageOfPet,
-                //     petForAdoptionDescription: petDescription
-                // }, petId);
-
-
-
-
-                //console.log(petForAdoption);
                 router.push({
                     pathname: '/SecretaryStack/Products',
 
