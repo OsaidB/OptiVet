@@ -1025,7 +1025,9 @@ const styles = StyleSheet.create({
         marginVertical: Platform.OS == 'web' ? 0 : 30,
     },
     scroll: {
-        width: '100%'
+        width: '100%',
+        marginVertical: Platform.OS == 'web' ? 0 : 30
+
     },
     main: {
         justifyContent: 'space-evenly'

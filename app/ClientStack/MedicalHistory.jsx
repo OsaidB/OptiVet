@@ -510,9 +510,9 @@ export default function MedicalHistory() {
                                 style={styles.elementPartText}></TextInput>
 
                             <TouchableOpacity
-                                style={styles.elementPartButton}>
+                                style={styles.elementPartButtonV}>
                                 <Text
-                                    style={styles.elementPartButtonText}
+                                    style={styles.elementPartButtonTextV}
                                     onPress={() => addVaccinationHandle()}
                                     numberOfLines={1}>
                                     Add Vaccination
@@ -616,23 +616,31 @@ export default function MedicalHistory() {
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Diagnosis:</Text><Text> {item.diagnosis}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Diagnosis:</Text><Text> {item.diagnosis}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment:</Text><Text> {item.treatment}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment:</Text><Text> {item.treatment}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Symptoms:</Text><Text> {item.symptoms}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Symptoms:</Text><Text> {item.symptoms}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment Plan:</Text><Text> {item.treatmentPlan}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment Plan:</Text><Text> {item.treatmentPlan}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
                                         {/* </TouchableOpacity> */}
@@ -808,10 +816,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 4,
     },
+    elementPartButtonV: {
+
+        width: Platform.OS == 'web' ? '20%' : '30%',
+        backgroundColor: '#A1CEDC',
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 2,
+    },
+
     elementPartButtonText: {
         alignSelf: 'center'
     },
-
+    elementPartButtonTextV: {
+        alignSelf: 'center',
+        fontSize:12
+    },
     scrollStyle: {
         height: 150,
         backgroundColor: '#508C9B',
@@ -887,7 +910,8 @@ const styles = StyleSheet.create({
         padding: 3,
         marginBottom: 3,
         backgroundColor: 'white',
-        borderRadius: 5
+        borderRadius: 5,
+        maxHeight: 50
     },
     medicalSessionElementTextStyling: {
         fontWeight: 'bold'
@@ -1006,7 +1030,7 @@ const styles = StyleSheet.create({
         color: 'white'
     },
 
-    notesPart:{
+    notesPart: {
         paddingLeft: 15,
         height: 60,
         color: 'white',
