@@ -512,7 +512,7 @@ export default function MedicalHistory() {
                             <TouchableOpacity
                                 style={styles.elementPartButtonV}>
                                 <Text
-                                    style={styles.elementPartButtonText}
+                                    style={styles.elementPartButtonTextV}
                                     onPress={() => addVaccinationHandle()}
                                     numberOfLines={1}>
                                     Add Vaccination
@@ -829,6 +829,10 @@ const styles = StyleSheet.create({
     },
     elementPartButtonText: {
         alignSelf: 'center'
+    },
+    elementPartButtonTextV: {
+        alignSelf: 'center',
+        fontSize:12
     },
 
     scrollStyle: {
