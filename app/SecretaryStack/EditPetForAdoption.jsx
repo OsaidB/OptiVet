@@ -11,7 +11,6 @@ import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-// import { ImageBackground } from "react-native-web";
 import { Ionicons } from '@expo/vector-icons';
 import baseURL from '../../Services/config'; // Adjust the path as necessary
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/petsForAdoption`;
