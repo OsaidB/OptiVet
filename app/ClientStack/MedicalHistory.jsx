@@ -510,7 +510,7 @@ export default function MedicalHistory() {
                                 style={styles.elementPartText}></TextInput>
 
                             <TouchableOpacity
-                                style={styles.elementPartButton}>
+                                style={styles.elementPartButtonV}>
                                 <Text
                                     style={styles.elementPartButtonText}
                                     onPress={() => addVaccinationHandle()}
@@ -816,6 +816,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 4,
     },
+    elementPartButtonV: {
+
+        width: Platform.OS == 'web' ? '20%' : '30%',
+        backgroundColor: '#A1CEDC',
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 2,
+    },
+
     elementPartButtonText: {
         alignSelf: 'center'
     },
