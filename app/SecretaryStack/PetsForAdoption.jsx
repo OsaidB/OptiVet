@@ -322,7 +322,9 @@ const styles = StyleSheet.create({
 
     },
     title: {
-        fontSize: 40
+        fontSize: 40,
+        marginVertical: Platform.OS == 'web' ? 0 : 30
+        
     },
     content: {
         flexDirection: 'row',

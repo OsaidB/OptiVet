@@ -616,23 +616,31 @@ export default function MedicalHistory() {
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Diagnosis:</Text><Text> {item.diagnosis}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Diagnosis:</Text><Text> {item.diagnosis}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment:</Text><Text> {item.treatment}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment:</Text><Text> {item.treatment}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Symptoms:</Text><Text> {item.symptoms}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Symptoms:</Text><Text> {item.symptoms}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
-                                            <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment Plan:</Text><Text> {item.treatmentPlan}</Text></Text>
+                                            <ScrollView>
+                                                <Text><Text style={styles.medicalSessionElementTextStyling}>Treatment Plan:</Text><Text> {item.treatmentPlan}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
                                         {/* </TouchableOpacity> */}
@@ -887,7 +895,8 @@ const styles = StyleSheet.create({
         padding: 3,
         marginBottom: 3,
         backgroundColor: 'white',
-        borderRadius: 5
+        borderRadius: 5,
+        maxHeight: 50
     },
     medicalSessionElementTextStyling: {
         fontWeight: 'bold'
@@ -1006,7 +1015,7 @@ const styles = StyleSheet.create({
         color: 'white'
     },
 
-    notesPart:{
+    notesPart: {
         paddingLeft: 15,
         height: 60,
         color: 'white',

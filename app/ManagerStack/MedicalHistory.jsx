@@ -616,7 +616,9 @@ export default function MedicalHistory() {
 
 
                                         <View style={styles.medicalSessionElementTextStyle}>
+                                        <ScrollView>
                                             <Text><Text style={styles.medicalSessionElementTextStyling}>Diagnosis:</Text><Text> {item.diagnosis}</Text></Text>
+                                            </ScrollView>
                                         </View>
 
 
@@ -887,7 +889,10 @@ const styles = StyleSheet.create({
         padding: 3,
         marginBottom: 3,
         backgroundColor: 'white',
-        borderRadius: 5
+        borderRadius: 5,
+        maxHeight:50
+
+
     },
     medicalSessionElementTextStyling: {
         fontWeight: 'bold'
@@ -955,7 +960,7 @@ const styles = StyleSheet.create({
     },
 
     imageStyling: {
-        borderRadius: '12%',
+        borderRadius: 4,
         width: '100%',
         height: '100%'
     },
