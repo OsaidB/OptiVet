@@ -4,9 +4,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../../Services/UserService";
 import PetService from "../../Services/PetService";
 import { Ionicons } from "@expo/vector-icons";
-import {Link} from "expo-router";
+import {Link, useLocalSearchParams} from "expo-router";
 import DailyChecklistService from "../../Services/DailyChecklistService";
 import ClientService from "../../Services/ClientService";
+import AppointmentService from "../../Services/AppointmentService";
 
 const ManagerStack = () => {
     const [managerInfo, setManagerInfo] = useState(null);
@@ -15,6 +16,9 @@ const ManagerStack = () => {
     const [registeredPets, setRegisteredPets] = useState(0);
     const [appointments, setAppointments] = useState(-1); // Example value for appointments
     const [clients, setClients] = useState(0);
+
+    // console.log(managerInfo);
+    // console.log(managerInfo.userId);
 
     useEffect(() => {
         const fetchEmail = async () => {
@@ -30,6 +34,8 @@ const ManagerStack = () => {
                 console.error(error);
             }
         };
+
+
 
         const fetchManagerInfo = async () => {
             if (!email) return;
@@ -81,6 +87,20 @@ const ManagerStack = () => {
         fetchMetrics();
     }, [email]);
 
+    useEffect(() => {
+        const fetchScheduledAppointments = async () => {
+            if (!managerInfo || !managerInfo.userId) return; // Wait until managerInfo is available
+            try {
+                const scheduledAppointments = await AppointmentService.getScheduledAppointments(managerInfo.userId);
+                setAppointments(scheduledAppointments);
+            } catch (error) {
+                console.error("Error fetching scheduled appointments:", error);
+            }
+        };
+
+        fetchScheduledAppointments();
+    }, [managerInfo]); // Now waits for `managerInfo` to be updated before running
+
     return (
         <ImageBackground
             source={require("../../assets/images/dog-and-cat.jpeg")} // Add your background image
@@ -125,7 +145,7 @@ const ManagerStack = () => {
                 </View>
                 <View style={styles.metricBox}>
                     <Ionicons name="calendar-outline" size={28} color="#007BFF" />
-                    <Text style={styles.metricValue}>{appointments}</Text>
+                    <Text style={styles.metricValue}>{appointments.length}</Text>
                     <Text style={styles.metricLabel}>Appointments</Text>
                 </View>
                 <View style={styles.metricBox}>

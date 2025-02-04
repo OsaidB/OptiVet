@@ -38,8 +38,19 @@ const AddEmployee = () => {
         if (!firstName || !lastName || !email || !password || !confirmPassword || !phoneNumber || !dateOfBirth) {
             Toast.show({
                 type: 'error',
-                text1: 'Error',
+                text1: 'Missing Information',
                 text2: 'All fields are required.',
+            });
+            return;
+        }
+
+        // Basic email format validation
+        const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+        if (!validateEmail(email)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Email',
+                text2: 'Please enter a valid email address (e.g., example@email.com).',
             });
             return;
         }
@@ -47,7 +58,7 @@ const AddEmployee = () => {
         if (password !== confirmPassword) {
             Toast.show({
                 type: 'error',
-                text1: 'Error',
+                text1: 'Password Mismatch',
                 text2: 'Passwords do not match!',
             });
             return;
@@ -79,7 +90,7 @@ const AddEmployee = () => {
 
             Toast.show({
                 type: 'success',
-                text1: 'Success',
+                text1: 'Employee Added 🎉',
                 text2: 'Employee account created successfully!',
             });
 
@@ -88,9 +99,21 @@ const AddEmployee = () => {
         } catch (error) {
             setLoading(false);
 
-            console.error('Error creating employee:', error);
-            const errorMessage =
-                error.response?.data?.message || 'Failed to create employee account. Please try again.';
+            let errorMessage = 'Failed to create employee account. Please try again.';
+
+            if (error.response) {
+                if (error.response.status === 400) {
+                    errorMessage = error.response.data?.message || 'Invalid input. Please check the details.';
+                } else if (error.response.status === 409) {
+                    errorMessage = 'An account with this email already exists.';
+                } else if (error.response.status === 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                }
+            } else if (error.request) {
+                errorMessage = 'Network error. Please check your internet connection.';
+            }
+
+            // ❌ Removed console.error() to avoid unwanted logs
             Toast.show({
                 type: 'error',
                 text1: 'Error',
@@ -98,6 +121,7 @@ const AddEmployee = () => {
             });
         }
     };
+
 
     const renderDatePicker = () => {
         if (Platform.OS === 'web') {
@@ -161,6 +185,7 @@ const AddEmployee = () => {
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
+                placeholderTextColor={'gray'}
             />
             <TextInput
                 style={styles.input}
@@ -168,12 +193,14 @@ const AddEmployee = () => {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                placeholderTextColor={'gray'}
             />
 
             <TextInput
                 style={styles.input}
                 placeholder="Confirm Password"
                 value={confirmPassword}
+                placeholderTextColor={'gray'}
                 onChangeText={setConfirmPassword} secureTextEntry
             />
 
@@ -183,6 +210,7 @@ const AddEmployee = () => {
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
+                placeholderTextColor={'gray'}
             />
 
             {/* Date of Birth Picker */}

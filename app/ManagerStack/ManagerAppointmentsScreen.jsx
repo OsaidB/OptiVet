@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {Text, View, FlatList, StyleSheet, TouchableOpacity, Modal, Image, SafeAreaView} from 'react-native';
-import {useLocalSearchParams, useRouter} from "expo-router";
+import {
+    Text,
+    View,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    Image,
+    SafeAreaView,
+    RefreshControl,
+    Alert
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from "expo-router";
 import AppointmentService from '../../Services/AppointmentService';
 import PetService from '../../Services/PetService';
 import ClientService from '../../Services/ClientService';
@@ -9,48 +20,59 @@ const ManagerAppointmentsScreen = () => {
     const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [pets, setPets] = useState([]);
+    const [refreshing, setRefreshing] = useState(false); // 🔹 Added refreshing state
     const router = useRouter();
     const { userId } = useLocalSearchParams(); // Retrieve userId from params
 
+    // 🔹 Initial data fetch
     useEffect(() => {
-        const fetchScheduledAppointments = async () => {
-            try {
-                const vetId = 1; // Update this ID as needed
-                const scheduledAppointments = await AppointmentService.getScheduledAppointments(userId);
-
-                // Fetch pet and client details for each appointment
-                const detailedAppointments = await Promise.all(
-                    scheduledAppointments.map(async (appointment) => {
-                        const petData = await PetService.getPetById(appointment.petId);
-                        const clientData = await ClientService.getClientById(appointment.clientId);
-
-                        console.log(petData);
-
-                        return {
-                            ...appointment,
-                            petName: petData?.name || 'Unknown Pet',
-                            petImage: PetService.serveImage(petData?.imageUrl || petData?.imageFileName),
-                            firstName: clientData?.firstName || 'Unknown Owner',
-                            lastName: clientData?.lastName || 'Unknown Owner',
-                        };
-                    })
-                );
-
-                setAppointments(detailedAppointments);
-            } catch (error) {
-                console.error('Error fetching scheduled appointments:', error);
-            }
-        };
-
-
+        if (!userId) {
+            console.error("Vet ID is missing");
+            Alert.alert("Error", "Vet ID is required to view appointments.");
+            return;
+        }
         fetchScheduledAppointments();
-    }, []);
+    }, [userId]);
+
+    // Function to fetch scheduled appointments
+    const fetchScheduledAppointments = async () => {
+        try {
+            setRefreshing(true); // Start refreshing
+            const scheduledAppointments = await AppointmentService.getScheduledAppointments(userId);
+
+            // Fetch pet and client details for each appointment
+            const detailedAppointments = await Promise.all(
+                scheduledAppointments.map(async (appointment) => {
+                    const petData = await PetService.getPetById(appointment.petId);
+                    const clientData = await ClientService.getClientById(appointment.clientId);
+
+                    return {
+                        ...appointment,
+                        petName: petData?.name || 'Unknown Pet',
+                        petImage: PetService.serveImage(petData?.imageUrl || petData?.imageFileName),
+                        firstName: clientData?.firstName || 'Unknown Owner',
+                        lastName: clientData?.lastName || 'Unknown Owner',
+                    };
+                })
+            );
+
+            setAppointments(detailedAppointments);
+        } catch (error) {
+            console.error('Error fetching scheduled appointments:', error);
+        } finally {
+            setRefreshing(false); // Stop refreshing
+        }
+    };
+
+
+    // 🔹 Refresh function
+    const onRefresh = () => {
+        fetchScheduledAppointments();
+    };
 
     const handleAppointmentPress = (appointment) => {
         setSelectedAppointment(appointment);
         setModalVisible(true);
-        console.log(appointment.id);
     };
 
     const handleStartMedicalSession = () => {
@@ -60,7 +82,7 @@ const ManagerAppointmentsScreen = () => {
             setModalVisible(false);
             router.push({
                 pathname: '/ManagerStack/MedicalSession',
-                params: { petId, clientId, appointmentId, userId, returnTo: "ManagerAppointmentsScreen"  },
+                params: { petId, clientId, appointmentId, userId, returnTo: "ManagerAppointmentsScreen" },
             });
         }
     };
@@ -69,20 +91,14 @@ const ManagerAppointmentsScreen = () => {
         <TouchableOpacity onPress={() => handleAppointmentPress(item)}>
             <View style={styles.appointmentItem}>
                 <View style={styles.rowContainer}>
-                    {/* Pet Image */}
                     <View style={styles.imageContainer}>
                         {item.petImage ? (
-                            <Image
-                                source={{ uri: item.petImage }}
-                                style={styles.petImage}
-                                resizeMode="cover"
-                            />
+                            <Image source={{ uri: item.petImage }} style={styles.petImage} resizeMode="cover" />
                         ) : (
                             <Text style={styles.noImageText}>No Image Available</Text>
                         )}
                     </View>
 
-                    {/* Appointment Details */}
                     <View style={styles.detailsContainer}>
                         <Text style={styles.appointmentText}>Pet Owner: {item.firstName} {item.lastName}</Text>
                         <Text style={styles.appointmentText}>Pet: {item.petName}</Text>
@@ -90,14 +106,11 @@ const ManagerAppointmentsScreen = () => {
                             Date: {`${new Date(item.appointmentDate).getDate()}/${new Date(item.appointmentDate).getMonth() + 1}/${new Date(item.appointmentDate).getFullYear()}`}
                         </Text>
                         <Text style={styles.appointmentText}>Time: {new Date(item.appointmentDate).toLocaleTimeString()}</Text>
-                        {/*<Text style={styles.appointmentText}>Duration: {selectedAppointment.duration} Minuets</Text>*/}
                     </View>
                 </View>
             </View>
         </TouchableOpacity>
     );
-
-
 
     return (
         <SafeAreaView style={styles.container}>
@@ -107,6 +120,9 @@ const ManagerAppointmentsScreen = () => {
                     data={appointments}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderAppointment}
+                    refreshControl={ // 🔹 Added pull-to-refresh
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#007BFF"]} />
+                    }
                 />
 
                 <Modal
@@ -115,11 +131,7 @@ const ManagerAppointmentsScreen = () => {
                     animationType="slide"
                     onRequestClose={() => setModalVisible(false)}
                 >
-                    <TouchableOpacity
-                        style={styles.modalContainer}
-                        activeOpacity={1}
-                        onPressOut={() => setModalVisible(false)}
-                    >
+                    <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPressOut={() => setModalVisible(false)}>
                         <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
                             {selectedAppointment && (
                                 <>
@@ -129,8 +141,6 @@ const ManagerAppointmentsScreen = () => {
                                         Date: {`${new Date(selectedAppointment.appointmentDate).getDate()}/${new Date(selectedAppointment.appointmentDate).getMonth() + 1}/${new Date(selectedAppointment.appointmentDate).getFullYear()}`}
                                     </Text>
                                     <Text style={styles.modalText}>Time: {new Date(selectedAppointment.appointmentDate).toLocaleTimeString()}</Text>
-                                    {/*<Text style={styles.modalText}>Owner: {selectedAppointment.ownerName}</Text>*/}
-                                    {/*<Text style={styles.modalText}>Details: {selectedAppointment.details}</Text>*/}
 
                                     <TouchableOpacity style={styles.button} onPress={handleStartMedicalSession}>
                                         <Text style={styles.buttonText}>Start a Medical Session</Text>
@@ -144,12 +154,12 @@ const ManagerAppointmentsScreen = () => {
                         </TouchableOpacity>
                     </TouchableOpacity>
                 </Modal>
+
                 <TouchableOpacity style={styles.scheduleButton} onPress={() => router.push({ pathname: '/ManagerStack/ManagerScheduleScreen', params: { userId } })}>
                     <Text style={styles.scheduleButtonText}>Publish Available Slots</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
-
     );
 };
 

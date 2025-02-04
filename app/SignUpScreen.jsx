@@ -37,8 +37,19 @@ const SignUpScreen = () => {
         if (!email || !password || !confirmPassword || !firstName || !lastName || !phoneNumber || !dateOfBirth) {
             Toast.show({
                 type: 'error',
-                text1: 'Error',
-                text2: 'Please fill out all fields.',
+                text1: 'Missing Information',
+                text2: 'Please fill out all required fields.',
+            });
+            return;
+        }
+
+        // Basic email format validation
+        const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+        if (!validateEmail(email)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Email',
+                text2: 'Please enter a valid email address (e.g., example@email.com).',
             });
             return;
         }
@@ -46,8 +57,8 @@ const SignUpScreen = () => {
         if (password !== confirmPassword) {
             Toast.show({
                 type: 'error',
-                text1: 'Error',
-                text2: 'Passwords do not match!',
+                text1: 'Password Mismatch',
+                text2: 'The passwords you entered do not match.',
             });
             return;
         }
@@ -56,7 +67,7 @@ const SignUpScreen = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Weak Password',
-                text2: 'Password must be at least 8 characters, include an uppercase, lowercase, number, and special character.',
+                text2: 'Password must be at least 8 characters long and include an uppercase letter, lowercase letter, number, and special character.',
             });
             return;
         }
@@ -79,22 +90,41 @@ const SignUpScreen = () => {
 
             Toast.show({
                 type: 'success',
-                text1: 'Success',
-                text2: 'Account created! Redirecting to login...',
+                text1: 'Account Created 🎉',
+                text2: 'Your account has been successfully registered. Redirecting to login...',
             });
 
             // Navigate to LoginScreen
             router.push('./');
 
         } catch (error) {
-            console.error('Error during sign up:', error);
+            let errorMessage = 'An error occurred during registration. Please try again later.';
+
+            if (error.response) {
+                // Handle specific backend responses
+                if (error.response.status === 400) {
+                    errorMessage = error.response.data?.message || 'Invalid input. Please check your details.';
+                } else if (error.response.status === 409) {
+                    errorMessage = 'An account with this email already exists.';
+                } else if (error.response.status === 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                }
+            } else if (error.request) {
+                // No response from server (network issue)
+                errorMessage = 'Network issue. Please check your internet connection.';
+            }
+
+            // Show only a toast, without logging to the console
             Toast.show({
                 type: 'error',
                 text1: 'Sign Up Failed',
-                text2: error.response?.data?.message || 'Please try again later.',
+                text2: errorMessage,
             });
         }
     };
+
+
+
 
 
     const renderDatePicker = () => {

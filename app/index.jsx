@@ -54,6 +54,17 @@ const LoginScreen = () => {
       return;
     }
 
+    /************  Basic email format validation before sending request  ************/
+    // const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+    // if (!validateEmail(email)) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'Invalid Email',
+    //     text2: 'Please enter a valid email address.',
+    //   });
+    //   return;
+    // }
+
     setLoading(true);
 
     try {
@@ -61,53 +72,74 @@ const LoginScreen = () => {
       setLoading(false);
 
       if (newToken?.token) {
-        console.log('Login successful, token:', newToken.token);
+        try {
+          // Decode JWT to extract email and role
+          const base64Payload = newToken.token.split('.')[1];
+          const payload = JSON.parse(atob(base64Payload));
 
+          // Ensure payload contains valid data
+          if (!payload?.sub || !payload?.role) {
+            throw new Error('Invalid token data');
+          }
 
-        // Decode JWT to extract email
-        const base64Payload = newToken.token.split('.')[1];
-        const payload = JSON.parse(atob(base64Payload));
-        console.log('Decoded payload:', payload);
+          // Save token and role
+          await AsyncStorage.setItem('authToken', newToken.token);
+          await AsyncStorage.setItem('role', payload.role);
+          await AsyncStorage.setItem('email', payload.sub);
 
-        // Save the token and role
-        await AsyncStorage.setItem('authToken', newToken.token);
-        if (payload?.role) await AsyncStorage.setItem('role', payload.role);
-        if (payload?.sub) await AsyncStorage.setItem('email', payload.sub);
+          // Handle "Remember Me" functionality
+          if (rememberMe) {
+            await AsyncStorage.setItem('savedEmail', email);
+            await AsyncStorage.setItem('savedPassword', password);
+            await AsyncStorage.setItem('rememberMe', 'true');
+          } else {
+            await AsyncStorage.removeItem('savedEmail');
+            await AsyncStorage.removeItem('savedPassword');
+            await AsyncStorage.setItem('rememberMe', 'false');
+          }
 
-        // Handle "Remember Me" functionality
-        if (rememberMe) {
-          await AsyncStorage.setItem('savedEmail', email);
-          await AsyncStorage.setItem('savedPassword', password);
-          await AsyncStorage.setItem('rememberMe', 'true');
-        } else {
-          await AsyncStorage.removeItem('savedEmail');
-          await AsyncStorage.removeItem('savedPassword');
-          await AsyncStorage.setItem('rememberMe', 'false');
+          Toast.show({
+            type: 'success',
+            text1: 'Login Successful',
+            text2: 'Welcome to the app!',
+          });
+
+          // Navigate to the home screen
+          router.push('/RoleBasedRedirector'); // Use Expo Router for navigation
+        } catch (jwtError) {
+          Toast.show({
+            type: 'error',
+            text1: 'Login Error',
+            text2: 'Invalid authentication response. Please try again.',
+          });
         }
-
-        Toast.show({
-          type: 'success',
-          text1: 'Login Successful',
-          text2: 'Welcome to the app!',
-        });
-
-        // Navigate to the home screen
-        router.push('/RoleBasedRedirector'); // Use Expo Router for navigation
       } else {
         Toast.show({
           type: 'error',
           text1: 'Login Failed',
-          text2: newToken?.message || 'Invalid credentials.',
+          text2: 'Invalid email or password.',
         });
       }
     } catch (error) {
       setLoading(false);
 
-      // Handle API errors gracefully
-      const responseData = error.response?.data;
-      const errorMessage = responseData?.message || 'An error occurred during login.';
-      console.error('Login Error:', errorMessage);
+      let errorMessage = 'An error occurred during login.';
 
+      if (error.response) {
+        // API responded but with an error status
+        if (error.response.status === 400) {
+          errorMessage = 'Invalid email or password.';
+        } else if (error.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = 'Something went wrong. Please try again.';
+        }
+      } else if (error.request) {
+        // No response from server (network error)
+        errorMessage = 'Network error. Please check your connection.';
+      }
+
+      // ❌ Removed console.error() to avoid showing errors in logs
       Toast.show({
         type: 'error',
         text1: 'Login Failed',
@@ -115,6 +147,8 @@ const LoginScreen = () => {
       });
     }
   };
+
+
 
   return (
       <SafeAreaView style={styles.safeArea}>

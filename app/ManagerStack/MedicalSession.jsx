@@ -216,7 +216,7 @@ const MedicalSession = () => {
 
         try {
             await AppointmentService.updateAppointment(appointmentId, updatedData);
-            Alert.alert('Success', 'Appointment deleted successfully.');
+            //Alert.alert('Success', 'Appointment deleted successfully.');
             // fetchAppointments(); // Refresh appointments list after deletion
         } catch (error) {
             console.error(`Error updating appointment with ID: ${appointmentId}`, error.response?.data || error);
