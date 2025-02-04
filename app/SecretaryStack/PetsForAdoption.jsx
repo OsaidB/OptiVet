@@ -14,8 +14,7 @@ import { createFilter } from "react-native-search-filter";
 import ProductService from "../../Services/ProductService";
 import baseURL from '../../Services/config'; // Adjust the path as necessary
 import PetForAdoptionService from "../../Services/PetForAdoptionService";
-//import { useRouter, useLocalSearchParams, Link } from 'expo-router'; // Import useLocalSearchParams
-//import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
+
 
 
 
@@ -24,28 +23,22 @@ const BASE_URL_IMAGES = `${baseURL.USED_BASE_URL}/api/pets`;
 
 const imagess = [];
 
-// import { createStackNavigator } from '@react-navigation/stack';
-// import ManagerScheduleScreen from '../../app/ManagerStack/ManagerScheduleScreen';
-// import ManagerNotesScreen from '../../app/ManagerStack/ManagerNotesScreen';
-// import ManagerUserManagementScreen from '../../app/ManagerStack/ManagerUserManagementScreen';
-// import ManagerReportsScreen from '../../app/ManagerStack/ManagerReportsScreen';
 
 
-// const Stack = createStackNavigator();
 
 const PetsForAdoption = () => {
     const navigation = useNavigation();
-    //const router = useRouter();
+    
 
 
 
-    //const [pets, setPets] = useState([{id:0,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2222.png'},{id:1,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 2225.png'},{id:2,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 222814.png'},{id:3,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 207.png'},{id:4,name:'hey',category:'Cat',image:'../../assets/images/Screenshot 2025-01-13 223128.png'}]);
+
     const [pets, setPets] = useState([]);
     const [viewModal, setViewModal] = useState(false);
     const [petId, setpPetId] = useState();
     const [selectedPet, setSelectedPet] = useState('');
     const [petForEdit, setPetForEdit] = useState();
-    // const [petToView,setPetToView] = useState();
+    
 
 
 
@@ -54,7 +47,7 @@ const PetsForAdoption = () => {
             try {
                 const fetchPetsForAdoption = await PetForAdoptionService.getpetsForAdoption();
                 setPets(fetchPetsForAdoption);
-                //setSearchedProducts(fetchProducts);
+                
             } catch (error) {
                 console.error("Error fetching pets for adoption:", error);
                 Alert.alert('Error', 'Failed to load pets for adoption.');
@@ -83,7 +76,7 @@ const PetsForAdoption = () => {
                 transparent={true}
                 visible={viewModal}
                 onRequestClose={() => {
-                    //Alert.alert('Modal has been closed.');
+                    
                     setViewModal(!viewModal);
                 }}>
                 <View style={styles.modalContainer}>
@@ -322,7 +315,9 @@ const styles = StyleSheet.create({
 
     },
     title: {
-        fontSize: 40
+        fontSize: 40,
+        marginVertical: Platform.OS == 'web' ? 0 : 30
+        
     },
     content: {
         flexDirection: 'row',

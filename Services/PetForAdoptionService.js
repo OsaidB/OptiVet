@@ -58,7 +58,7 @@ const PetForAdoptionService = {
                     'X-Auth-Token': token,
                 },
             });
-console.log(response.data);
+//console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Error uploading pet for adoption image:', error);

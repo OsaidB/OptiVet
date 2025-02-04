@@ -10,7 +10,6 @@ import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-// import { ImageBackground } from "react-native-web";
 import { Ionicons } from '@expo/vector-icons';
 import baseURL from '../../Services/config'; // Adjust the path as necessary
 const BASE_URL = `${baseURL.USED_BASE_URL}/api/petsForAdoption`;
@@ -92,19 +91,6 @@ export default function AddPetForAdoption() {
 
 
 
-
-
-    // useEffect(() => {
-    //     const subscription = Dimensions.addEventListener(
-    //         'change',
-    //         ({ window, screen }) => {
-    //             setDimensions({ window, screen });
-    //         },
-    //     );
-    //     return () => subscription?.remove();
-    // });
-
-
     const pickImage = async () => {
         const { status } = await ImagePicker.
             requestMediaLibraryPermissionsAsync();
@@ -149,25 +135,6 @@ export default function AddPetForAdoption() {
 
 
 
-    // const checkValueIsNumberOrNot = () => {
-
-    //     if (isNaN(priceValue)) {
-
-    //         return false;
-    //     } else {
-
-
-    //         setPriceValue(parseFloat(priceValue));
-    //         return true;
-    //     }
-    // };
-
-
-    // const addPetForAdoptionHandlee = async () => {
-
-
-    //     console.log('heyy');
-    // }
 
 
 
@@ -191,10 +158,7 @@ export default function AddPetForAdoption() {
             console.log('entering the breed of the pet in mandatory');
         }
 
-        // else if (!petDescription) {
-        //     Alert.alert('entering the description of the pet in mandatory');
-        //     console.log('entering the description of the pet in mandatory');
-        // }
+
 
         else {
 
@@ -204,18 +168,6 @@ export default function AddPetForAdoption() {
                 if (!petImage) {
 
 
-                    // const getFile = {
-                    //     uri: '../../assets/images/box.png',
-                    //     name: 'box.png',
-                    //     type: 'image/png',
-
-                    // };
-                    // setPetImage(getFile);
-
-
-
-
-                    //const image = await PetForAdoptionService.uploadPetForAdoptionImages('../../assets/images/box.png');
 
                     const dateOfBirth = calcBirthDate(petAge);
 
