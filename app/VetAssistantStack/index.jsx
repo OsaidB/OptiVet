@@ -10,8 +10,8 @@ import {
     Image,
     Alert,
     StatusBar, Platform,
-    Picker,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PetService from "../../Services/PetService";
 import UserService from "../../Services/UserService";
@@ -256,21 +256,19 @@ const VetAssistantStack = () => {
                             {/* Residency Type Picker Section */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Update Residency Type</Text>
+                                // Inside the modal where you update residency type:
                                 <View style={styles.pickerContainer}>
                                     <Picker
                                         selectedValue={newResidencyType}
                                         onValueChange={(itemValue) => setNewResidencyType(itemValue)}
-                                        style={styles.picker}
+                                        style={[styles.picker, Platform.OS === "android" && { height: 50 }]} // Fix for Android
+                                        mode="dropdown" // Ensure dropdown mode for better UI on Android
                                     >
-                                        <Picker.Item label="Select Residency Type..." value="nothing chosen" /> {/* Placeholder */}
+                                        <Picker.Item label="Select Residency Type..." value="nothing_chosen" />
                                         {categories
                                             .filter((category) => category.value !== "ALL")
                                             .map((category) => (
-                                                <Picker.Item
-                                                    key={category.value}
-                                                    label={category.label}
-                                                    value={category.value}
-                                                />
+                                                <Picker.Item key={category.value} label={category.label} value={category.value} />
                                             ))}
                                     </Picker>
                                 </View>
@@ -320,7 +318,7 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 12,
         marginBottom: 20,
-        width: "40%",
+        width: "80%",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,

@@ -16,8 +16,15 @@ const WalkInClientsScreen = () => {
         const fetchClients = async () => {
             try {
                 const clientData = await ClientService.getAllClients();
-                setClients(clientData);
-                setFilteredClients(clientData);
+
+                // Filter out deleted pets before setting state
+                const clientsWithValidPets = clientData.map(client => ({
+                    ...client,
+                    pets: client.pets.filter(pet => !pet.deleted), // Exclude deleted pets
+                }));
+
+                setClients(clientsWithValidPets);
+                setFilteredClients(clientsWithValidPets);
             } catch (error) {
                 console.error("Error fetching clients:", error);
             }
@@ -79,6 +86,7 @@ const WalkInClientsScreen = () => {
                     placeholder="Search by client or pet name..."
                     value={searchQuery}
                     onChangeText={handleSearch}
+                    multiline={false}
                 />
                 <FlatList
                     data={filteredClients}
@@ -150,14 +158,23 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     searchInput: {
-        height: 40,
-        borderColor: '#ccc',
+        width: '100%', // Ensure it takes full width of the parent
+        // height: 40, // Fixed height
+        borderColor: "#CED6E0", // Light border color
         borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        marginBottom: 20,
-        width: '100%',
-        backgroundColor: '#f8f8f8',
+        borderRadius: 10,
+        paddingHorizontal: 10, // Padding for horizontal space
+        paddingVertical: 10, // Padding for horizontal space
+        backgroundColor: "#FFF",
+        color: "#000", // Explicit black text color
+        // color: "#000", // Explicit black text color
+        includeFontPadding: false, // Remove extra padding on Android
+
+        fontSize: 16, // Fixed font size
+        lineHeight: 30, // Explicit line height to prevent resizing
+        // textAlignVertical: "center", // Center text vertically
+        // overflow: "hidden", // Prevent content overflow
+        marginBottom: 10, // Space below the search bar
     },
     clientItem: {
         backgroundColor: '#ffffff',

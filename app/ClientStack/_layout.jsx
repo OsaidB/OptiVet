@@ -93,7 +93,7 @@ export default function ClientStackLayout() {
     }
 
     return (
-        <AuthGuard allowedRoles={['ROLE_CLIENT']}> {/* Ensure only clients can access this stack */}
+        <AuthGuard allowedRoles={['ROLE_CLIENT', 'VET','MANAGER']}> {/* Ensure only clients can access this stack */}
 
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 {/* Header */}

@@ -36,7 +36,7 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
                 // If the role is ROLE_USER, fetch the detailed employeeRole
                 if (role === 'ROLE_USER') {
                     const storedEmployeeRole = await AsyncStorage.getItem('employeeRole');
-
+                    console.log("storedEmployeeRole:",storedEmployeeRole);
                     if (!storedEmployeeRole) {
                         // Fetch employee info if not stored
                             const storedEmail = await AsyncStorage.getItem('email');
