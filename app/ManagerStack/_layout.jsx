@@ -214,7 +214,7 @@ export default function ManagerStackLayout() {
                 >
                     <TouchableOpacity style={styles.footerButton}>
                         <Ionicons name="people-outline" size={24} color="#FFF" />
-                        <Text style={styles.footerButtonText}>Clients</Text>
+                        <Text style={styles.footerButtonText}>Walk-in Clients</Text>
                     </TouchableOpacity>
                 </Link>
                 <Link
@@ -226,7 +226,7 @@ export default function ManagerStackLayout() {
                 >
                     <TouchableOpacity style={styles.footerButton}>
                         <Ionicons name="chatbox-outline" size={24} color="#FFF" />
-                        <Text style={styles.footerButtonText}>Messages</Text>
+                        <Text style={styles.footerButtonText}>Critical Messages</Text>
                     </TouchableOpacity>
                 </Link>
             </View>

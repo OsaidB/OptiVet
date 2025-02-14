@@ -156,7 +156,7 @@ const ManagerAppointmentsScreen = () => {
                 </Modal>
 
                 <TouchableOpacity style={styles.scheduleButton} onPress={() => router.push({ pathname: '/ManagerStack/ManagerScheduleScreen', params: { userId } })}>
-                    <Text style={styles.scheduleButtonText}>Publish Available Slots</Text>
+                    <Text style={styles.scheduleButtonText}>Handle Available Slots</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

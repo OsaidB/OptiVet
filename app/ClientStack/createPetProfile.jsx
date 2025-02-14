@@ -21,7 +21,8 @@ import PetService from "../../Services/PetService";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import PickerItem from "react-native-web/src/exports/Picker/PickerItem";
-import {color} from "@rneui/base"; // Import useLocalSearchParams
+import {color} from "@rneui/base";
+import AuthGuard from "../AuthGuard"; // Import useLocalSearchParams
 
 export default function CreatePetProfile() {
     const router = useRouter();
@@ -261,6 +262,7 @@ export default function CreatePetProfile() {
     }
 
     return (
+        <AuthGuard allowedRoles={['ROLE_CLIENT', 'VET','MANAGER']}> {/* Override AuthGuard here */}
 
         <ScrollView style={styles.container}>
             <Text style={styles.title}>Create Pet Profile</Text>
@@ -401,7 +403,7 @@ export default function CreatePetProfile() {
                 </TouchableOpacity>
             </View>
         </ScrollView>
-
+</AuthGuard>
     );
 }
 

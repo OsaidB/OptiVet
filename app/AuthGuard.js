@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import UserService from '../Services/UserService';
+import UserService from '../Services/UserService'; // Import UserService for role fetching if needed
 
 const AuthGuard = ({ children, allowedRoles = [] }) => {
     const [loading, setLoading] = useState(true);
@@ -15,13 +15,14 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
                 const token = await AsyncStorage.getItem('authToken');
                 if (!token) {
                     console.log("No token found");
-                    router.replace('');
+                    router.replace(''); // Redirect to login if no token
                     return;
                 }
 
                 let decodedPayload;
                 try {
-                    const base64Payload = token.split('.')[1];
+                // Decode the token to get the user's base role
+                const base64Payload = token.split('.')[1];
                     decodedPayload = JSON.parse(atob(base64Payload));
                 } catch (error) {
                     console.error("Invalid token format:", error);
@@ -30,22 +31,25 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
                 }
 
                 const role = decodedPayload.role || '';
-                let finalRole = role;
+                let finalRole = role; // Default to the role from the token
 
+                // If the role is ROLE_USER, fetch the detailed employeeRole
                 if (role === 'ROLE_USER') {
                     const storedEmployeeRole = await AsyncStorage.getItem('employeeRole');
+
                     if (!storedEmployeeRole) {
-                        const storedEmail = await AsyncStorage.getItem('email');
-                        if (!storedEmail) {
-                            Alert.alert('Error', 'No email found. Please log in again.');
-                            router.replace('');
-                            return;
-                        }
+                        // Fetch employee info if not stored
+                            const storedEmail = await AsyncStorage.getItem('email');
+                            if (!storedEmail) {
+                                Alert.alert('Error', 'No email found. Please log in again.');
+                                router.replace('');
+                                return;
+                            }
 
                         try {
                             const employeeData = await UserService.getUserByEmail(storedEmail);
-                            finalRole = employeeData.role || '';
-                            await AsyncStorage.setItem('employeeRole', finalRole);
+                            finalRole = employeeData.role || ''; // Get the detailed role
+                            await AsyncStorage.setItem('employeeRole', finalRole); // Cache it
                         } catch (error) {
                             console.error('Error fetching employee info:', error);
                             Alert.alert('Error', 'Failed to load employee information.');
@@ -53,20 +57,22 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
                             return;
                         }
                     } else {
-                        finalRole = storedEmployeeRole;
+                        finalRole = storedEmployeeRole; // Use the cached employee role
                     }
                 }
 
+                // Check if the role is allowed
                 if (!allowedRoles.length || allowedRoles.includes(finalRole)) {
                     setUserRole(finalRole);
-                    setLoading(false);
+                    setLoading(false); // Allow access
                 } else {
                     Alert.alert('Unauthorized', 'You do not have permission to access this page.');
-                    router.replace('');
+                    console.log("Unauthorized: You do not have permission to access this page.");
+                    router.replace(''); // Redirect if role is not allowed
                 }
             } catch (error) {
                 console.error('Authentication error:', error);
-                router.replace('');
+                router.replace(''); // Redirect to login on error
             }
         };
 
